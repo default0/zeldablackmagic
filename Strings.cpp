@@ -1034,9 +1034,45 @@ int Get3Bytes(bufPtr source, int offset)
 
 // ===============================================================
 
+    bool FromFile(bufPtr target, char* pathName, u32 length, u32 offset)
+    {
+        bool success = true;
+
+        u32 fileLength = 0;
+
+        FILE* f = NULL;
+
+        // --------------------------
+
+        if((!target) || (target->length == 0))
+            return false;
+
+        f = fopen(pathName, "rb");
+
+        if(!f)
+            return false;
+
+        fseek(f, 0, SEEK_END);
+
+        fileLength  = ftell(f);
+
+        fseek(f, 0, SEEK_SET);
+
+        if(fileLength == target->length)
+            fread(target->contents + offset, fileLength, 1, f);
+        else
+            success = false;
+
+        fclose(f);
+    
+        return success;
+    }
+
+// ===============================================================
+
     bool ToFile(bufPtr source, char* pathName, u32 length, u32 offset)
     {
-        FILE* f;
+        FILE* f = NULL;
 
         // --------------------------
 

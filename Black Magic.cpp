@@ -790,80 +790,43 @@
                 u32 a = 0, b = 0;
                 u32 c = 0;
 
-                bufPtr decomp;
-
                 HANDLE dumpFH;
 
                 // -----------------------------
 
-                chdir( (const char*) ToString(game->image));
+                chdir( (const char*) ToString(game->image) );
 
                 i = _mkdir("gfx");
         
-                game->testPtr = CreateBuffer(0x800);
+                // dump all background graphics
+                for(i = 0; i < 0x73; ++i)
+                {
+                    sprintf(path, "gfx\\bg_gfx_%x.bin", i);
+
+                    ToFile(game->sprPacks[i], path); 
+                }
+
+                // dump all sprite graphics
+                for(i = 0; i < 0x6C; ++i)
+                {                
+                    sprintf(path, "gfx\\spr_gfx_%x.bin", i);
+
+                    ToFile(game->sprPacks[i], path);
+                }
         
-                if(0)
-                {
+                // Output the 2bpp font graphics for the menus / dialogue
+                sprintf(path, "gfx\\font_gfx.bin");
+                ToFile(game->fontGfx, path);
 
-                }
-                else
-                {
-                    // dump all background graphics
-                    for(i = 0; i < 0x73; i++)
-                    {
-                        c = GetBgGfxPtr(game->image, i);
-                
-                        sprintf(path, "gfx\\bg_gfx_%x.bin", i);
+                // Output Link's 4bpp sprite graphics
+                sprintf(path, "gfx\\link_gfx.bin");
+                ToFile(game->linkGfx, path);
 
-                        decomp = DecompressStandard(game->image, c);
-
-                        ToFile(decomp, path); 
-
-                        DeallocBuffer(decomp);                    
-                    }
-
-                    decomp = CreateBuffer(0x600);
-
-                    // dump all sprite graphics
-                    for(i = 0; i < 0x6C; i++)
-                    {                
-                        c = GetSprGfxPtr(game->image, i);
-
-                        sprintf(path, "gfx\\spr_gfx_%x.bin", i);
-
-                        if(i < 0x0C)
-                        {
-                            // The first 12 graphics sets are uncompressed in the rom, hence
-                            // the differing treatment.
-                            CopyBuffer(decomp, game->image, 0, c, 0x600);
-                            ToFile(decomp, path);
-                        }
-                        else
-                        {
-                            // The rest are compressed.
-                            game->testPtr = DecompressStandard(game->image, c);
-                            ToFile(game->testPtr, path, 0x600);
-                            DeallocBuffer(game->testPtr);                    
-                        }
-                    }
-
-                    DeallocBuffer(decomp);
+                // Output mode7 graphics (to-do listed)
+                sprintf(path, "gfx\\mode7_gfx.bin");
+                ToFile(game->mode7Gfx, path);
             
-                        // Output the 2bpp font graphics for the menus / dialogue
-                        sprintf(path, "gfx\\font_gfx.bin");
-                        ToFile(game->image, path, 0x1000, 0x70000);
-
-                        // Output Link's 4bpp sprite graphics
-                        sprintf(path, "gfx\\link_gfx.bin");
-                        ToFile(game->image, path, 0x7000, 0x80000);
-
-                        // Output mode7 graphics (to-do listed)
-                        sprintf(path, "gfx\\mode7_gfx.bin");
-                        ToFile(game->image, path, 0x4000, 0xC4000);
-
-            
-                    break;
-                }
+                break;
             }
             case ID_GRAPHICS_IMPORT:
             {
@@ -871,23 +834,21 @@
 
                 // ------------------------------
 
-                for(i = 0; i < 0x74; i++)
+                chdir( (const char*) ToString(game->image) );
+
+                for(i = 0; i < 0x73; ++i)
                 {
-                    sprintf(path, "%s\\%s\\bg_gfx_%x", ToString(game->romName), "gfx", i);
+                    sprintf(path, "gfx\\bg_gfx_%x", ToString(game->romName), i);
 
-                    i = 0;
-
-
-
+                    FromFile(game->bgPacks[i], path);
                 }
 
-                
+                for(i = 0; i < 0x6C; ++i)
+                {
+                    sprintf(path, "gfx\\spr_gfx_%x", ToString(game->romName), i);
 
-
-                
-
-
-
+                    FromFile(game->bgPacks[i], path);
+                }
 
                 break;
             }
@@ -1188,86 +1149,91 @@ int IsDuplicateRom(char compareBuf[MAX_PATH])
 
     // Fulfills the role of a constructor
 
-void MakeNewGamePtr(char fileName[MAX_PATH],
-                    HANDLE fileHandle,
-                    u32 hasHeader,
-                    u32 fileLength)
-{
-    /* 
-    Allocates a new entry into the gameList
-    Allocates room for a name of the rom,
-    and allocates a pointer to the buffer where the
-    game image will be stored.
-    */
+    void MakeNewGamePtr(char fileName[MAX_PATH],
+                        HANDLE fileHandle,
+                        u32 hasHeader,
+                        u32 fileLength)
+    {
+        /* 
+        Allocates a new entry into the gameList
+        Allocates room for a name of the rom,
+        and allocates a pointer to the buffer where the
+        game image will be stored.
+        */
 
-    int dungSize = sizeof(WindowElement) * numDungElements;
-    int overSize = sizeof(WindowElement) * numOverElements;
-    int i = 0;
+        int dungSize = sizeof(WindowElement) * numDungElements;
+        int overSize = sizeof(WindowElement) * numOverElements;
+        int i = 0;
 
         unsigned long dummyRead = 0;
 
         // --------------------------
 
-    numGames++;
+        numGames++;
     
-    // allocate a new game pointer
-    newGamePtr = (zgPtr) malloc(sizeof(ZeldaGame));
+        // allocate a new game pointer
+        newGamePtr = (zgPtr) malloc(sizeof(ZeldaGame));
 
-    // assign the game's index (out of a list of currently open files)
-    newGamePtr->index = (numGames - 1);
-    zgIndex = newGamePtr->index;
+        // assign the game's index (out of a list of currently open files)
+        newGamePtr->index = (numGames - 1);
 
-    // create a buffer for the header
-    newGamePtr->hasHeader = hasHeader;
-    newGamePtr->headerBuf = CreateBuffer(0x200);
+        zgIndex = newGamePtr->index;
+
+        // create a buffer to preserve the header
+        newGamePtr->hasHeader = hasHeader;
+        newGamePtr->headerBuf = CreateBuffer(0x200);
                 
-    // if the file actually has a header, preserve it            
+        // if the file actually has a header, preserve it            
 
-    if(hasHeader)
-    {
-        // you should add exception / error handling to this at some point
-        // like if(ReadFile(...) ; else {deallocate that shit; }
-        // in fact it might be better to read the file before anything else
+        if(hasHeader)
+        {
+            // you should add exception / error handling to this at some point
+            // like if(ReadFile(...) ; else {deallocate that shit; }
+            // in fact it might be better to read the file before anything else
+            ReadFile(fileHandle,
+                     newGamePtr->headerBuf->contents,
+                     0x200,
+                     &dummyRead,
+                     0 );
+
+            fileLength -= 0x200;
+        }
+
+        newGamePtr->image = CreateBuffer(fileLength);
+
         ReadFile(fileHandle,
-                 newGamePtr->headerBuf->contents,
-                 0x200,
+                 newGamePtr->image->contents,
+                 fileLength,
                  &dummyRead,
                  0 );
 
-        fileLength -= 0x200;
+        newGamePtr->zgFileHandle = fileHandle;
+
+        newGamePtr->romName = CreateBuffer(MAX_PATH);
+        strcpy( (char*) ToString(newGamePtr->romName), fileName);
+
+        newGamePtr->dungeonWE = (WindowElement*) malloc(dungSize);
+        newGamePtr->overWE    = (WindowElement*) malloc(overSize);
+
+        memcpy(newGamePtr->dungeonWE, dungTemp, dungSize);
+        memcpy(newGamePtr->overWE,    overTemp, overSize);
+
+        OffsetWindowIds(newGamePtr->dungeonWE);
+        OffsetWindowIds(newGamePtr->overWE);
+
+        // When the window comes up, nothing will happen until we go into an editing mode first   
+        newGamePtr->currentFunc = do_nothing;
+    
+        newGamePtr->currentWES.numElements = 0;
+        newGamePtr->currentWES.WESet = 0;
+    
+        // Decompress all the graphics out of the rom so they're available at run time.
+        newGamePtr->LoadAllGfx();
+
+        MakeNewEditWindow();
+
+        return;
     }
-
-    newGamePtr->image = CreateBuffer(fileLength);
-
-    ReadFile(fileHandle,
-             newGamePtr->image->contents,
-             fileLength,
-             &dummyRead,
-             0 );
-
-    newGamePtr->zgFileHandle = fileHandle;
-
-    newGamePtr->romName = CreateBuffer(MAX_PATH);
-    strcpy( (char*) newGamePtr->romName->contents, fileName);
-
-    newGamePtr->dungeonWE = (WindowElement*) malloc(dungSize);
-    newGamePtr->overWE = (WindowElement*) malloc(overSize);
-
-    memcpy(newGamePtr->dungeonWE,dungTemp,dungSize);
-    memcpy(newGamePtr->overWE, overTemp, overSize);
-
-    OffsetWindowIds(newGamePtr->dungeonWE);
-    OffsetWindowIds(newGamePtr->overWE);
-   
-    newGamePtr->currentFunc = do_nothing;
-    
-    newGamePtr->currentWES.numElements = 0;
-    newGamePtr->currentWES.WESet = 0;
-    
-    MakeNewEditWindow();
-
-    return;
-}
 
 // ===============================================================
 

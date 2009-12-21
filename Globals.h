@@ -276,8 +276,6 @@
         class ZeldaGame
         //typedef struct _ZeldaGame
         {
-            ZeldaGame();
-
         public:
             
             int hasHeader; // Flag indicating whether the file has an extra $200 bytes
@@ -317,12 +315,15 @@
 
             giPtr        gi;
             
-            // All the bg graphics packs
+            // All the background graphics packs
             bufPtr       bgPacks[0x100];
 
-            // 
-            bufPtr       sprPackets[0x100];
+            // All the sprite graphics packs
+            bufPtr       sprPacks[0x100];
 
+            bufPtr       linkGfx;
+            bufPtr       fontGfx;
+            bufPtr       mode7Gfx;
 
             bufPtr       vram;
             bufPtr       cgram;
@@ -353,6 +354,10 @@
             SnesPal cursorPal;
 
             DngObjStruct *dngObjs;
+
+        public:
+
+            void LoadAllGfx();
 
 
         };

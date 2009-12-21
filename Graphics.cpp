@@ -6,11 +6,11 @@
 
 // ===============================================================
 
-    int GetSprGfxPtr(bufPtr inputBuf, int offset)
+    int GetSprGfxPtr(bufPtr inputBuf, int index)
     {
-        int source = (GetByte(inputBuf, 0x4FF3 + offset) << 0x10);
-        source |= (GetByte(inputBuf, 0x50D2 + offset) << 0x08);
-        source |= GetByte(inputBuf, 0x51B1 + offset);
+        int source  = (GetByte(inputBuf, 0x4FF3 + index) << 0x10);
+        source     |= (GetByte(inputBuf, 0x50D2 + index) << 0x08);
+        source     |= (GetByte(inputBuf, 0x51B1 + index));
 
         source = CpuToRomAddr(source);
 
@@ -19,11 +19,11 @@
 
 // ===============================================================
 
-    int GetBgGfxPtr(bufPtr inputBuf, int offset)
+    int GetBgGfxPtr(bufPtr inputBuf, int index)
     {
-        int source = (GetByte(inputBuf, 0x4F80 + offset) << 0x10);
-        source |= (GetByte(inputBuf, 0x505F + offset) << 0x08);
-        source |= GetByte(inputBuf, 0x513E + offset);
+        int source  = (GetByte(inputBuf, 0x4F80 + index) << 0x10);
+        source     |= (GetByte(inputBuf, 0x505F + index) << 0x08);
+        source     |= (GetByte(inputBuf, 0x513E + index));
 
         source = CpuToRomAddr(source);
 
@@ -712,12 +712,12 @@
         */
 
         u32 bp_2bpp = 0; // could be 1 in some situations like ending mode.
-        u32 paletteNum = header->paletteIndex * 4;
+        u32 paletteNum = game->bm_dung_header.paletteIndex * 4;
 
-        u32 bp_4bpp = GetByte(rom, paletteNum + 0x75460);
-        u32 sp_0 = GetByte(rom, paletteNum + 0x75461);
-        u32 sp_1 = GetByte(rom, paletteNum + 0x75462);
-        u32 sp_2 = GetByte(rom, paletteNum + 0x75463);
+        u32 bp_4bpp = GetByte(game->image, paletteNum + 0x75460);
+        u32 sp_0 = GetByte(game->image, paletteNum + 0x75461);
+        u32 sp_1 = GetByte(game->image, paletteNum + 0x75462);
+        u32 sp_2 = GetByte(game->image, paletteNum + 0x75463);
         u32 sword = 4, shield = 3, armor = 2;
         u32 sp_throw = 0;
 
@@ -1067,67 +1067,58 @@
 
 // ===============================================================
 
-    ZeldaGame::ZeldaGame()
+    void ZeldaGame::LoadAllGfx()
     {
-        bufPtr decomp = Create
-
-        game->testPtr = CreateBuffer(0x800);
+        u32 offset = 0;
+        u32 i      = 0;
         
-        // dump all background graphics
+        bufPtr decomp = NULL;
+
+        // ----------------------------------
+        
+        // decompress all background graphics
         for(i = 0; i < 0x73; i++)
         {
-            c = GetBgGfxPtr(game->image, i);
-    
-            sprintf(path, "gfx\\bg_gfx_%x.bin", i);
+            offset = GetBgGfxPtr(this->image, i);
 
-            decomp = DecompressStandard(game->image, c);
+            this->bgPacks[i] = DecompressStandard(this->image, offset);
 
-            ToFile(decomp, path); 
-
-            DeallocBuffer(decomp);                    
         }
-
-        decomp = CreateBuffer(0x600);
 
         // dump all sprite graphics
         for(i = 0; i < 0x6C; i++)
         {                
-            c = GetSprGfxPtr(game->image, i);
-
-            sprintf(path, "gfx\\spr_gfx_%x.bin", i);
+            // The rest are compressed.
+            offset = GetSprGfxPtr(this->image, i);
 
             if(i < 0x0C)
             {
                 // The first 12 graphics sets are uncompressed in the rom, hence
                 // the differing treatment.
-                CopyBuffer(decomp, game->image, 0, c, 0x600);
-                ToFile(decomp, path);
+                this->sprPacks[i] = CreateBuffer(0x600);
+
+                CopyBuffer(this->sprPacks[i], this->image, 0, offset, 0x600);
             }
             else
             {
-                // The rest are compressed.
-                game->testPtr = DecompressStandard(game->image, c);
-                ToFile(game->testPtr, path, 0x600);
-                DeallocBuffer(game->testPtr);                    
+                this->sprPacks[i] = DecompressStandard(this->image, offset);
             }
         }
 
-        DeallocBuffer(decomp);
+        // Copy the 2bpp font graphics for the menus / dialogue
+        this->fontGfx = CreateBuffer(0x1000);
+        CopyBuffer(this->fontGfx, this->image, 0, 0x70000, 0x1000);
 
-            // Output the 2bpp font graphics for the menus / dialogue
-            sprintf(path, "gfx\\font_gfx.bin");
-            ToFile(game->image, path, 0x1000, 0x70000);
+        // Copy Link's 4bpp sprite graphics to a buffer
+        this->linkGfx = CreateBuffer(0x7000);
+        CopyBuffer(this->linkGfx, this->image, 0, 0x80000, 0x7000);
 
-            // Output Link's 4bpp sprite graphics
-            sprintf(path, "gfx\\link_gfx.bin");
-            ToFile(game->image, path, 0x7000, 0x80000);
+        // Copy mode7 graphics to a buffer
+        this->mode7Gfx = CreateBuffer(0x4000);
+        CopyBuffer(this->mode7Gfx, this->image, 0, 0xC4000, 0x4000);
 
-            // Output mode7 graphics (to-do listed)
-            sprintf(path, "gfx\\mode7_gfx.bin");
-            ToFile(game->image, path, 0x4000, 0xC4000);
-
-
-        break;
+        // That should about do it... don't think there are any other graphics in the game...
+        return;
     }
 
 // ===============================================================
