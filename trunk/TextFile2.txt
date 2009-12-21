@@ -1,0 +1,64 @@
+
+; DungeonSpritePatch.asm
+; Hooks into the existing sprite data loading mechanism and allows us to load from a different
+; bank
+
+!dngRoomIndex = $048E
+
+org $4C16E ; we have 5 bytes to work with
+
+JML spriteDataHook : NOP
+
+; end of hook
+
+spriteDataHook:
+
+	SEP #$30
+	
+	PEA $C172 ; This is the return address back in bank $09
+			  ; When I JML back into bank $09, the routine will rts and go back
+			  ; to where I hooked from
+			  
+	REP #$30
+	
+	LDA !dngRoomIndex
+	TAX
+	
+	SEP #$20  ; set the accumulator to 8 bits since that's all we need to push
+	
+	LDA spriteBankTable, X
+	PHA : PLB ; Data Bank Register = A
+	
+	SEP #$10
+	
+	JML $09C290
+	
+spriteBankTable:
+
+	db $.... ; define all the data here. this is determined by the program itself as it
+			 ; saves the data
+			 
+	; Now, how to translate this all into code? :(
+	
+This is one possible solution:
+
+Convert this routine to straight binary. Only problem is that the data can be moved around...
+however it does have a fixed length. The other option is to write it out as code and then
+write a simple parser... probably way more work than it would be worth though.
+
+Anyways, using straight binary:
+
+00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
+-----------------------------------------------
+E2 30 F4 72 C1 C2 30 AD 8E 04 AA E2 20 BD XX XX 
+48 AB E2 10 5C 90 C2 09
+
+
+
+	
+	
+	
+	
+	
+	
+	
