@@ -41,7 +41,8 @@
     bufPtr  AllocBuffer(void);
     u32     DeallocBuffer(bufPtr);
 
-    bool    ToFile(bufPtr source, char* pathName, u32 length = 0, u32 offset = 0);
+    bool    FromFile(bufPtr target, char* pathName, u32 length = 0, u32 offset = 0);
+    bool    ToFile(bufPtr source,   char* pathName, u32 length = 0, u32 offset = 0);
 
     bufPtr  GetSubBuffer(bufPtr source, u32 offset, u32 newLength = 0);
     u32     GetBit(bufPtr source, u32 bit);

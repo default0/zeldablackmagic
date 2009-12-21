@@ -43,7 +43,7 @@
 // ===============================================================
  
     void Create_BM_Header(zgPtr game)
-            {
+    {
         int newLength = 0x200000;
         int inRomHeaderOffset = 0x109000;
 
@@ -1218,269 +1218,269 @@
 
     void UnpackDungeonHeader(BM_DungeonHeader *header)
     {
-    bufPtr data;
-    u8 currentByte;
-    zgPtr game = (zgPtr) GetWindowLong(windowList[zgIndex], 0);
+        bufPtr data;
+        u8 currentByte;
+        zgPtr game = (zgPtr) GetWindowLong(windowList[zgIndex], 0);
 
-    data = header->data;
+        data = header->data;
 
-    CopyBuffer(data,    &(game->currentFile->headerData),
-               0,       game->currentDungRoom * 0x0E,
-               0x0E);
+        CopyBuffer(data,    &(game->currentFile->headerData),
+                   0,       game->currentDungRoom * 0x0E,
+                   0x0E);
 
-    currentByte = GetByte(data, 0);
+        currentByte = GetByte(data, 0);
 
-    header->bg0_props = (currentByte >> 5) & 0x07;
-    header->collision = (currentByte >> 2) & 0x07;
-    header->lightsOut = (currentByte)      & 0x01;
+        header->bg0_props = (currentByte >> 5) & 0x07;
+        header->collision = (currentByte >> 2) & 0x07;
+        header->lightsOut = (currentByte)      & 0x01;
 
-    header->paletteIndex = GetByte(data, 1);
-    header->graphicsNum  = GetByte(data, 2);
-    header->spriteGfx    = GetByte(data, 3) + 0x40;
-    header->effect       = GetByte(data, 4);
-    header->tag_1        = GetByte(data, 5);
-    header->tag_2        = GetByte(data, 6);
+        header->paletteIndex = GetByte(data, 1);
+        header->graphicsNum  = GetByte(data, 2);
+        header->spriteGfx    = GetByte(data, 3) + 0x40;
+        header->effect       = GetByte(data, 4);
+        header->tag_1        = GetByte(data, 5);
+        header->tag_2        = GetByte(data, 6);
      
-    currentByte = GetByte(data, 7);
+        currentByte = GetByte(data, 7);
 
-     // The modulo 3 (% 3) is because 3 is not actually a valid value.
-    header->warpPlane       = ((currentByte >> 0) & 0x03) % 3;
-    header->staircasePlane1 = ((currentByte >> 2) & 0x03) % 3;
-    header->staircasePlane2 = ((currentByte >> 4) & 0x03) % 3;
-    header->staircasePlane3 = ((currentByte >> 6) & 0x03) % 3;
+         // The modulo 3 (% 3) is because 3 is not actually a valid value.
+        header->warpPlane       = ((currentByte >> 0) & 0x03) % 3;
+        header->staircasePlane1 = ((currentByte >> 2) & 0x03) % 3;
+        header->staircasePlane2 = ((currentByte >> 4) & 0x03) % 3;
+        header->staircasePlane3 = ((currentByte >> 6) & 0x03) % 3;
      
-    header->staircasePlane4 = (GetByte(data, 8) & 0x03 ) % 3;
+        header->staircasePlane4 = (GetByte(data, 8) & 0x03 ) % 3;
 
-    header->warpRoom        = GetByte(data, 9);
-    header->staircaseRoom1  = GetByte(data, 10);
-    header->staircaseRoom2  = GetByte(data, 11);
-    header->staircaseRoom3  = GetByte(data, 12);
-    header->staircaseRoom4  = GetByte(data, 13);        
+        header->warpRoom        = GetByte(data, 9);
+        header->staircaseRoom1  = GetByte(data, 10);
+        header->staircaseRoom2  = GetByte(data, 11);
+        header->staircaseRoom3  = GetByte(data, 12);
+        header->staircaseRoom4  = GetByte(data, 13);        
 
-    return;
+        return;
     }
 
 // ===============================================================
 
     void RepackDungeonHeader(zgPtr game, BM_DungeonHeader *header, bufPtr data)
     {
-    u8 byte;
+        u8 byte;
 
-    byte = (header->bg0_props & 0x07) << 5;
-    byte |= (header->collision & 0x07) << 2;
-    byte |= (header->lightsOut & 0x01);
+        byte = (header->bg0_props & 0x07) << 5;
+        byte |= (header->collision & 0x07) << 2;
+        byte |= (header->lightsOut & 0x01);
 
-    PutByte(data, 0, byte);
-    PutByte(data, 1, header->paletteIndex);
-    PutByte(data, 2, header->graphicsNum);
-    PutByte(data, 3, header->spriteGfx - 0x40);
-    PutByte(data, 4, header->effect);
-    PutByte(data, 5, header->tag_1);
-    PutByte(data, 6, header->tag_2);
+        PutByte(data, 0, byte);
+        PutByte(data, 1, header->paletteIndex);
+        PutByte(data, 2, header->graphicsNum);
+        PutByte(data, 3, header->spriteGfx - 0x40);
+        PutByte(data, 4, header->effect);
+        PutByte(data, 5, header->tag_1);
+        PutByte(data, 6, header->tag_2);
 
-    byte =  (header->warpPlane % 0x03)       << 0;
-    byte |= (header->staircasePlane1 % 0x03) << 2;
-    byte |= (header->staircasePlane2 % 0x03) << 4;
-    byte |= (header->staircasePlane3 % 0x03) << 6;
+        byte =  (header->warpPlane % 0x03)       << 0;
+        byte |= (header->staircasePlane1 % 0x03) << 2;
+        byte |= (header->staircasePlane2 % 0x03) << 4;
+        byte |= (header->staircasePlane3 % 0x03) << 6;
 
-    PutByte(data, 7, byte);
-    PutByte(data, 8, header->staircasePlane4 % 0x03);
-    PutByte(data, 9, header->warpRoom);
-    PutByte(data, 10, header->staircaseRoom1);
-    PutByte(data, 11, header->staircaseRoom2);
-    PutByte(data, 12, header->staircaseRoom3);
-    PutByte(data, 13, header->staircaseRoom4);
+        PutByte(data, 7, byte);
+        PutByte(data, 8, header->staircasePlane4 % 0x03);
+        PutByte(data, 9, header->warpRoom);
+        PutByte(data, 10, header->staircaseRoom1);
+        PutByte(data, 11, header->staircaseRoom2);
+        PutByte(data, 12, header->staircaseRoom3);
+        PutByte(data, 13, header->staircaseRoom4);
 
-    CopyBuffer(&game->currentFile->headerData, data,
-               game->currentDungRoom * 0x0E,   0,
-               0x0E);
+        CopyBuffer(&game->currentFile->headerData, data,
+                   game->currentDungRoom * 0x0E,   0,
+                   0x0E);
 
-    return;
+        return;
     }
 
 // ===============================================================
  
     void LoadTileMap(zgPtr game)
     {
-    u32 room = game->currentDungRoom;
-    u32 tileOffset = 0;
-    u32 i = 0;
-    u32 j = 0;
-    u32 map = 0;
+        u32 room = game->currentDungRoom;
+        u32 tileOffset = 0;
+        u32 i = 0;
+        u32 j = 0;
+        u32 map = 0;
 
-    DngObjStruct *d = game->dngObjs;
+        DngObjStruct *d = game->dngObjs;
 
-    bufPtr rom = game->image;
-    bufPtr objects = &game->currentFile->objectData[room];
+        bufPtr rom = game->image;
+        bufPtr objects = &game->currentFile->objectData[room];
 
-    bufPtr BG0_Map = game->BG_Map[0];
-    bufPtr BG1_Map = game->BG_Map[1];
+        bufPtr BG0_Map = game->BG_Map[0];
+        bufPtr BG1_Map = game->BG_Map[1];
   
-    // Each 64x64 tile BG is painted with a preset pattern of tiles
-    // floor0 is for BG0 and floor1 is for BG1
-    d->floor[0] = (GetByte(objects, 0) & 0xF0);
-    d->floor[1] = (GetByte(objects, 0) & 0x0F) << 4;
+        // Each 64x64 tile BG is painted with a preset pattern of tiles
+        // floor0 is for BG0 and floor1 is for BG1
+        d->floor[0] = (GetByte(objects, 0) & 0xF0);
+        d->floor[1] = (GetByte(objects, 0) & 0x0F) << 4;
 
-    for(i = 0, map = 0;   ; i += 2)
-    {
-        if(i == 8)
-            i = 0, map++;
-        
-        if(map == 2)
-            break;
- 
-        // Tells us what part of the tilemap to write into
-        // tileOffset will correspond to Y in routine $8A44 if you're confused
-        // i corresponds to $0C
-        tileOffset = Get2Bytes(rom, 0x1B02 + i );
-
-        for(j = 0; j < 8; j++)
+        for(i = 0, map = 0;   ; i += 2)
         {
-            Draw4x4s(rom, game->BG_Map[map], 8, &tileOffset, d->floor[map]);
-            tileOffset += 0x1C0;
+            if(i == 8)
+                i = 0, map++;
+        
+            if(map == 2)
+                break;
+ 
+            // Tells us what part of the tilemap to write into
+            // tileOffset will correspond to Y in routine $8A44 if you're confused
+            // i corresponds to $0C
+            tileOffset = Get2Bytes(rom, 0x1B02 + i );
+
+            for(j = 0; j < 8; j++)
+            {
+                Draw4x4s(rom, game->BG_Map[map], 8, &tileOffset, d->floor[map]);
+                tileOffset += 0x1C0;
+            }
         }
-    }
 
-    d->layoutNum = GetByte(objects, 1) >> 2;
+        d->layoutNum = GetByte(objects, 1) >> 2;
 
-    LoadObjects(game); 
-    //LoadBlocks(game);
-    //LoadTorches(game);
+        LoadObjects(game); 
+        //LoadBlocks(game);
+        //LoadTorches(game);
 
-    DrawObjects(game);
-    LoadAttributes(game);
+        DrawObjects(game);
+        LoadAttributes(game);
     }
 
 // ===============================================================
 
     void Draw4x4s(bufPtr rom, bufPtr BG_Map, u32 numBlocks, u32 *tileOffset, u32 index)
     {
-    // index corresponds to 
-    // numBlocks is the number of 4x4 tile blocks to draw from right to left.
+        // index corresponds to 
+        // numBlocks is the number of 4x4 tile blocks to draw from right to left.
 
-    u32 i = 0;
-    u32 j = 0; // just loop counters
-    u32 k = *tileOffset; // Corresponds to Y in $8A44
+        u32 i = 0;
+        u32 j = 0; // just loop counters
+        u32 k = *tileOffset; // Corresponds to Y in $8A44
 
-    for( i = 0; i < numBlocks; i++)
-    {     
-        // The fixed constants 0, 2, 4, 6, 80, are risky... they might vary in reality
-        for( j = 0; j < 2; j++ )
-        {
-            Put2Bytes( BG_Map, 0 + k,    Get2Bytes(rom, 0x1B52 + index) );
-            Put2Bytes( BG_Map, 2 + k,    Get2Bytes(rom, 0x1B54 + index) );
-            Put2Bytes( BG_Map, 4 + k,    Get2Bytes(rom, 0x1B56 + index) );
-            Put2Bytes( BG_Map, 6 + k,    Get2Bytes(rom, 0x1B58 + index) );
-            Put2Bytes( BG_Map, 0x80 + k, Get2Bytes(rom, 0x1B5A + index) );
-            Put2Bytes( BG_Map, 0x82 + k, Get2Bytes(rom, 0x1B5C + index) );
-            Put2Bytes( BG_Map, 0x84 + k, Get2Bytes(rom, 0x1B5E + index) );
-            Put2Bytes( BG_Map, 0x86 + k, Get2Bytes(rom, 0x1B60 + index) );
+        for( i = 0; i < numBlocks; i++)
+        {     
+            // The fixed constants 0, 2, 4, 6, 80, are risky... they might vary in reality
+            for( j = 0; j < 2; j++ )
+            {
+                Put2Bytes( BG_Map, 0 + k,    Get2Bytes(rom, 0x1B52 + index) );
+                Put2Bytes( BG_Map, 2 + k,    Get2Bytes(rom, 0x1B54 + index) );
+                Put2Bytes( BG_Map, 4 + k,    Get2Bytes(rom, 0x1B56 + index) );
+                Put2Bytes( BG_Map, 6 + k,    Get2Bytes(rom, 0x1B58 + index) );
+                Put2Bytes( BG_Map, 0x80 + k, Get2Bytes(rom, 0x1B5A + index) );
+                Put2Bytes( BG_Map, 0x82 + k, Get2Bytes(rom, 0x1B5C + index) );
+                Put2Bytes( BG_Map, 0x84 + k, Get2Bytes(rom, 0x1B5E + index) );
+                Put2Bytes( BG_Map, 0x86 + k, Get2Bytes(rom, 0x1B60 + index) );
 
-            k += 0x100;
+                k += 0x100;
+            }
+
+            k -= 0x1F8;
+
         }
 
-        k -= 0x1F8;
+        *tileOffset = k;
 
-    }
-
-    *tileOffset = k;
-
-    return;
+        return;
     }
 
 // ===============================================================
 
     void LoadObjects(zgPtr game, u32 typeSelect)
     {
-    u32 i = 0; // simple index
-    u32 c = 0;
-    u32 roomNum = game->currentDungRoom;
-    u32 index = 0;
-    u32 layoutNum = 0;
-    u32 objNum = 0;
-    u32 objectSize = 3;
-    u32 placeHolder1 = 0;
-    u32 placeHolder2 = 0;
+        u32 i = 0; // simple index
+        u32 c = 0;
+        u32 roomNum = game->currentDungRoom;
+        u32 index = 0;
+        u32 layoutNum = 0;
+        u32 objNum = 0;
+        u32 objectSize = 3;
+        u32 placeHolder1 = 0;
+        u32 placeHolder2 = 0;
 
-    DngObjStruct *d = game->dngObjs;
-    DngObjList* type1[4];
-    DngObjList* type2[4];   
+        DngObjStruct *d = game->dngObjs;
+        DngObjList* type1[4];
+        DngObjList* type2[4];   
 
-    bufPtr objects = &(game->currentFile->objectData[roomNum]);
-    bufPtr layout = &(game->currentFile->layoutData[ d->layoutNum ]);
-    bufPtr objData = 0; // used to select between layout and objects 
+        bufPtr objects = &(game->currentFile->objectData[roomNum]);
+        bufPtr layout = &(game->currentFile->layoutData[ d->layoutNum ]);
+        bufPtr objData = 0; // used to select between layout and objects 
 
-    for(i = 0; i < 4; i++)
-    {
-        type1[i] = &d->type1[i]; // temporary I hope >:(
-        type2[i] = &d->type2[i];
-    }
-
-    u32 layerType1Obj[3] = {0, 0, 0};
-    u32 layerType2Obj[3] = {0, 0, 0};
-  
-    typeSelect &= 0x3;
-
-    for(c = 0; c < 4; c++) // --------------------------for(counter)
-    {
-        if(c == 0)
-            objData = layout, index = 0;
-        
-        if(c == 1)
-            objData = objects, index = 2;
-
-        objectSize = 3;
-        placeHolder1 = placeHolder2 = index;
-
-        if(index > objData->length)
-            exit(-1); // precaution
-
-        while(1)        // ---------------------------------------------------------------
+        for(i = 0; i < 4; i++)
         {
-            objNum = Get2Bytes(objData, index);
+            type1[i] = &d->type1[i]; // temporary I hope >:(
+            type2[i] = &d->type2[i];
+        }
 
-            if(objNum == 0xFFFF)
+        u32 layerType1Obj[3] = {0, 0, 0};
+        u32 layerType2Obj[3] = {0, 0, 0};
+  
+        typeSelect &= 0x3;
+
+        for(c = 0; c < 4; c++) // --------------------------for(counter)
+        {
+            if(c == 0)
+                objData = layout, index = 0;
+        
+            if(c == 1)
+                objData = objects, index = 2;
+
+            objectSize = 3;
+            placeHolder1 = placeHolder2 = index;
+
+            if(index > objData->length)
+                exit(-1); // precaution
+
+            while(1)        // ---------------------------------------------------------------
             {
-                index += 2;
-                break;
-            }
+                objNum = Get2Bytes(objData, index);
 
-            if(objNum == 0xFFF0)
-            {
-                if(objectSize == 2)
-                    goto alreadySize2;
+                if(objNum == 0xFFFF)
+                {
+                    index += 2;
+                    break;
+                }
 
-                objectSize = 2;
-                index += 2;
-                placeHolder2 = index;
+                if(objNum == 0xFFF0)
+                {
+                    if(objectSize == 2)
+                        goto alreadySize2;
+
+                    objectSize = 2;
+                    index += 2;
+                    placeHolder2 = index;
                
-                continue;
-            }
+                    continue;
+                }
 
-            if(objectSize == 3)
-            {
-                type1[c]->numObj++;
-                index += objectSize;
-            }
-            else
-            {
-    alreadySize2:
-                type2[c]->numObj++;
-                index += objectSize;
-            }
-        }               //------------------------------------------------- while( 1 )
+                if(objectSize == 3)
+                {
+                    type1[c]->numObj++;
+                    index += objectSize;
+                }
+                else
+                {
+        alreadySize2:
+                    type2[c]->numObj++;
+                    index += objectSize;
+                }
+            }               //------------------------------------------------- while( 1 )
 
-        if(typeSelect & 0x01)
-            ParseType1(type1[c], objData, placeHolder1, game, c);
+            if(typeSelect & 0x01)
+                ParseType1(type1[c], objData, placeHolder1, game, c);
         
-        if(typeSelect & 0x02)
-            ParseType2(type2[c], objData, placeHolder2, game, c);
+            if(typeSelect & 0x02)
+                ParseType2(type2[c], objData, placeHolder2, game, c);
         
 
 
-    } // ---------------------------------------------------for( counter )
+        } // ---------------------------------------------------for( counter )
 
-    return; 
+        return; 
     }
 
 // ===============================================================

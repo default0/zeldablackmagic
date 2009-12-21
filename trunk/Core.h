@@ -22,9 +22,9 @@
 
     int RomToCpuAddr(int holderLong);
 
-    int GetSprGfxPtr(bufPtr inputBuf, int offset);
+    int GetSprGfxPtr(bufPtr inputBuf, int index);
 
-    int GetBgGfxPtr(bufPtr inputBuf, int offset);
+    int GetBgGfxPtr(bufPtr inputBuf, int index);
 
     bufPtr DecompressOther(bufPtr inputBuf, int source);
 
