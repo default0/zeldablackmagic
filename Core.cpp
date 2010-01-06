@@ -30,7 +30,7 @@
 // ===============================================================
 
     int RomToCpuAddr(int holderLong)
-	    {
+	{
         // converts a ROM Address to a CPU Address
 		    
         holderLong &= 0x7FFFFF;
@@ -38,7 +38,7 @@
         holderLong = ( (holderLong & 0x3F8000) << 1 ) + ( holderLong & 0x7FFF ) | 0x8000;
         
         return holderLong;
-                    }
+    }
 			    
 // ===============================================================
  
@@ -107,10 +107,7 @@
 
         // initialize default information about the structure of the graphics data
         h->sprGfxOffset     = Get2Bytes(rom, asm_spr_gfx_ptr);
-        h->sprGfxCount      = 0x73;
-
         h->bgGfxOffset      = Get2Bytes(rom, asm_bg_gfx_ptr);
-        h->bgGfxCount       = 0x6C;
     
         // Expand the rom to 2 megabytes if the initial size is 1 megabyte or less
         if(game->image->length <= 0x100000)
@@ -120,20 +117,19 @@
 
         CopyBuffer(rom, temp, inRomHeaderOffset, 0, temp->length);
         Put3Bytes(rom, bm_header_loc, inRomHeaderOffset);
-
-                }
+    }
 
 // ===============================================================
 	    
     void Check_BM_Header(zgPtr game)
-	    {
+	{
         Buffer temp;
 
         // This is the alleged header offset.
         u32 offset = Get3Bytes(game->image, bm_header_loc);
 
         if( offset > (game->image->length - sizeof(BM_Header) ) )
-    {
+        {
             Create_BM_Header(game);
             return;
         }
@@ -145,13 +141,13 @@
         {
             // Add version support for headers! soon!
             //MessageBox(0, "header found", ":)", MB_OK);
-            }
+        }
         else
-    {
+        {
             Create_BM_Header(game);
             DestroyBuffer(&temp);
-                return;
-    }
+            return;
+        }
 
         DestroyBuffer(&temp);
 
@@ -167,101 +163,101 @@
 
     bufPtr DecompressOther(bufPtr inputBuf, int source)
     {
-    // deprecated!!!!
-    // Seems to take type one or type 
-    // two pointers in the lower spectrum. 
+        // deprecated!!!!
+        // Seems to take type one or type 
+        // two pointers in the lower spectrum. 
 
-    int x_reg = 0x0E;
-    u32 y_reg = 0x40;
-    u32 a_reg = 0;
-    u32 target = 0;
-    u8 infoArray[0x10];
-    ZeroMemory(infoArray, 0x10);
+        int x_reg = 0x0E;
+        u32 y_reg = 0x40;
+        u32 a_reg = 0;
+        u32 target = 0;
+        u8 infoArray[0x10];
+        ZeroMemory(infoArray, 0x10);
 
-    int dummy = 0;
+        int dummy = 0;
 
-    bufPtr storeBuf = CreateBuffer(0x1000);
+        bufPtr storeBuf = CreateBuffer(0x1000);
 
-    y_reg = 0x40;
+        y_reg = 0x40;
 
-    nextSegment:
+        nextSegment:
 
-    x_reg = 0x0E;
+        x_reg = 0x0E;
 
-    loop1:
+        loop1:
 
-    a_reg = Get2Bytes(inputBuf, source); // lda [$00]
+        a_reg = Get2Bytes(inputBuf, source); // lda [$00]
   
-    Put2Bytes(storeBuf, target, a_reg);
-    target += 2; // sta $2118
+        Put2Bytes(storeBuf, target, a_reg);
+        target += 2; // sta $2118
    
-    a_reg = XBA(a_reg); // xba
+        a_reg = XBA(a_reg); // xba
 
-    a_reg |= Get2Bytes(inputBuf, source); // ora [$00]
-    a_reg &= 0xFF; // and #$00ff
-    infoArray[x_reg]   = (u8) a_reg; // sta $bf, x
-    infoArray[x_reg+1] = (u8) (a_reg >> 8);
+        a_reg |= Get2Bytes(inputBuf, source); // ora [$00]
+        a_reg &= 0xFF; // and #$00ff
+        infoArray[x_reg]   = (u8) a_reg; // sta $bf, x
+        infoArray[x_reg+1] = (u8) (a_reg >> 8);
 
-    source += 2; x_reg -= 2; // inc $00, inc $00, x--, x--;
+        source += 2; x_reg -= 2; // inc $00, inc $00, x--, x--;
 
-    a_reg = Get2Bytes(inputBuf, source); // lda [$00]
+        a_reg = Get2Bytes(inputBuf, source); // lda [$00]
   
-    Put2Bytes(storeBuf, target, a_reg);
-    target += 2; // sta $2118
+        Put2Bytes(storeBuf, target, a_reg);
+        target += 2; // sta $2118
    
-    a_reg = XBA(a_reg); // xba
+        a_reg = XBA(a_reg); // xba
 
-    a_reg |= Get2Bytes(inputBuf, source); // ora [$00]
-    a_reg &= 0xFF; // and #$00ff
-    infoArray[x_reg]   = (u8) a_reg; // sta $bf, x
-    infoArray[x_reg+1] = (u8) (a_reg >> 8);
+        a_reg |= Get2Bytes(inputBuf, source); // ora [$00]
+        a_reg &= 0xFF; // and #$00ff
+        infoArray[x_reg]   = (u8) a_reg; // sta $bf, x
+        infoArray[x_reg+1] = (u8) (a_reg >> 8);
 
-    source += 2; x_reg -= 2; // inc $00, inc $00, x--, x--;
+        source += 2; x_reg -= 2; // inc $00, inc $00, x--, x--;
 
-    if(x_reg >= 0)
-        goto loop1; // bpl loop1
+        if(x_reg >= 0)
+            goto loop1; // bpl loop1
     
-    x_reg = 0x0E;
+        x_reg = 0x0E;
 
-    loop2:
+        loop2:
 
-    a_reg = Get2Bytes(inputBuf, source);
-    a_reg &= 0x00FF;
-    dummy = a_reg;
+        a_reg = Get2Bytes(inputBuf, source);
+        a_reg &= 0x00FF;
+        dummy = a_reg;
     
-    a_reg |= (infoArray[x_reg] | (infoArray[x_reg+1] << 8));
-    a_reg = XBA(a_reg);
-    a_reg |= dummy;
+        a_reg |= (infoArray[x_reg] | (infoArray[x_reg+1] << 8));
+        a_reg = XBA(a_reg);
+        a_reg |= dummy;
 
-    Put2Bytes(storeBuf, target, a_reg);
-    target += 2;
+        Put2Bytes(storeBuf, target, a_reg);
+        target += 2;
 
-    source++; x_reg -= 2;
+        source++; x_reg -= 2;
 
-    a_reg = Get2Bytes(inputBuf, source);
-    a_reg &= 0x00FF;
-    dummy = a_reg;
+        a_reg = Get2Bytes(inputBuf, source);
+        a_reg &= 0x00FF;
+        dummy = a_reg;
     
-    a_reg |= (infoArray[x_reg] | (infoArray[x_reg+1] << 8));
-    a_reg = XBA(a_reg);
-    a_reg |= dummy;
+        a_reg |= (infoArray[x_reg] | (infoArray[x_reg+1] << 8));
+        a_reg = XBA(a_reg);
+        a_reg |= dummy;
 
-    Put2Bytes(storeBuf, target, a_reg);
-    target += 2;
+        Put2Bytes(storeBuf, target, a_reg);
+        target += 2;
 
-    source++; x_reg -= 2;
+        source++; x_reg -= 2;
 
-    if(x_reg >= 0)
-        goto loop2;
+        if(x_reg >= 0)
+            goto loop2;
 
-    y_reg--;
+        y_reg--;
 
-    if(y_reg > 0)
-        goto nextSegment;
+        if(y_reg > 0)
+            goto nextSegment;
 
-    ResizeBuffer(storeBuf, target);
+        ResizeBuffer(storeBuf, target);
 
-    return storeBuf;
+        return storeBuf;
     }
 
 // ===============================================================

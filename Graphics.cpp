@@ -1140,24 +1140,29 @@
 
     void DecodePalettes(zgPtr game)
     {
-        bufPtr cgram = game->cgram;
-    
-        u32 i = 0;
-        u32 j = 0;
-        u32 red = 0x1F;
-        u32 green = 0x1F << 5;
-        u32 blue = 0x1F << 10;
-        u32 color = 0;
+        u32 color   = 0;
+        u32 i       = 0;
+        u32 j       = 0;
 
-        for(i = 0; i < 0x10; i++)
+        // masks for extracting each 5-bit component
+        // of color data from the 15-bit BGR (SNES) color.
+        u32 red     = 0x1F;
+        u32 green   = 0x1F << 5;
+        u32 blue    = 0x1F << 10;
+
+        bufPtr cgram = game->cgram;
+
+        // --------------------------
+    
+        for(i = 0; i < 0x10; ++i)
         {
-            for(j = 0; j < 0x10; j++)
+            for(j = 0; j < 0x10; ++j)
             {
                 color = Get2Bytes(cgram, (0x20*i) + (2*j));
             
-                (game->Pals[i])[j] = ((color & red) << 0x13);
-                (game->Pals[i])[j] |= ((color & green) << 0x6);
-                (game->Pals[i])[j] |= ((color & blue) >> 7);
+                (game->Pals[i])[j]  = ((color & red)   << 0x13);
+                (game->Pals[i])[j] |= ((color & green) << 0x06);
+                (game->Pals[i])[j] |= ((color & blue)  >> 0x07);
                 (game->Pals[i])[j] &= 0xFFFFFF;
 
             }
@@ -1199,16 +1204,26 @@
     int ZeldaGame::GetSprGfxPtr(int index)
     {
         u32 base    = CpuToRomAddr(bm_Header.sprGfxOffset);
+        u32 defBase = CpuToRomAddr(default_spr_gfx_ptr);
+
         u32 c       = bm_Header.sprGfxCount;
         u32 source  = 0;
 
         // -------------------------------------
 
-        source  = GetByte(image, base               + index) << 0x10;
-        source |= GetByte(image, base + 0xDF        + index) << 0x08;
-        source |= GetByte(image, base + (0x0DF * 2) + index);
+        if(base == defBase)
+        {
+            // broke ass old method in the original game
+            source  = GetByte(image, base               + index) << 0x10;
+            source |= GetByte(image, base + 0xDF        + index) << 0x08;
+            source |= GetByte(image, base + (0x0DF * 2) + index);
 
-        source = CpuToRomAddr(source);
+            source = CpuToRomAddr(source);
+        }
+        {
+            // new school method
+            source = Get3Bytes(image, index * 3);
+        }
 
         return source;
     }
@@ -1218,16 +1233,27 @@
     int ZeldaGame::GetBgGfxPtr(int index)
     {
         u32 base    = CpuToRomAddr(bm_Header.bgGfxOffset);
+        u32 defBase = CpuToRomAddr(default_bg_gfx_ptr);
+
         u32 c       = bm_Header.bgGfxCount;
         u32 source  = 0;
 
         // -------------------------------------
 
-        source  = GetByte(image, base              + index) << 0x10;
-        source |= GetByte(image, base + 0xDF       + index) << 0x08;
-        source |= GetByte(image, base + (0xDF * 2) + index);
+        if(base == defBase)
+        {
+            // broke ass old method in the original game
+            source  = GetByte(image, base              + index) << 0x10;
+            source |= GetByte(image, base + 0xDF       + index) << 0x08;
+            source |= GetByte(image, base + (0xDF * 2) + index);
 
-        source = CpuToRomAddr(source);
+            source = CpuToRomAddr(source);
+        }
+        else
+        {
+            // new school method
+            source = Get3Bytes(image, index * 3);
+        }
 
         return source;
     }
@@ -1236,25 +1262,26 @@
 
     void ZeldaGame::LoadAllGfx()
     {
-        u32 offset = 0;
-        u32 i      = 0;
+        u32 i           = 0;
+        u32 offset      = 0;
+        u32 numPacks    = 0;
         
         bufPtr decomp = NULL;
 
         // ----------------------------------
-        
-        // decompress all background graphics
-        for(i = 0; i < bm_Header.bgGfxCount; ++i)
-        {
-            offset = GetBgGfxPtr(i);
 
-            this->bgPacks[i] = DecompressStandard(this->image, offset);
-        }
+        numPacks = (bm_Header.sprGfxOffset == default_spr_gfx_ptr) ? 0x73 : 0x100;
 
         // dump all sprite graphics
-        for(i = 0; i < bm_Header.sprGfxCount; ++i)
-        {                
-            // The rest are compressed.
+        for(i = 0; i < 0x100; ++i)
+        { 
+            if(i >= numPacks)
+            {
+                this->sprPacks[i] = CreateBuffer(0x600); 
+
+                continue;
+            }               
+
             offset = GetSprGfxPtr(i);
 
             if(i < 0x0C)
@@ -1267,8 +1294,26 @@
             }
             else
             {
+                // The rest are compressed.
                 this->sprPacks[i] = DecompressStandard(this->image, offset);
             }
+        }
+
+        numPacks = (bm_Header.bgGfxOffset == default_bg_gfx_ptr) ? 0x6C : 0x100;
+        
+        // decompress all background graphics
+        for(i = 0; i < 0x100; ++i)
+        {
+            if(i >= numPacks)
+            {
+                this->bgPacks[i] = CreateBuffer(0x600);
+
+                continue;
+            }
+        
+            offset = GetBgGfxPtr(i);
+
+            this->bgPacks[i] = DecompressStandard(this->image, offset);
         }
 
         // Copy the 2bpp font graphics for the menus / dialogue

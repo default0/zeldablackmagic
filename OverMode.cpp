@@ -80,15 +80,14 @@
         targPtr = 0x1680; 
         srcPtr  = 0;
 
-        gfx   = game->bgPacks[source];
+        gfx = game->bgPacks[source];
         
         Do3To4Low(ani, gfx, &targPtr, &srcPtr, 0x40);
 
         targPtr = 0x1E80; 
         srcPtr  = 0;
 
-        gfx2  = game->bgPacks[source + 1];
-
+        gfx2 = game->bgPacks[source + 1];
         Do3To4Low(ani, gfx2, &targPtr, &srcPtr, 0x20);
 
         ToFile(ani, "C:\\aniTestOver.smc");
@@ -367,7 +366,6 @@
         gi->spritePal1 = 0;
         gi->spritePal2 = 0;
 
-
         // Now we need to load all the necessary palettes
         LoadOverPalettes(game);
 
@@ -394,15 +392,16 @@
 
             GetWindowRect(game->pictWin, &r);
 
+            // locate which window handle
             for(i = 0; ((HWND) we->handle != game->pictWin) && i < wes->numElements; ++i, we = &wes->WESet[i])
                 continue;
 
             if(i != wes->numElements)
             {
                 if(o->largeArea)
-                        we->nHeight = we->nWidth = 1024;
+                    we->nHeight = we->nWidth = 1024;
                 else
-                        we->nHeight = we->nWidth = 512;
+                    we->nHeight = we->nWidth = 512;
 
                 MoveWindow(game->pictWin, we->x, we->y, we->nWidth, we->nHeight, TRUE);
             }

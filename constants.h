@@ -85,6 +85,9 @@
     #define asm_spr_gfx_ptr             0x553C
     #define asm_bg_gfx_ptr              0x6790
 
+    #define default_spr_gfx_ptr         0xCFF3
+    #define default_bg_gfx_ptr          0xCF80
+
     // black magic specific pointers ------------------------------
     #define bm_header_loc       0xFFFFC
 
