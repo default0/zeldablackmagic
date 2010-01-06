@@ -406,7 +406,7 @@
         extern WindowElement dungTemp[];
         extern WindowElement overTemp[];
 
-    extern u32 entranceBufSizes[];
+        extern u32 entranceBufSizes[];
         extern char* SprStrings[];
         extern char* OverStrings[];
         extern char* ItemStrings[];

@@ -920,12 +920,16 @@ void LoadDialogueFile(zgPtr game)
     bufPtr digits   = NULL;
 
     if(textPointer == 0x7F71C0)
+    {
         // pointer table is using the old formatting method
         textPtrs = GetOldTextTable(game);
+    }
     else
+    {
         // pointer table is in ROM b/c Black Magic has previously saved it.
         // but without the BM_HEADER struct we don't know where it is
         textPtrs = GetNewTextTable(game);
+    }
 
     if(!textPtrs)
     {
@@ -975,8 +979,7 @@ void LoadDialogueFile(zgPtr game)
                 // check for command bytes
 
                 // b is the code length,
-                b = GetByte(game->image, 
-                            asm_code_lengths + a) - 1;
+                b = GetByte(game->image, asm_code_lengths + a) - 1;
                 
                 PutByte(df->data[j], dataPointer++, a);
 
@@ -1021,7 +1024,7 @@ void LoadDialogueFile(zgPtr game)
             }
         }
 
-            ResizeBuffer(df->data[j], dataPointer);        
+        ResizeBuffer(df->data[j], dataPointer);        
     }
 
     DestroyBuffer(textPtrs);
