@@ -213,55 +213,58 @@
         {
             // Want this to be a header that has room for expansion
 
-            char designation[12];
-            unsigned int header_version;
-            unsigned int dngHeaderOffset;
-            unsigned int dngHeaderBank;
-            unsigned int dngObjOffset;
-            unsigned int dngEntranceOffset;
-            unsigned int dngChestOffset;
-            unsigned int dngNumChests;
-            unsigned int dngSpriteOffset;
-            unsigned int dngSpriteBanks;
-            unsigned int header_size;
-            unsigned int dngLayoutOffset;   // Offset in the rom where the dungeon layout (template) object data is at.
-            unsigned int textOffset;        // The offset where the pointer table for all the dialogue is at.
-            unsigned int textNumMsgs;       // Number of dialogue messages being stored in the rom.
-            
-            unsigned int overNumParts;      // Number of parts used in the game (not implemented yet)
-            
-            unsigned int overHoleOffset;    // CPU pointer to the beginning of the overworld hole data.
-            unsigned int overNumHoles;      // The number of hole markers that are on the overworld.
-            
-            unsigned int overEntrOffset;    // CPU pointer to the beginning of the overworld entrance data.
-            unsigned int overNumEntr;       // The number of entrance markers (not the same as the number of entrances to the dungeons) on the overworld.
-            
-            unsigned int overItemOffset;    // CPU pointer to the table that has all the overworld item data.
+            char designation[12];   // defaults to "BM_HEADER"
 
-            unsigned int overSprOffset0;    // CPU pointer to the sprite data table for parts 0 and 1
-            unsigned int overSprOffset2;    // CPU pointer to the sprite data table for part 2
-            unsigned int overSprOffset3;    // CPU pointer to the sprite data table for part 3
+            u32 header_version;
+            u32 dngHeaderOffset;
+            u32 dngHeaderBank;
+            u32 dngObjOffset;
+            u32 dngEntranceOffset;
+            u32 dngChestOffset;
+            u32 dngNumChests;
+            u32 dngSpriteOffset;
+            u32 dngSpriteBanks;
+            u32 header_size;
             
-            unsigned int map32To16UL;   // CPU pointer to the map32 to map16 conversion array (upper left)
-            unsigned int map32To16UR;   // CPU pointer to the map32 to map16 conversion array (upper right)
-            unsigned int map32To16LL;   // CPU pointer to the map32 to map16 conversion array (lower left)
-            unsigned int map32To16LR;   // CPU pointer to the map32 to map16 conversion array (lower right)
+            u32 dngLayoutOffset;    // Offset in the rom where the dungeon layout (template) object data is at.
+            u32 textOffset;         // The offset where the pointer table for all the dialogue is at.
+            u32 textNumMsgs;        // Number of dialogue messages being stored in the rom.
+            
+            u32 overNumParts;       // Number of parts used in the game (not implemented yet)
+            
+            u32 overHoleOffset;     // CPU pointer to the beginning of the overworld hole data.
+            u32 overNumHoles;       // The number of hole markers that are on the overworld.
+            
+            u32 overEntrOffset;     // CPU pointer to the beginning of the overworld entrance data.
+            u32 overNumEntr;        // The number of entrance markers (not the same as the number of entrances to the dungeons) on the overworld.
+            
+            u32 overItemOffset;     // CPU pointer to the table that has all the overworld item data.
 
-            unsigned int reserved17;
-            unsigned int reserved18;
-            unsigned int reserved19;
-            unsigned int reserved21;
-            unsigned int reserved22;
-            unsigned int reserved23;
-            unsigned int reserved24;
-            unsigned int reserved25;
-            unsigned int reserved26;
-            unsigned int reserved27;
-            unsigned int reserved28;
-            unsigned int reserved29;
-            unsigned int reserved30;
-            unsigned int reserved31;
-            unsigned int reserved32;
+            u32 overSprOffset0;     // CPU pointer to the sprite data table for parts 0 and 1
+            u32 overSprOffset2;     // CPU pointer to the sprite data table for part 2
+            u32 overSprOffset3;     // CPU pointer to the sprite data table for part 3
+            
+            u32 map32To16UL;        // CPU pointer to the map32 to map16 conversion array (upper left)
+            u32 map32To16UR;        // CPU pointer to the map32 to map16 conversion array (upper right)
+            u32 map32To16LL;        // CPU pointer to the map32 to map16 conversion array (lower left)
+            u32 map32To16LR;        // CPU pointer to the map32 to map16 conversion array (lower right)
+
+            u32 sprGfxOffset;       // CPU pointer to the sprite graphics pointer array
+            u32 sprGfxCount;        // Number of sprite graphics packs in existence in the rom. (Defaults to 0x73)
+            u32 bgGfxOffset;        // CPU pointer to the background graphics pointer array
+            u32 bgGfxCount;         // Number of background graphics packs in existence in the rom. (Defaults to 0x6C)
+
+            u32 reserved22;
+            u32 reserved23;
+            u32 reserved24;
+            u32 reserved25;
+            u32 reserved26;
+            u32 reserved27;
+            u32 reserved28;
+            u32 reserved29;
+            u32 reserved30;
+            u32 reserved31;
+            u32 reserved32;
 
         } BM_Header;
 
@@ -359,6 +362,8 @@
 
             void LoadAllGfx();
 
+            int GetSprGfxPtr(int index);
+            int GetBgGfxPtr(int index);
 
         };
         //ZeldaGame, *zgPtr;
@@ -401,7 +406,7 @@
         extern WindowElement dungTemp[];
         extern WindowElement overTemp[];
 
-        extern unsigned int entranceBufSizes[];
+    extern u32 entranceBufSizes[];
         extern char* SprStrings[];
         extern char* OverStrings[];
         extern char* ItemStrings[];

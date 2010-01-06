@@ -82,6 +82,8 @@
 
         case OVER_CHANGE:
         {
+                char temp[0x100];
+
             giPtr gi = game->gi;
             
             RECT r;
@@ -111,7 +113,14 @@
 
             // Load up graphics info
             gi->backGfx1   = GetByte(game->image, CpuToRomAddr(0x00FC9C) + o->area);
+                
+                sprintf(temp, "%0X", gi->backGfx1);
+                SetDlgItemText(game->toolDlg, ID_AUX_BG_GFX, temp);
+
             gi->spriteGfx0 = GetByte(game->image, CpuToRomAddr(0x00FA41) + o->area);
+
+                sprintf(temp, "%0X", gi->spriteGfx0);
+                SetDlgItemText(game->toolDlg, ID_AUX_SPR_GFX, temp);
 
             gi->backPal0   = 0;
             gi->spritePal0 = 0;
