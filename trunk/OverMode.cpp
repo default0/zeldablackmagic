@@ -77,22 +77,19 @@
             break;
         }
 
-        targPtr = 0x1680; srcPtr = 0;
+        targPtr = 0x1680; 
+        srcPtr  = 0;
 
-        index = GetBgGfxPtr(rom, source);
-        gfx   = DecompressStandard(rom, index);
+        gfx   = game->bgPacks[source];
         
         Do3To4Low(ani, gfx, &targPtr, &srcPtr, 0x40);
 
-        targPtr = 0x1E80; srcPtr = 0;
+        targPtr = 0x1E80; 
+        srcPtr  = 0;
 
-        index = GetBgGfxPtr(rom, source + 1);
-        gfx2  = DecompressStandard(rom, index);
+        gfx2  = game->bgPacks[source + 1];
 
         Do3To4Low(ani, gfx2, &targPtr, &srcPtr, 0x20);
-
-        DeallocBuffer(gfx);
-        DeallocBuffer(gfx2);
 
         ToFile(ani, "C:\\aniTestOver.smc");
 }
@@ -437,38 +434,37 @@
 
         // Find the pointer to the graphics to decompress
         // should optionally use this or 0x01 or 0x0A depending on whether you're in the dark world or not.
-        index4 = GetSprGfxPtr(game->image, gi->spriteGfx1);
         
         // Decompress them using a special method
         index = 0x8800;
+        index4 = 0;
 
-        Do3To4High(game->vram, game->image,
-                   &index,     &index4,
-                   0x600);
+        Do3To4High(game->vram, game->sprPacks[gi->spriteGfx1], &index, &index4, 0x600);
 
         // --------------------------------------------------------
 
         // 0x06 is always used for this graphics slot
-        index4 = GetSprGfxPtr(game->image, 0x6);
+        index4 = 0;
     
-        Do3To4Low(game->vram, game->image,
-                  &index,     &index4,
-                  0x80);
+        Do3To4Low(game->vram, game->sprPacks[0x06], &index, &index4, 0x80);
  
         // --------------------------------------------------------
 
         // Now we move on to decompressing and storing the 4 graphics subsets
         // that are dependent upon the room you are in.
 
+        // These explicit offsets really ought to be generalized
         index3 = gi->spriteGfx0;
         index3 *= 4;
         index3 += 0x5B57;
 
-        for(i = 0; i < 4; i++, index3++)
+        for(i = 0; i < 4; ++i, ++index3)
         {
             // Get one of the current 4 graphics set numbers
             index2 = GetByte(game->image, index3);
-            index4 = GetSprGfxPtr(game->image, index2);
+            index4 = 0;
+
+            decomp = game->sprPacks[index2];
     
             switch(index2)
             {
@@ -487,65 +483,48 @@
             case 0x5E:
             case 0x5F:
 
-                decomp = DecompressStandard(game->image, index4);
-                index4 = 0;
-
-                Do3To4High(game->vram, decomp,
-                           &index,     &index4,
-                           0x600);
-
-                DeallocBuffer(decomp);
+                Do3To4High(game->vram, decomp, &index, &index4, 0x600);
 
                 break;
 
             default:
             
-                decomp = DecompressStandard(game->image, index4);
-                index4 = 0;
-
-                Do3To4Low(game->vram,   decomp,
-                          &index,       &index4,
-                          0x40);
-
-                DeallocBuffer(decomp);
+                Do3To4Low(game->vram, decomp, &index, &index4, 0x40);
 
                 break;
             }
         }
-
-
 
         // Next decompress the BG graphic data
         // Target in VRAM is 0x4000
 
         index = 0x4000;
 
-        // The primary BG tile set 
+        // The primary BG tileset (corresponds to $0AA1)
         index3 = gi->backGfx0;
         index3 *= 8;
         index3 += 0x6073;
 
-        // graphicsNum corresponds to $0AA2
+        // (corresponds to $0AA2)
         index2 = gi->backGfx1;
         index2 *= 4;
         index2 += 0x5D97;
 
-        for(i = 0; i < 8; i++, index3++)
+        for(i = 0; i < 8; ++i, ++index3)
         {
             j = 7 - i;
 
             source = GetByte(game->image, index3);     
-            source = GetBgGfxPtr(game->image, source);
 
+            decomp = game->bgPacks[source];
+
+            // these graphics can override the graphics specified by backGfx0, if the tileset number is nonzero.
             index4 = GetByte(game->image, index2 + i - 3);
 
-            if( j >= 1 && j <= 4)
-                if( index4 != 0)
-                    source = GetBgGfxPtr(game->image, index4);
+            if( (j >= 1) && (j <= 4) && (index4 != 0) )
+                decomp = game->bgPacks[index4];
 
             index4 = 0;
-
-            decomp = DecompressStandard(game->image, source);
 
             // depending on the value of $0AA1 we use different 3bpp to 4bpp methods
             if( (gi->backGfx0 < 0x20) && (j < 3))
@@ -568,9 +547,6 @@
                     break;
                 }
             }
-
-            DeallocBuffer(decomp);
-        
         }
 
         return;
@@ -1387,6 +1363,7 @@
         chdir( (const char*) ToString(game->romName) );
 
         /// experimental resource loading and output of a text file
+        /// THIS NEEDS TO BE MOVED SOMEWHERE MORE GENERAL, NOT JUST IN THE OVERWORLD SAVING CODE
 
         HRSRC hooksRsrc     = FindResource(thisProg, MAKEINTRESOURCE(IDR_HOOKS_ASM), "TEXT");
 
@@ -1716,22 +1693,9 @@
     
         // output exit data.
 
-
         // ------------------------------------------------------------
 
-        
-
-
-
-
-        // wrap up
-
-        // reference a source file that modifies a lot of loading code to make use of the code and data in owData.asm
-
-        fprintf(f, "\n\nincsrc hooks.asm");
-
-        // ------------------------------------------------------------
-
+        // wrap things up
         (*offset) = CpuToRomAddr(*offset);
 
         fclose(f);

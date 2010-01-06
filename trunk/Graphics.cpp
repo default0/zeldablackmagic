@@ -6,32 +6,6 @@
 
 // ===============================================================
 
-    int GetSprGfxPtr(bufPtr inputBuf, int index)
-    {
-        int source  = (GetByte(inputBuf, 0x4FF3 + index) << 0x10);
-        source     |= (GetByte(inputBuf, 0x50D2 + index) << 0x08);
-        source     |= (GetByte(inputBuf, 0x51B1 + index));
-
-        source = CpuToRomAddr(source);
-
-        return source;
-    }
-
-// ===============================================================
-
-    int GetBgGfxPtr(bufPtr inputBuf, int index)
-    {
-        int source  = (GetByte(inputBuf, 0x4F80 + index) << 0x10);
-        source     |= (GetByte(inputBuf, 0x505F + index) << 0x08);
-        source     |= (GetByte(inputBuf, 0x513E + index));
-
-        source = CpuToRomAddr(source);
-
-        return source;
-    }
-
-// ===============================================================
-
     typedef enum 
     {
         mode_no_compress,
@@ -654,6 +628,161 @@
 
 // ===============================================================
 
+    void LoadTilesets(zgPtr game)
+    {
+        // this routine corresponds to $00:E19B in the rom
+
+        u32 i = 0, j = 0;
+        u32 index = 0, index2 = 0, index3 = 0, index4 = 0, dummyInt = 0, source = 0; 
+
+        bufPtr decomp = NULL;
+        giPtr gi = game->gi;
+
+        // -----------------------------------------------
+
+        // Find the pointer to the graphics to decompress
+        // should optionally use this or 0x01 or 0x0A depending on whether you're in the dark world or not.
+        index4 = game->GetSprGfxPtr(gi->spriteGfx1);
+        
+        // Decompress them using a special method
+        index = 0x8800;
+
+        Do3To4High(game->vram, game->image,
+                   &index,     &index4,
+                   0x600);
+
+        // --------------------------------------------------------
+
+        // 0x06 is always used for this graphics slot
+        index4 = game->GetSprGfxPtr(0x6);
+    
+        Do3To4Low(game->vram, game->image,
+                  &index,     &index4,
+                  0x80);
+ 
+        // --------------------------------------------------------
+
+        // Now we move on to decompressing and storing the 4 graphics subsets
+        // that are dependent upon the room you are in.
+
+        index3 = gi->spriteGfx0;
+        index3 *= 4;
+        index3 += 0x5B57;
+
+        for(i = 0; i < 4; i++, index3++)
+        {
+            // Get one of the current 4 graphics set numbers
+            index2 = GetByte(game->image, index3);
+            index4 = game->GetSprGfxPtr(index2);
+    
+            switch(index2)
+            {
+            case 0x00:
+
+                for(j = 0; j < 0x800; j++, index++)
+                    PutByte(game->vram, index, 0);
+
+                break;
+
+            case 0x52:
+            case 0x53:
+            case 0x5A:
+            case 0x5B:
+            case 0x5C:
+            case 0x5E:
+            case 0x5F:
+
+                decomp = DecompressStandard(game->image, index4);
+                index4 = 0;
+
+                Do3To4High(game->vram, decomp,
+                           &index,     &index4,
+                           0x600);
+
+                DeallocBuffer(decomp);
+
+                break;
+
+            default:
+            
+                decomp = DecompressStandard(game->image, index4);
+                index4 = 0;
+
+                Do3To4Low(game->vram,   decomp,
+                          &index,       &index4,
+                          0x40);
+
+                DeallocBuffer(decomp);
+
+                break;
+            }
+        }
+
+
+
+        // Next decompress the BG graphic data
+        // Target in VRAM is 0x4000
+
+        index = 0x4000;
+
+        // The primary BG tile set 
+        index3 = gi->backGfx0;
+        index3 *= 8;
+        index3 += 0x6073;
+
+        // graphicsNum corresponds to $0AA2
+        index2 = gi->backGfx1;
+        index2 *= 4;
+        index2 += 0x5D97;
+
+        for(i = 0; i < 8; i++, index3++)
+        {
+            j = 7 - i;
+
+            source = GetByte(game->image, index3);     
+            source = game->GetBgGfxPtr(source);
+
+            index4 = GetByte(game->image, index2 + i - 3);
+
+            if( j >= 1 && j <= 4)
+                if( index4 != 0)
+                    source = game->GetBgGfxPtr(index4);
+
+            index4 = 0;
+
+            decomp = DecompressStandard(game->image, source);
+
+            // depending on the value of $0AA1 we use different 3bpp to 4bpp methods
+            if( (gi->backGfx0 < 0x20) && (j < 3))
+                Do3To4Low(game->vram, decomp, &index, &index4, 0x40);
+            else if(gi->backGfx0 < 0x20)
+                Do3To4High(game->vram, decomp, &index, &index4, 0x600);
+            else 
+            {
+                switch(j)
+                {
+                case 2:
+                case 3:
+                case 4:
+                case 7:
+                    Do3To4High(game->vram, decomp, &index, &index4, 0x600);
+                    break;
+
+                default:
+                    Do3To4Low(game->vram, decomp, &index, &index4, 0x40);
+                    break;
+                }
+            }
+
+            DeallocBuffer(decomp);
+        
+        }
+
+        return;
+    }
+
+// ===============================================================
+
     void LoadPalettes(zgPtr game, u32 offset, u32 numPalettes, u32 numColors, u32 cgOffset)
     {
         bufPtr rom   = game->image;
@@ -1067,6 +1196,44 @@
 
 // ===============================================================
 
+    int ZeldaGame::GetSprGfxPtr(int index)
+    {
+        u32 base    = CpuToRomAddr(bm_Header.sprGfxOffset);
+        u32 c       = bm_Header.sprGfxCount;
+        u32 source  = 0;
+
+        // -------------------------------------
+
+        source  = GetByte(image, base               + index) << 0x10;
+        source |= GetByte(image, base + 0xDF        + index) << 0x08;
+        source |= GetByte(image, base + (0x0DF * 2) + index);
+
+        source = CpuToRomAddr(source);
+
+        return source;
+    }
+
+// ===============================================================
+
+    int ZeldaGame::GetBgGfxPtr(int index)
+    {
+        u32 base    = CpuToRomAddr(bm_Header.bgGfxOffset);
+        u32 c       = bm_Header.bgGfxCount;
+        u32 source  = 0;
+
+        // -------------------------------------
+
+        source  = GetByte(image, base              + index) << 0x10;
+        source |= GetByte(image, base + 0xDF       + index) << 0x08;
+        source |= GetByte(image, base + (0xDF * 2) + index);
+
+        source = CpuToRomAddr(source);
+
+        return source;
+    }
+
+// ===============================================================
+
     void ZeldaGame::LoadAllGfx()
     {
         u32 offset = 0;
@@ -1077,19 +1244,18 @@
         // ----------------------------------
         
         // decompress all background graphics
-        for(i = 0; i < 0x73; i++)
+        for(i = 0; i < bm_Header.bgGfxCount; ++i)
         {
-            offset = GetBgGfxPtr(this->image, i);
+            offset = GetBgGfxPtr(i);
 
             this->bgPacks[i] = DecompressStandard(this->image, offset);
-
         }
 
         // dump all sprite graphics
-        for(i = 0; i < 0x6C; i++)
+        for(i = 0; i < bm_Header.sprGfxCount; ++i)
         {                
             // The rest are compressed.
-            offset = GetSprGfxPtr(this->image, i);
+            offset = GetSprGfxPtr(i);
 
             if(i < 0x0C)
             {
@@ -1122,3 +1288,45 @@
     }
 
 // ===============================================================
+
+    // List of what values of $0AA2 correspond to
+    // 0x20 - default light world
+    // 0x21 - forest
+    // 0x22 - light world death mountain
+    // 0x23 - village / fortune teller
+    // 0x24 - hyrule castle
+    // 0x25 - eastern palace (ruins)
+    // 0x26 - desert area / village area
+    // 0x27 - wood bridge and stone bridge near hyrule castle
+    // 0x28 - unused
+    // 0x29 - sanctuary / graveyard / witch hut
+    // 0x2A - library
+    // 0x2B - desert area
+    // 0x2C - unused
+    // 0x2D - unused
+    // 0x2E - unused
+    // 0x2F - master sword / under bridge / zora falls
+
+    // 0x30 - default dark world
+    // 0x31 - forest (repeated)
+    // 0x32 - light world death mountain (repeated)
+    // 0x33 - village / fortune teller (repeated)
+    // 0x34 - hyrule castle (repeated)
+    // 0x35 - eastern palace (ruins) (repeated)
+    // 0x36 - desert area / village area (repeated)
+    // 0x37 - wood bridge / stone bridge near hyrule castle (repeated)
+    // 0x38 - unused
+    // 0x39 - sanctuary / graveyard / witch hut
+    // 0x3A - library (without village elements)
+    // 0x3B - pyramic of power
+    // 0x3C - turtle rock
+    // 0x3D - maze / dark palace area
+    // 0x3E - skull forest
+    // 0x3F - dark world village
+
+    // 0x40 - lake of ill omen / dark world graveyard
+    // 0x41 - dark world death mountain
+    // 0x42 - swamp of evil / dark world lake hylia
+    // 0x43 - 
+
+    // 0x51 - triforce room

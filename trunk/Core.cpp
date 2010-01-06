@@ -47,7 +47,10 @@
         int newLength = 0x200000;
         int inRomHeaderOffset = 0x109000;
 
+        u32 a = 0;
+    
         bufPtr temp = NULL;
+        bufPtr rom  = game->image;
 
         BM_Header *h = &game->bm_Header;
         
@@ -60,32 +63,31 @@
 
         strcpy(h->designation, "BM_HEADER");
 
-        h->dngHeaderOffset  = Get3Bytes(game->image, asm_header_ref);
+        h->dngHeaderOffset  = Get3Bytes(rom, asm_header_ref);
             
-        h->dngHeaderBank    = GetByte(game->image, asm_header_bank);
+        h->dngHeaderBank    = GetByte(rom, asm_header_bank);
 		    
-        h->dngObjOffset     = Get3Bytes(game->image, asm_object_ref);
+        h->dngObjOffset     = Get3Bytes(rom, asm_object_ref);
     
-        h->dngLayoutOffset  = Get3Bytes(game->image, asm_layout_ref);
+        h->dngLayoutOffset  = Get3Bytes(rom, asm_layout_ref);
 
         h->dngEntranceOffset = asm_entrance_ref;
             
-        h->dngChestOffset   = Get3Bytes(game->image, asm_chest_ref);
+        h->dngChestOffset   = Get3Bytes(rom, asm_chest_ref);
 
-        h->dngNumChests     = Get2Bytes(game->image, asm_num_chests) / 3;
+        h->dngNumChests     = Get2Bytes(rom, asm_num_chests) / 3;
 
-        h->dngSpriteOffset  = Get2Bytes(game->image, asm_sprite_ref);
+        h->dngSpriteOffset  = Get2Bytes(rom, asm_sprite_ref);
 
-        h->map32To16UL      = Get3Bytes(game->image, asm_map32To16UL);
-        h->map32To16UR      = Get3Bytes(game->image, asm_map32To16UR);
-        h->map32To16LL      = Get3Bytes(game->image, asm_map32To16LL);
-        h->map32To16LR      = Get3Bytes(game->image, asm_map32To16LR);
+        h->map32To16UL      = Get3Bytes(rom, asm_map32To16UL);
+        h->map32To16UR      = Get3Bytes(rom, asm_map32To16UR);
+        h->map32To16LL      = Get3Bytes(rom, asm_map32To16LL);
+        h->map32To16LR      = Get3Bytes(rom, asm_map32To16LR);
                         
         // Check to see if there is a hooked JML to extended regions
         // If there is a hook, this will be the offset in-rom for the bank table
-        if(GetByte(game->image, asm_sprite_hook) == 0x5C)
-            h->dngSpriteBanks = CpuToRomAddr(Get3Bytes(game->image,
-                                                                    asm_sprite_hook + 1)) + 0x0E;
+        if(GetByte(rom, asm_sprite_hook) == 0x5C)
+            h->dngSpriteBanks = CpuToRomAddr(Get3Bytes(rom, asm_sprite_hook + 1)) + 0x0E;
         // In this case there isn't ;) And in that case the sprite data is all in bank 09
                 else 
             h->dngSpriteBanks = 0x090000;
@@ -103,13 +105,21 @@
         // default location of this data.
         h->overItemOffset   = 0x1BC2F9;
 
+        // initialize default information about the structure of the graphics data
+        h->sprGfxOffset     = Get2Bytes(rom, asm_spr_gfx_ptr);
+        h->sprGfxCount      = 0x73;
+
+        h->bgGfxOffset      = Get2Bytes(rom, asm_bg_gfx_ptr);
+        h->bgGfxCount       = 0x6C;
+    
+        // Expand the rom to 2 megabytes if the initial size is 1 megabyte or less
         if(game->image->length <= 0x100000)
             ExpandRom(&newLength, 1);
 
         temp = FromString( (char*) &(game->bm_Header), sizeof(BM_Header) );
 
-        CopyBuffer(game->image, temp, inRomHeaderOffset, 0, temp->length);
-        Put3Bytes(game->image, bm_header_loc, inRomHeaderOffset);
+        CopyBuffer(rom, temp, inRomHeaderOffset, 0, temp->length);
+        Put3Bytes(rom, bm_header_loc, inRomHeaderOffset);
 
                 }
 
@@ -2199,8 +2209,8 @@
             index = GetByte(rom, 0x75463 + gfxNum);
             index = GetByte(rom, 0x1011E + index);
        
-            //index = GetBgGfxPtr(rom, index);
-            index = GetBgGfxPtr(rom, 0x5D);
+            //index = game->GetBgGfxPtr(index);
+            index = game->GetBgGfxPtr(0x5D);
         
             game->testPtr = DecompressStandard(rom, index);
 
@@ -2240,7 +2250,7 @@
                       &targPtr, &srcPtr,
                       0x30);
 
-            index = GetBgGfxPtr(rom, 0x5C); // This constant is fixed in the game. Could
+            index = game->GetBgGfxPtr(0x5C); // This constant is fixed in the game. Could
                                               // Find a way to change it I guess.
 
             DeallocBuffer(game->testPtr); // Deallocates the previous buffer that the 
@@ -2308,7 +2318,7 @@
 
         // Find the pointer to the graphics to decompress
         // should optionally use this or 0x01 or 0x0A depending on... something >_<
-        index4 = GetSprGfxPtr(game->image, 0xB);
+        index4 = game->GetSprGfxPtr(0xB);
         
         // Decompress them using a special method
         game->testPtr = DecompressOther(game->image, index4);
@@ -2321,7 +2331,7 @@
                      game->testPtr->length);
 
         // this happens for all modes regardless of dungeons or outdoors
-        index4 = GetSprGfxPtr(game->image, 0x6);
+        index4 = game->GetSprGfxPtr(0x6);
         
         Do3To4Low(game->vram,
                   game->image,
@@ -2343,7 +2353,7 @@
         {
             // Get one of the current 4 graphics set numbers
             index2 = GetByte(game->image, index3);
-            index4 = GetSprGfxPtr(game->image, index2);
+            index4 = game->GetSprGfxPtr(index2);
     
             switch(index2)
             {
@@ -2434,13 +2444,13 @@
         for( i = 0; i < 8; i++, index3++)
         {
             source = GetByte(game->image, index3);     
-            source = GetBgGfxPtr(game->image, source);
+            source = game->GetBgGfxPtr(source);
 
             index4 = GetByte(game->image, index2 + i - 3);
 
             if( i >= 3 && i <= 6)
                 if( index4 != 0)
-                    source = GetBgGfxPtr(game->image, index4);
+                    source = game->GetBgGfxPtr(index4);
 
             index4 = 0;
 

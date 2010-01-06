@@ -145,7 +145,7 @@
         SetWindowLong(ngWnd, 0, (long) newGamePtr);
         windowList[newGamePtr->index] = ngWnd;
     
-        SetWindowText(ngWnd, (char*) newGamePtr->romName->contents);
+        SetWindowText(ngWnd, (const char*) ToString(newGamePtr->romName));
         ShowWindow(ngWnd, 1);
         DrawMenuBar(ngWnd);
     }
@@ -1227,9 +1227,6 @@ int IsDuplicateRom(char compareBuf[MAX_PATH])
         newGamePtr->currentWES.numElements = 0;
         newGamePtr->currentWES.WESet = 0;
     
-        // Decompress all the graphics out of the rom so they're available at run time.
-        newGamePtr->LoadAllGfx();
-
         MakeNewEditWindow();
 
         return;
@@ -1424,8 +1421,6 @@ void ActivateCurrentWES(WEStruct *currentWES, HWND parent)
                 i = fLength & 0x200 ? 1 : 0;
 
                 MakeNewGamePtr(tempFileName, fHandle, i, fLength);           
-
-
             }
 
             // Note if the game had a header, I think the file pointer is already at 0x200
@@ -1450,6 +1445,9 @@ void ActivateCurrentWES(WEStruct *currentWES, HWND parent)
                 newGamePtr->numRooms = 320;
                 newGamePtr->numEntrances = 0x85;
             }
+
+            // Decompress all the graphics out of the rom so they're available at run time.
+            newGamePtr->LoadAllGfx();
 
             newGamePtr->currentWES.numElements = 0;
             newGamePtr->currentWES.WESet = 0;

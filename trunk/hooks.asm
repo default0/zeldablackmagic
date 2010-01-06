@@ -1,13 +1,93 @@
 ; =====================================================
 
-; overworld map32 to map16 conversion arrays hooks
+    incsrc owData.asm
+    incsrc graphics.asm
+    
+; =====================================================
 
+    ; patch the sprite graphics loading location
+    ; GetSprGfxPtr and GetBgGfxPtr are externally defined routines that Black Magic will output at a dynamic location.
+    org $00D53B
+    
+        LDA.b #$00
+
+        JSL GetSprGfxPtr
+        
+        LDA $02 : STA $05
+        
+        NOP #7
+
+    org $00DA99
+
+        LDA.b #$00
+
+        JSL GetSprGfxPtr
+        
+        LDA $02 : STA $05
+        
+        NOP #7
+    
+    org $00E2D8
+
+        LDA.b #$00
+
+        JSL GetSprGfxPtr
+        
+        NOP #9
+    
+    org $00E462
+    
+        LDA.b #$00
+
+        JSL GetSprGfxPtr
+        
+        LDA $02 : STA $05
+        
+        NOP #7
+
+    org $00E6BA
+    
+        LDA.b #$00
+
+        JSL GetSprGfxPtr
+        
+        NOP #9
+
+    org $00E72E
+    
+        LDA.b #$00
+
+        JSL GetSprGfxPtr
+        
+        NOP #9
+
+    org $00E772
+
+        LDA.b #$C8
+
+        JSL GetSprGfxPtr
+        
+        NOP #9
+
+    ; Patch the background graphics loading location
+    org $00E78F
+    
+        LDA.b #$C8
+
+        JSL GetBgGfxPtr
+        
+        NOP #9
+    
+; =====================================================
+
+; overworld map32 to map16 conversion arrays hooks
 
     ; Overworld patch to expand the number of map32 tiles available.    
 
     org $02F691
 
     ConvertMap32ToMap16:
+    {
 
         PHA : AND.w #$FFF8 : CMP $4440  ; map32 value
     	
@@ -81,6 +161,7 @@
     	LDA $4430, X : STA [$03], Y : INY #2
     	
     	RTS
+    }
 
 ; =====================================================
 
@@ -114,7 +195,8 @@
     ; Overworld patch to expand the number of hole markers
     org $1BB860
 
-    holePatch:
+    HolePatch:
+    {
         ; Patch to expand the number of Overworld holes
         ; Sets the entrance for when Link falls into a hole
 
@@ -163,6 +245,7 @@
         STZ $010F
 
         RTL        
+    }
 
 ; =====================================================
     
@@ -200,7 +283,8 @@
     
     ; Overworld patch to expand the number of exits (dungeon to overworld linkage or overworld to overworld linkage)
     org $02E4A3
-    exitPatch:
+    ExitPatch:
+    {
     	; Loads a bunch of exit data (e.g. Link's coordinates)
 
         ; Data Bank = Program Bank
@@ -353,6 +437,7 @@
     	LDA.b #$FF : STA $24 : STA $29
     	
         RTS
+    }
 
 ; =====================================================
 
@@ -360,16 +445,18 @@
 
         ; Overworld patch to expand the number of sprites that can be stored in the ROM.
         ; This is a rewritten version of the original routine, except this one uses 3-byte pointers rather than 2-byte pointers.
+    
     LoadOwData:
-
+    {
         JSL LoadOwData2
         
         RTS
+    }
         
     org $3F8000
         
     LoadOwData2:
-
+    {
         PHP
     
         REP #$30
@@ -484,5 +571,6 @@
         PLP
     
     	RTL        
+    }
         
 ; =====================================================

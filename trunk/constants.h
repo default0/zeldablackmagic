@@ -79,6 +79,12 @@
     // in a clean rom this is 0xB800 (2 bytes) which references 0x1BB800 (0xDB800) in rom
     #define asm_hole_ptr_old        0xDB894
 
+    // graphics asm pointers ---------------------------------------
+
+    // ROM addresses of asm location where an untouched Zelda 3 rom will load graphics from
+    #define asm_spr_gfx_ptr             0x553C
+    #define asm_bg_gfx_ptr              0x6790
+
     // black magic specific pointers ------------------------------
     #define bm_header_loc       0xFFFFC
 
