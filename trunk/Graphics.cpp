@@ -1220,6 +1220,7 @@
 
             source = CpuToRomAddr(source);
         }
+        else
         {
             // new school method
             source = Get3Bytes(image, index * 3);
