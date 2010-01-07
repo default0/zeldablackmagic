@@ -88,6 +88,7 @@
         srcPtr  = 0;
 
         gfx2 = game->bgPacks[source + 1];
+
         Do3To4Low(ani, gfx2, &targPtr, &srcPtr, 0x20);
 
         ToFile(ani, "C:\\aniTestOver.smc");

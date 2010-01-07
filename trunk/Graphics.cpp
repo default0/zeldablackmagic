@@ -1334,7 +1334,60 @@
 
 // ===============================================================
 
+    // List of what values of $0AA1 correspond to
+
+    // 0x00 - hyrule castle throne room
+    // 0x01 - dungeon interior?
+    // 0x02 - agahnim's room
+    // 0x03 - houses
+    // 0x04 - hyrule castle part 1 / sanctuary / hyrule castle part 2
+    // 0x05 - eastern palace (dungeon) / tower of hera
+    // 0x06 - cave
+    // 0x08 - swamp palace / watergate
+    // 0x09 - skull woods palace
+    // 0x0A - gargoyle's domain / blind's old hideout
+    // 0x0B - ice palace (dungeon)
+    // 0x0C - misery mire
+    // 0x0D - turtle rock
+    // 0x0E - Ganon's tower
+    // 0x0F - sahashralah's hideout
+
+    // 0x11 - fortune teller / bow & arrow game
+    // 0x12 - desert palace / pyramid of power fountain
+    // 0x13 - Ganon pit room
+    // 0x14 - shopkeeper / storytellers
+    // 0x15 - ???
+
+    
+    
+    // 0x20 - light world overworld / map screen
+    // 0x21 - dark world overworld
+    // 0x22 - 2bpp graphics? why?
+    // 0x23 - title screen / menus
+    // 0x24 - triforce room
+
+
     // List of what values of $0AA2 correspond to
+
+    // 0x02 - hyrule castle part 2
+    // 0x03 - houses
+    // 0x04 - sanctuary
+    // 0x05 - desert palace / eastern palace (dungeon) / tower of hera
+    // 0x06 - cave interior
+    // 0x08 - swamp palace / watergate
+    // 0x09 - skull woods palace
+    // 0x0A - gargoyle's domain / blind's old hideout
+    // 0x0B - ice palace (dungeon)
+    // 0x0C - misery mire
+    // 0x0D - turtle rock
+    // 0x0E - Ganon's tower
+    // 0x0F - sahashralah's
+
+    // 0x10 - cape room
+    // 0x11 - fortune teller / bow & arrow game
+    // 0x13 - Ganon's room
+    // 0x14 - shopkeeper / storytellers
+
     // 0x20 - default light world
     // 0x21 - forest
     // 0x22 - light world death mountain
@@ -1363,15 +1416,16 @@
     // 0x38 - unused
     // 0x39 - sanctuary / graveyard / witch hut
     // 0x3A - library (without village elements)
-    // 0x3B - pyramic of power
+    // 0x3B - pyramid of power
     // 0x3C - turtle rock
     // 0x3D - maze / dark palace area
     // 0x3E - skull forest
     // 0x3F - dark world village
 
-    // 0x40 - lake of ill omen / dark world graveyard
+    // 0x40 - lake of ill omen / dark world graveyard / map screen
     // 0x41 - dark world death mountain
     // 0x42 - swamp of evil / dark world lake hylia
-    // 0x43 - 
-
+    // 0x43 - unused
+    // 0x44 to 0x4F - unused
+    // 0x50 - 2bpp graphics
     // 0x51 - triforce room
