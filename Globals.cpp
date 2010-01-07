@@ -469,18 +469,18 @@ int expansionList[] =  {IDC_8MB,
 
 WindowElement dungTemp[] =
 {
-    { editExStyle,    "EDIT",   editBuf, editStyle | ES_READONLY, 60, 0, 30, 20, 0, (HMENU) ID_DungAttrNum, 0, 0, 0, 12},
-    { editExStyle,    "EDIT",   editBuf, editStyle | ES_READONLY, 90, 0, 60, 20, 0, (HMENU) ID_DungAttrAddress, 0, 0, 0, 0},
-    { editExStyle,    "EDIT",   editBuf, editStyle | ES_READONLY, 150, 0, 60, 20, 0, (HMENU) ID_DungTilemapAddress, 0, 0, 0, 0},
-    { editExStyle,    "EDIT",   editBuf, editStyle | ES_READONLY, 210, 0, 60, 20, 0, (HMENU) ID_DungTilemapNum, 0, 0, 0, 0},
-    { editExStyle,    "EDIT",   editBuf, editStyle | ES_READONLY, 270, 0, 60, 20, 0, (HMENU) ID_DungRoomNum, 0, 0, 0, 0},
+    { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 60, 0, 30, 20, 0, (HMENU) ID_DungAttrNum, 0, 0, 0, 12},
+    { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 90, 0, 60, 20, 0, (HMENU) ID_DungAttrAddress, 0, 0, 0, 0},
+    { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 150, 0, 60, 20, 0, (HMENU) ID_DungTilemapAddress, 0, 0, 0, 0},
+    { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 210, 0, 60, 20, 0, (HMENU) ID_DungTilemapNum, 0, 0, 0, 0},
+    { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 270, 0, 60, 20, 0, (HMENU) ID_DungRoomNum, 0, 0, 0, 0},
     { pictureExStyle, "PICTURE", "DUNGPIC", pictureStyle|WS_GROUP, 80, 80, 512, 512, 0, (HMENU) ID_DungPictureBox, 0, 0, 0, 0},
-    { buttonExStyle,  "BUTTON", "->", buttonStyle|WS_GROUP, 0, 0, 50,  30, 0, (HMENU) ID_DungJumpButton, 0, 0, 0, 0},
-    { buttonExStyle,  "BUTTON", "Header", buttonStyle|WS_GROUP, 0, 60, 50, 30, 0, (HMENU) ID_DungHeaderButton, 0, 0, 0, 0},
-    { buttonExStyle,  "BUTTON", "<-", buttonStyle|WS_GROUP, 0, 30, 50, 30, 0, (HMENU) ID_DungRoomButton, 0, 0, 0, 0},
-    { buttonExStyle,  "BUTTON", "Search", buttonStyle|WS_GROUP, 0, 90, 50, 30, 0, (HMENU) ID_DungSearchButton, 0, 0, 0, 0},
-    { radioExStyle,  "BUTTON", "BG1", radioStyle|WS_GROUP, 0, 120, 50, 30, 0, (HMENU) ID_DungLayer1Radio, 0, 0, 0, 0},
-    { radioExStyle,  "BUTTON", "BG2", radioStyle|WS_GROUP, 0, 150, 50, 30, 0, (HMENU) ID_DungLayer2Radio, 0, 0, 0, END_FLAG}
+    { buttonExStyle,  "BUTTON",  "->",      buttonStyle|WS_GROUP, 0, 0, 50,  30, 0, (HMENU) ID_DungJumpButton, 0, 0, 0, 0},
+    { buttonExStyle,  "BUTTON",  "Header",  buttonStyle|WS_GROUP, 0, 60, 50, 30, 0, (HMENU) ID_DungHeaderButton, 0, 0, 0, 0},
+    { buttonExStyle,  "BUTTON",  "<-",      buttonStyle|WS_GROUP, 0, 30, 50, 30, 0, (HMENU) ID_DungRoomButton, 0, 0, 0, 0},
+    { buttonExStyle,  "BUTTON",  "Search",  buttonStyle|WS_GROUP, 0, 90, 50, 30, 0, (HMENU) ID_DungSearchButton, 0, 0, 0, 0},
+    { radioExStyle,   "BUTTON",  "BG1",     radioStyle|WS_GROUP, 0, 120, 50, 30, 0, (HMENU) ID_DungLayer1Radio, 0, 0, 0, 0},
+    { radioExStyle,   "BUTTON",  "BG2",     radioStyle|WS_GROUP, 0, 150, 50, 30, 0, (HMENU) ID_DungLayer2Radio, 0, 0, 0, END_FLAG}
 };
 
 WindowElement overTemp[] =

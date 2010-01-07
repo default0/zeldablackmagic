@@ -250,10 +250,10 @@
             u32 map32To16LR;        // CPU pointer to the map32 to map16 conversion array (lower right)
 
             u32 sprGfxOffset;       // CPU pointer to the sprite graphics pointer array
-            u32 sprGfxCount;        // Number of sprite graphics packs in existence in the rom. (Defaults to 0x73)
             u32 bgGfxOffset;        // CPU pointer to the background graphics pointer array
-            u32 bgGfxCount;         // Number of background graphics packs in existence in the rom. (Defaults to 0x6C)
 
+            u32 reserved20;
+            u32 reserved21;
             u32 reserved22;
             u32 reserved23;
             u32 reserved24;

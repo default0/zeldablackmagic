@@ -798,33 +798,32 @@
 
                 i = _mkdir("gfx");
         
-                // dump all background graphics
-                for(i = 0; i < 0x73; ++i)
-                {
-                    sprintf(path, "gfx\\bg_gfx_%x.bin", i);
-
-                    ToFile(game->sprPacks[i], path); 
-                }
-
                 // dump all sprite graphics
-                for(i = 0; i < 0x6C; ++i)
+                for(i = 0; i < 0x100; ++i)
                 {                
                     sprintf(path, "gfx\\spr_gfx_%x.bin", i);
 
                     ToFile(game->sprPacks[i], path);
                 }
+
+                // dump all background graphics
+                for(i = 0; i < 0x100; ++i)
+                {
+                    sprintf(path, "gfx\\bg_gfx_%x.bin", i);
+
+                    ToFile(game->bgPacks[i], path); 
+                }
         
                 // Output the 2bpp font graphics for the menus / dialogue
-                sprintf(path, "gfx\\font_gfx.bin");
-                ToFile(game->fontGfx, path);
+                ToFile(game->fontGfx, "gfx\\font_gfx.bin");
 
                 // Output Link's 4bpp sprite graphics
-                sprintf(path, "gfx\\link_gfx.bin");
-                ToFile(game->linkGfx, path);
+                ToFile(game->linkGfx, "gfx\\link_gfx.bin");
 
                 // Output mode7 graphics (to-do listed)
-                sprintf(path, "gfx\\mode7_gfx.bin");
-                ToFile(game->mode7Gfx, path);
+                ToFile(game->mode7Gfx, "gfx\\mode7_gfx.bin");
+
+                MessageBox(mainHwnd, "Finished exporting", "success", MB_OK);
             
                 break;
             }
@@ -836,19 +835,27 @@
 
                 chdir( (const char*) ToString(game->image) );
 
-                for(i = 0; i < 0x73; ++i)
+                // import all sprite packs
+                for(i = 0; i < 0x100; ++i)
                 {
-                    sprintf(path, "gfx\\bg_gfx_%x", ToString(game->romName), i);
+                    sprintf(path, "gfx\\spr_gfx_%x.bin", i);
+
+                    FromFile(game->sprPacks[i], path);
+                }
+
+                // import all background packs
+                for(i = 0; i < 0x100; ++i)
+                {
+                    sprintf(path, "gfx\\bg_gfx_%x.bin", i);
 
                     FromFile(game->bgPacks[i], path);
                 }
 
-                for(i = 0; i < 0x6C; ++i)
-                {
-                    sprintf(path, "gfx\\spr_gfx_%x", ToString(game->romName), i);
+                FromFile(game->fontGfx,  "gfx\\font_gfx.bin");
+                FromFile(game->linkGfx,  "gfx\\link_gfx.bin");
+                FromFile(game->mode7Gfx, "gfx\\mode7_gfx.bin");
 
-                    FromFile(game->bgPacks[i], path);
-                }
+                MessageBox(mainHwnd, "Finished importing", "success", MB_OK);
 
                 break;
             }
