@@ -99,6 +99,8 @@
 
     // function prototypes
 
+    char* GetAsmTextResource(int resourceID);
+
     int     SaveDataToFile(zgPtr game);
 
     void    SaveExtendedDataToFile(zgPtr game);
@@ -107,6 +109,8 @@
 
     bool    SaveSprites(zgPtr game, u32 *romOffset);
 
-    void ChangeWES(WindowElement* we, HWND win, zgPtr game);
+    void    SetupAsmPatching(zgPtr game);
+
+    void    ChangeWES(WindowElement* we, HWND win, zgPtr game);
 
 #endif

@@ -900,7 +900,10 @@
 
             // No more room left in the rom!
             if(newBank > maxBank)
+            {
+                // should throw an exception here....
                 return 0;
+            }
 
             // Moves the address into the start of the next bank.
             oldOffset = (newBank << 0x10) | 0x8000;

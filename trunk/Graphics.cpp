@@ -1,8 +1,14 @@
 
+    #include "direct.h"
 
+    #include "Black Magic.h"
     #include "Globals.h"
     #include "Strings.h"
     #include "Core.h"
+
+    #include "PathName.h"
+
+    #include "compresch_lttp.h"
 
 // ===============================================================
 
@@ -1331,98 +1337,102 @@
 
 // ===============================================================
 
-    // List of what values of $0AA1 correspond to
+    bool ZeldaGame::SaveGraphics(u32 *offset)
+    {
+        char *gfxText   = NULL;
 
-    // 0x00 - hyrule castle throne room
-    // 0x01 - dungeon interior?
-    // 0x02 - agahnim's room
-    // 0x03 - houses
-    // 0x04 - hyrule castle part 1 / sanctuary / hyrule castle part 2
-    // 0x05 - eastern palace (dungeon) / tower of hera
-    // 0x06 - cave
-    // 0x08 - swamp palace / watergate
-    // 0x09 - skull woods palace
-    // 0x0A - gargoyle's domain / blind's old hideout
-    // 0x0B - ice palace (dungeon)
-    // 0x0C - misery mire
-    // 0x0D - turtle rock
-    // 0x0E - Ganon's tower
-    // 0x0F - sahashralah's hideout
+        u32 cpuOffset   = 0;
+        u32 i           = 0;
+        u32 size        = 0;
 
-    // 0x11 - fortune teller / bow & arrow game
-    // 0x12 - desert palace / pyramid of power fountain
-    // 0x13 - Ganon pit room
-    // 0x14 - shopkeeper / storytellers
-    // 0x15 - ???
+        BM_Header *h    = &this->bm_Header;
 
-    
-    
-    // 0x20 - light world overworld / map screen
-    // 0x21 - dark world overworld
-    // 0x22 - 2bpp graphics? why?
-    // 0x23 - title screen / menus
-    // 0x24 - triforce room
+        bufPtr compBuf  = CreateBuffer(0x2000);
 
+        FILE *f         = NULL;
 
-    // List of what values of $0AA2 correspond to
+        Compresch_LTTP *lt  = new Compresch_LTTP(false);
 
-    // 0x02 - hyrule castle part 2
-    // 0x03 - houses
-    // 0x04 - sanctuary
-    // 0x05 - desert palace / eastern palace (dungeon) / tower of hera
-    // 0x06 - cave interior
-    // 0x08 - swamp palace / watergate
-    // 0x09 - skull woods palace
-    // 0x0A - gargoyle's domain / blind's old hideout
-    // 0x0B - ice palace (dungeon)
-    // 0x0C - misery mire
-    // 0x0D - turtle rock
-    // 0x0E - Ganon's tower
-    // 0x0F - sahashralah's
+        // ---------------------
 
-    // 0x10 - cape room
-    // 0x11 - fortune teller / bow & arrow game
-    // 0x13 - Ganon's room
-    // 0x14 - shopkeeper / storytellers
+        gfxText = GetAsmTextResource(IDR_GRAPHICS_ASM);
 
-    // 0x20 - default light world
-    // 0x21 - forest
-    // 0x22 - light world death mountain
-    // 0x23 - village / fortune teller
-    // 0x24 - hyrule castle
-    // 0x25 - eastern palace (ruins)
-    // 0x26 - desert area / village area
-    // 0x27 - wood bridge and stone bridge near hyrule castle
-    // 0x28 - unused
-    // 0x29 - sanctuary / graveyard / witch hut
-    // 0x2A - library
-    // 0x2B - desert area
-    // 0x2C - unused
-    // 0x2D - unused
-    // 0x2E - unused
-    // 0x2F - master sword / under bridge / zora falls
+        if(!gfxText)
+        {
+            return false;
+        }
 
-    // 0x30 - default dark world
-    // 0x31 - forest (repeated)
-    // 0x32 - light world death mountain (repeated)
-    // 0x33 - village / fortune teller (repeated)
-    // 0x34 - hyrule castle (repeated)
-    // 0x35 - eastern palace (ruins) (repeated)
-    // 0x36 - desert area / village area (repeated)
-    // 0x37 - wood bridge / stone bridge near hyrule castle (repeated)
-    // 0x38 - unused
-    // 0x39 - sanctuary / graveyard / witch hut
-    // 0x3A - library (without village elements)
-    // 0x3B - pyramid of power
-    // 0x3C - turtle rock
-    // 0x3D - maze / dark palace area
-    // 0x3E - skull forest
-    // 0x3F - dark world village
+        (*offset) = RomToCpuAddr(*offset);
 
-    // 0x40 - lake of ill omen / dark world graveyard / map screen
-    // 0x41 - dark world death mountain
-    // 0x42 - swamp of evil / dark world lake hylia
-    // 0x43 - unused
-    // 0x44 to 0x4F - unused
-    // 0x50 - 2bpp graphics
-    // 0x51 - triforce room
+        // set the current directory to the directory that the rom was found in.
+        PathName *p = new PathName( (const char*) ToString(romName) );
+
+        p->SetName("");
+        p->SetExt("");
+
+        chdir( (const char*) p->GetFullPath() );
+
+        char path[MAX_PATH];
+        _getcwd(path, MAX_PATH);
+
+        f = fopen("graphics.asm", "wt");
+
+        if(f)
+        {
+            // leave enough room for the hooked in routine
+            fprintf(f, "\norg $%06X", AdvancePointer(this, offset, 0x80));
+            fprintf(f, "%s", gfxText);
+
+            // compress all the sprite graphics packs and construct the
+            // table of their pointers in the asm file.
+            h->sprGfxOffset = AdvancePointer(this, offset, 0x300);
+
+            fprintf(f, "\norg $%06X", h->sprGfxOffset);
+            fprintf(f, "\n    SprGfxPtrTable:");
+
+            for(i = 0; i < 0x100; ++i)
+            {
+                size      = lt->Compress(sprPacks[i]->contents, sprPacks[i]->length, compBuf->contents);
+                cpuOffset = AdvancePointer(this, offset, size);
+
+                fprintf(f, "\n        dl $%06X", cpuOffset);
+
+                CopyBuffer(image, compBuf, CpuToRomAddr(cpuOffset), 0, size);
+            }
+
+            // Same as before, but this time for background graphics
+            h->bgGfxOffset = AdvancePointer(this, offset, 0x300);
+
+            fprintf(f, "\norg $%06X", h->bgGfxOffset);
+            fprintf(f, "\n    BgGfxPtrTable:");
+
+            for(i = 0; i < 0x100; ++i)
+            {
+                size      = lt->Compress(bgPacks[i]->contents, bgPacks[i]->length, compBuf->contents);
+                cpuOffset = AdvancePointer(this, offset, size);
+
+                fprintf(f, "\n        dl $%06X", cpuOffset);
+
+                CopyBuffer(image, compBuf, CpuToRomAddr(cpuOffset), 0, size);
+            }
+
+            fclose(f);
+        }
+
+        // the locations of these graphics don't change
+        CopyBuffer(image, fontGfx,  0x70000, 0, 0x1000);
+        CopyBuffer(image, linkGfx,  0x80000, 0, 0x7000);
+        CopyBuffer(image, mode7Gfx, 0xC4000, 0, 0x4000);
+
+        (*offset) = CpuToRomAddr(*offset);
+
+        // clean up ------------------------------------------
+
+        delete lt;
+
+        DeallocBuffer(compBuf);
+
+        return true;
+    }
+
+// ===============================================================

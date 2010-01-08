@@ -1319,8 +1319,7 @@
         }
 
         return 0;
-    }        
-    
+    }
 
 // ************************************************************
 
@@ -1358,29 +1357,9 @@
 
         FILE *f = NULL;
 
-        // ==================================
+        // -------------------------------------------------------------
 
         chdir( (const char*) ToString(game->romName) );
-
-        /// experimental resource loading and output of a text file
-        /// THIS NEEDS TO BE MOVED SOMEWHERE MORE GENERAL, NOT JUST IN THE OVERWORLD SAVING CODE
-
-        HRSRC hooksRsrc     = FindResource(thisProg, MAKEINTRESOURCE(IDR_HOOKS_ASM), "TEXT");
-
-        u32 hooksSize       = SizeofResource(thisProg, hooksRsrc);
-
-        HGLOBAL hooksHandle = LoadResource(thisProg, hooksRsrc);
-
-        char *hooksBuf      = (char*) LockResource(hooksHandle);
-
-        f = fopen("hooks.asm", "wb");
-
-        fwrite(hooksBuf, hooksSize, 1, f);
-
-        fclose(f);
-
-        /// end experiment
-
         mkdir("overworld");
         chdir("overworld");
 
@@ -1395,19 +1374,7 @@
         if(!f || !game || !offset)     { return 0; }
         if(!game->overData)            { return 0; }
 
-        // ------------------------------------------------------------
-
-        // initialize the ASM file with basic information about the ROM and a couple basic macros.
-
-        fprintf(f, "\nlorom");
-
-        if(game->hasHeader)
-            fprintf(f, "\nheader");
-
-        fprintf(f, "\n    !ADD = \"CLC : ADC\"");
-        fprintf(f, "\n    !SUB = \"SEC : SBC\"\n");
-
-        // ------------------------------------------------------------
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
         // update the map32 to map16 conversion arrays and pack them together
         // there's a special, nonlinear format that uses 12 bits for each map32 to map16 conversion
@@ -1438,12 +1405,12 @@
         fprintf(f, "\n        incbin overworld/owMap32To16LowerRight.bin");
         ToFile(o->lowerRight32, "owMap32To16LowerRight.bin");
 
-        // ------------------------------------------------------------
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         
         // output map16 to map8 conversion array
         CopyBuffer(game->image, o->map16To8, CpuToRomAddr(0xF8000), 0, 0x7540);
 
-        // ------------------------------------------------------------
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
         // output map data
 
@@ -1505,7 +1472,7 @@
         DeallocBuffer(comp1);
         DeallocBuffer(comp2);
 
-        // ------------------------------------------------------------
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
         // output hole data
 
@@ -1542,7 +1509,7 @@
 
         (*offset) += (game->bm_Header.overNumHoles * 5);
 
-        // ------------------------------------------------------------
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
         // output entrance data
  
@@ -1575,7 +1542,7 @@
         for(e = (Entrance*) MarkerList::GetHead(list); e != NULL; e = (Entrance*) e->GetNext())
             fprintf(f, "        db $%02x\n", e->entrance);
 
-        // ------------------------------------------------------------
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
         // output secrets (item) pointer table.
         fprintf(f, "\norg $%06X", AdvancePointer(game, offset, 0x20));
@@ -1627,7 +1594,7 @@
         fprintf(f, "\n    nullSecretSet:"
                    "\n        dw $FFFF");
 
-        // ------------------------------------------------------------
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
         // output sprite data
 
@@ -1689,18 +1656,18 @@
         fprintf(f, "\n    nullSpriteSet:"
                    "\n        db $FF");
 
-        // ------------------------------------------------------------
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     
         // output exit data.
 
-        // ------------------------------------------------------------
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
         // wrap things up
         (*offset) = CpuToRomAddr(*offset);
 
         fclose(f);
 
-        chdir("..");
+        delete lt;
 
         return 1;
     }
