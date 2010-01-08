@@ -3,101 +3,101 @@
 //
 // Will handle things like file io.
 
-#include "Core.h"
-#include "Strings.h"
-#include "Globals.h"
+    #include "Core.h"
+    #include "Strings.h"
+    #include "Globals.h"
 
 #ifndef BLACK_MAGIC_H
 
-#define BLACK_MAGIC_H
+    #define BLACK_MAGIC_H
 
-//#include "Strings.h"
-//#include <windows.h>
-//#include "resource.h"
+    //#include "Strings.h"
+    //#include <windows.h>
+    //#include "resource.h"
 
-/*
-typedef struct
-{
-  int hasHeader; // Flag indicating whether the file has an extra $200 bytes
-  int index; // tells us which file it is among many
+    /*
+    typedef struct
+    {
+        int hasHeader; // Flag indicating whether the file has an extra $200 bytes
+        int index; // tells us which file it is among many
 
-  bufPtr headerBuf; // pointer for the header's data so we can logically separate rom and header
-  bufPtr image; // The game file as a char*
-  bufPtr romName; // Pointer to the full path name of the rom.
+        bufPtr headerBuf; // pointer for the header's data so we can logically separate rom and header
+        bufPtr image; // The game file as a char*
+        bufPtr romName; // Pointer to the full path name of the rom.
 
-  HWND subWindow; // The window used to edit this rom
-  HANDLE zgFileHandle; // handle to this particular game's file.
+        HWND subWindow; // The window used to edit this rom
+        HANDLE zgFileHandle; // handle to this particular game's file.
     
-  // other declarations like the location of headers
+        // other declarations like the location of headers
 
-} ZeldaGame;
-*/
+    } ZeldaGame;
+    */
 
-// windows variables
+    // windows variables
 
-/*
-HMENU mainMenu;
-HMENU editMenu;
+    /*
+    HMENU mainMenu;
+    HMENU editMenu;
 
-HINSTANCE thisProg;
-HDC mainDC;
-RECT mainRect;
-MSG mainMsg;
-WNDCLASSEX mainClass;
-HWND mainWin;
+    HINSTANCE thisProg;
+    HDC mainDC;
+    RECT mainRect;
+    MSG mainMsg;
+    WNDCLASSEX mainClass;
+    HWND mainWin;
 
-// image testing stuff
-BITMAPINFO* bmInfoPtr;
-BITMAPINFOHEADER* bmInfoHeadPtr;
-HBITMAP mainBM;
-SnesPalPtr defaultPal;
-SnesImage* testImage;
-SnesTile*  testTile;
-SnesTile*  testTile2;
-
-
-// testing stuff
-HANDLE testFH;
-bufPtr testPtr;
-
-OPENFILENAME bmOFN;
-
-// normal variables
-
-int quit = 0;
-int numGames = 0;
-int zgIndex = 0;
-
-unsigned long numBytesRead = 0;
+    // image testing stuff
+    BITMAPINFO* bmInfoPtr;
+    BITMAPINFOHEADER* bmInfoHeadPtr;
+    HBITMAP mainBM;
+    SnesPalPtr defaultPal;
+    SnesImage* testImage;
+    SnesTile*  testTile;
+    SnesTile*  testTile2;
 
 
-zgPtr* gameList;
-zgPtr newGamePtr;
+    // testing stuff
+    HANDLE testFH;
+    bufPtr testPtr;
 
-int expansionList[7] = {IDC_8MB,
-                        IDC_12MB,
-                        IDC_16MB,
-                        IDC_20MB,
-                        IDC_24MB,
-                        IDC_28MB,
-                        IDC_32MB};
+    OPENFILENAME bmOFN;
+
+    // normal variables
+
+    int quit = 0;
+    int numGames = 0;
+    int zgIndex = 0;
+
+    unsigned long numBytesRead = 0;
 
 
-HWND edit = NULL;
+    zgPtr* gameList;
+    zgPtr newGamePtr;
 
-// Dungeon window template
+    int expansionList[7] = {IDC_8MB,
+                            IDC_12MB,
+                            IDC_16MB,
+                            IDC_20MB,
+                            IDC_24MB,
+                            IDC_28MB,
+                            IDC_32MB};
 
-WindowElement dungTemp[] =
-{
 
-    { editExStyle, "EDIT", editBuf, editStyle, 200, 200 , 100, 20, 0, (HMENU) ID_DungPaletteNum, 0, 0, 0, 2},
-    { buttonExStyle, "BUTTON", "Jump", buttonStyle|WS_GROUP, 0, 0, 50, 50, 0, (HMENU) ID_DungJumpButton, 0, 0, 0, END_FLAG}
+    HWND edit = NULL;
 
-};
+    // Dungeon window template
 
-*/
+    WindowElement dungTemp[] =
+    {
 
-// function prototypes
+        { editExStyle, "EDIT", editBuf, editStyle, 200, 200 , 100, 20, 0, (HMENU) ID_DungPaletteNum, 0, 0, 0, 2},
+        { buttonExStyle, "BUTTON", "Jump", buttonStyle|WS_GROUP, 0, 0, 50, 50, 0, (HMENU) ID_DungJumpButton, 0, 0, 0, END_FLAG}
+
+    };
+
+    */
+
+    // function prototypes
 
     int     SaveDataToFile(zgPtr game);
 

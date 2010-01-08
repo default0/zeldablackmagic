@@ -1,11 +1,11 @@
 
-// Functions for handling strings
-// MathOnNapkins Copyright 2005
+    // Functions for handling strings
+    // MathOnNapkins Copyright 2005
 
-// 1. #include "Strings.h"
-#include "Globals.h"
-#include "Black Magic.h"
-#include "Strings.h"
+    // 1. #include "Strings.h"
+    #include "Globals.h"
+    #include "Black Magic.h"
+    #include "Strings.h"
 
 // ===============================================================
 
@@ -207,11 +207,11 @@
 
 // ===============================================================
 
-// Sample buffer - assume 32 bit int
-// 00 02 04 06 08 0A 0C 0F
-//             [ intsize ]
-// [    new intsize      ]
-// then assume 64 bit int
+    // Sample buffer - assume 32 bit int
+    // 00 02 04 06 08 0A 0C 0F
+    //             [ intsize ]
+    // [    new intsize      ]
+    // then assume 64 bit int
 
     int Get4Bytes(bufPtr source, unsigned int offset)
     {
@@ -258,41 +258,41 @@
 
 // ===============================================================
 
-// returns a 24 bit integer.
+    // returns a 24 bit integer.
 
-int Get3Bytes(bufPtr source, int offset)
-{
-    unsigned int checker = offset + 3;
-
-    if(source->contents == NULL)
-        return 0;
-
-    if(checker > source->length)
+    int Get3Bytes(bufPtr source, int offset)
     {
-        //MessageBox(0, "Out of bounds in Get3Bytes", "error", MB_OK); 
+        unsigned int checker = offset + 3;
+
+        if(source->contents == NULL)
+            return 0;
+
+        if(checker > source->length)
+        {
+            //MessageBox(0, "Out of bounds in Get3Bytes", "error", MB_OK); 
         
-        source->error = 1;
+            source->error = 1;
 
-        return 0;
+            return 0;
+        }
+
+        if(offset < 0)
+        {
+            //MessageBox(0, "Out of bounds in Get3Bytes", "error", MB_OK); 
+
+            source->error = 1;
+
+            return 0;
+        }
+
+        checker = (int) ( ( (source->contents) + offset)[0] & 0xFF );
+        checker |= (int) ( ( (source->contents) + offset)[1] << 8 & 0x00FF00);
+        checker |= (int) ( ( (source->contents) + offset)[2] << 16 & 0xFF0000);
+
+        checker &= 0xFFFFFF;
+
+        return checker;
     }
-
-    if(offset < 0)
-    {
-        //MessageBox(0, "Out of bounds in Get3Bytes", "error", MB_OK); 
-
-        source->error = 1;
-
-        return 0;
-    }
-
-    checker = (int) ( ( (source->contents) + offset)[0] & 0xFF );
-    checker |= (int) ( ( (source->contents) + offset)[1] << 8 & 0x00FF00);
-    checker |= (int) ( ( (source->contents) + offset)[2] << 16 & 0xFF0000);
-
-    checker &= 0xFFFFFF;
-
-    return checker;
-}
 
 // ===============================================================
 
@@ -306,10 +306,10 @@ int Get3Bytes(bufPtr source, int offset)
 
 // ===============================================================
 
-// returns a 16 bit integer
+    // returns a 16 bit integer
 
     int Get2Bytes(bufPtr source, int offset)
-        {
+    {
         int checker = offset + 2;
 
         if(source->contents == NULL)

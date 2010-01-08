@@ -14,268 +14,268 @@
 
     int overworld(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
     {   
-    u32 i = 0;
+        u32 i = 0;
 
-    zgPtr game = (zgPtr) GetWindowLong(hwnd, 0);
+        zgPtr game = (zgPtr) GetWindowLong(hwnd, 0);
     
-    WEStruct *wes = &(game->currentWES);
-    ManagedBitmap *b = NULL;
+        WEStruct *wes = &(game->currentWES);
+        ManagedBitmap *b = NULL;
 
-    OverData *o = NULL;
+        OverData *o = NULL;
 
-    HDC memDC = (HDC) wp;
-    HDC picDC = (HDC) lp;
+        HDC memDC = (HDC) wp;
+        HDC picDC = (HDC) lp;
 
-    // ------------------------------
+        // ------------------------------
 
-    if(game)
-    {
-        if(game->pictWin)
-            b = (ManagedBitmap*) GetWindowLong(game->pictWin, 0);
-
-        o = game->overData;
-    }
-
-    switch(msg)
-    {
-        case OVER_INIT:
+        if(game)
         {
-
-            ChangeWES(game->overWE, hwnd, game);
-
-            game->pictWin = NULL;
-
-            for(i = 0; i < wes->numElements; i++)
-            {
-                if( !strcmp(wes->WESet[i].windowCaption, "OVERPIC") )
-                {
-                    // If the caption name matched but the class name is incorrect, we must move on.
-                    if( strcmp(wes->WESet[i].className, "PICTURE") )
-                        continue;
-
-                    game->pictWin = wes->WESet[i].handle; break;
-                }
-            }
-
-            InitOverMode(game);
-
-            // now that graphics are ready and all that we can generate bitmaps for menus
-            // and create this dialog
-            game->toolDlg = CreateDialogParam(thisProg,
-                                              MAKEINTRESOURCE(IDD_OVER_TILES),
-                                              hwnd,
-                                              overTileDlgProc,
-                                              (long) game);
-
-            game->active = 1;
-
-            i = (u32) InvalidateRect(game->pictWin, NULL, true);
-        }
-
-        break;
-
-        case OVER_SAVE:
-    
-            // needs implementation
-            // SaveRoom(game);
-            break;
-
-        case OVER_CHANGE:
-        {
-            char temp[0x100];
-
-            giPtr gi = game->gi;
-            
-            RECT r;
-
-            // --------------------------------
-
-            o->allEntr[o->area]     = o->areaEntr;
-            o->allHoles[o->area]    = o->areaHoles;
-            o->allExits[o->area]    = o->areaExits;
-            o->allItems[0][o->area] = o->areaItems;
-            o->allSpr[1][o->area]   = o->areaSpr;
-
-            o->area = (u8) wp;
-           
-            o->LoadArea();
-
-            if(o->area & 0x40)
-            {
-                gi->backGfx0 = 0x21;
-                gi->spriteGfx1 = 0x0B;
-            }
-            else
-            {
-                gi->backGfx0 = 0x20;
-                gi->spriteGfx1 = 0x01;
-            }
-
-            // Load up graphics info
-            gi->backGfx1   = GetByte(game->image, CpuToRomAddr(0x00FC9C) + o->area);
-                
-            sprintf(temp, "%0X", gi->backGfx1);
-            SetDlgItemText(game->toolDlg, ID_AUX_BG_GFX, temp);
-
-            gi->spriteGfx0 = GetByte(game->image, CpuToRomAddr(0x00FA41) + o->area);
-
-            sprintf(temp, "%0X", gi->spriteGfx0);
-            SetDlgItemText(game->toolDlg, ID_AUX_SPR_GFX, temp);
-
-            gi->backPal0   = 0;
-            gi->spritePal0 = 0;
-            gi->spritePal1 = 0;
-            gi->spritePal2 = 0;
-
-            AniDecompressOverworld(game);
-            OverDecompress(game);
-            LoadOverPalettes(game);
-
-            DecodePalettes(game);
-            DecodeTiles(game);
-            DecodeOAMTiles(game);
-
-            // Blank out the screen
             if(game->pictWin)
-            {
-                WEStruct *wes     = &game->currentWES;
-                WindowElement *we = &wes->WESet[0];
-
                 b = (ManagedBitmap*) GetWindowLong(game->pictWin, 0);
 
-                for(i = 0; i < b->pixels->length; i += 4)
+            o = game->overData;
+        }
+
+        switch(msg)
+        {
+            case OVER_INIT:
+            {
+
+                ChangeWES(game->overWE, hwnd, game);
+
+                game->pictWin = NULL;
+
+                for(i = 0; i < wes->numElements; i++)
                 {
-                    Put4Bytes(b->pixels, i, game->Pals[0][0]);
+                    if( !strcmp(wes->WESet[i].windowCaption, "OVERPIC") )
+                    {
+                        // If the caption name matched but the class name is incorrect, we must move on.
+                        if( strcmp(wes->WESet[i].className, "PICTURE") )
+                            continue;
+
+                        game->pictWin = wes->WESet[i].handle; break;
+                    }
                 }
 
-                GetWindowRect(game->pictWin, &r);
+                InitOverMode(game);
 
-                for(i = 0; ((HWND) we->handle != game->pictWin) && i < wes->numElements; ++i, we = &wes->WESet[i])
-                    continue;
+                // now that graphics are ready and all that we can generate bitmaps for menus
+                // and create this dialog
+                game->toolDlg = CreateDialogParam(thisProg,
+                                                  MAKEINTRESOURCE(IDD_OVER_TILES),
+                                                  hwnd,
+                                                  overTileDlgProc,
+                                                  (long) game);
 
-                if(i != wes->numElements)
-                {
-                    if(o->largeArea)
-                        we->nHeight = we->nWidth = 1024;
-                    else
-                        we->nHeight = we->nWidth = 512;
+                game->active = 1;
 
-                    MoveWindow(game->pictWin, we->x, we->y, we->nWidth, we->nHeight, TRUE);
-                }
+                i = (u32) InvalidateRect(game->pictWin, NULL, true);
             }
 
-            DrawOW(game, b, o->map8Buf);
-
             break;
-        }
-        case PICTURE_PAINT:
-        {        
-            picDC = (HDC) lp;
-            memDC = (HDC) wp;
 
-            if(wp == 1)
-            {
-
-
-
-            }
-        
-            OwOnPicturePaint(game, picDC, memDC);    
-
-            break;
-        }
-        case WM_KEYDOWN:
-        {
-            OwOnPictureKeydown(hwnd, wp, lp, game); break;
-        }
-        case WM_SETCURSOR:
-        {
-            return TRUE;
-
-            break;
-        }
-        case WM_CHAR:
-        {
-            OwOnPictureChar(hwnd, wp, lp, game); break;
-        }
-        case PICTURE_MOUSEMOVE:
-        {
-            OwOnPictureMouseMove(hwnd, wp, lp, game); break;
-        }
-        case PICTURE_LBUTTON_DOWN:
-        {
-            OwOnPictureLButtonDown(hwnd, b, lp, game); break;
-        }
-        case PICTURE_LBUTTON_UP:
-        {
-            OwOnPictureLButtonUp(hwnd, b, lp, game); break;
-        }
-        case PICTURE_RBUTTON_DOWN:
-        {
-            OwOnPictureRButtonDown(hwnd, b, lp, game);
-
-            u16 x = LOWORD(lp) >> 3;
-            u16 y = HIWORD(lp) >> 3;
-
-            /** game->overData->value = Get2Bytes(game->overData->map8Buf,
-                                              (x*2) + (y*0x100));*/
-
-            break;
-        }
-        case BM_TEARDOWN:
-        {
-            o->allEntr[o->area]     = o->areaEntr;
-            o->allHoles[o->area]    = o->areaHoles;
-            o->allExits[o->area]    = o->areaExits;
-            o->allItems[0][o->area] = o->areaItems;
-            o->allSpr[1][o->area]   = o->areaSpr;
-
-            break;
-        }
-        case PICTURE_TIMER:
-        {
-            if(!game->pictWin)
-            {
+            case OVER_SAVE:
+    
+                // needs implementation
+                // SaveRoom(game);
                 break;
-            }
 
-            if(!game->active)
+            case OVER_CHANGE:
             {
-                MessageBox(0, "hurp", "a durp", MB_OK);
-                break;
-            }
+                char temp[0x100];
 
-            game->aniTimer %= 9;
-
-            if(game->aniTimer == 0)
-            { 
-                // Blit 0x20 animated tiles to vram
-                CopyBuffer(game->vram, game->aniVram,
-                           0x7800,      (0x1680) + (0x400 * game->aniFrame),
-                           0x400);
+                giPtr gi = game->gi;
             
-                // Then decode them so we can actually use them
-                DecodeTiles(game, 0x1C0, 0x1DF); 
+                RECT r;
 
-                game->aniFrame++;
-                game->aniFrame %= 3;
+                // --------------------------------
 
-                DrawOW(game, b, game->overData->map8Buf);
+                o->allEntr[o->area]     = o->areaEntr;
+                o->allHoles[o->area]    = o->areaHoles;
+                o->allExits[o->area]    = o->areaExits;
+                o->allItems[0][o->area] = o->areaItems;
+                o->allSpr[1][o->area]   = o->areaSpr;
 
-                i = (u32) InvalidateRect(game->pictWin, NULL, TRUE);
+                o->area = (u8) wp;
+           
+                o->LoadArea();
+
+                if(o->area & 0x40)
+                {
+                    gi->backGfx0 = 0x21;
+                    gi->spriteGfx1 = 0x0B;
+                }
+                else
+                {
+                    gi->backGfx0 = 0x20;
+                    gi->spriteGfx1 = 0x01;
+                }
+
+                // Load up graphics info
+                gi->backGfx1   = GetByte(game->image, CpuToRomAddr(0x00FC9C) + o->area);
+                
+                sprintf(temp, "%0X", gi->backGfx1);
+                SetDlgItemText(game->toolDlg, ID_AUX_BG_GFX, temp);
+
+                gi->spriteGfx0 = GetByte(game->image, CpuToRomAddr(0x00FA41) + o->area);
+
+                sprintf(temp, "%0X", gi->spriteGfx0);
+                SetDlgItemText(game->toolDlg, ID_AUX_SPR_GFX, temp);
+
+                gi->backPal0   = 0;
+                gi->spritePal0 = 0;
+                gi->spritePal1 = 0;
+                gi->spritePal2 = 0;
+
+                AniDecompressOverworld(game);
+                OverDecompress(game);
+                LoadOverPalettes(game);
+
+                DecodePalettes(game);
+                DecodeTiles(game);
+                DecodeOAMTiles(game);
+
+                // Blank out the screen
+                if(game->pictWin)
+                {
+                    WEStruct *wes     = &game->currentWES;
+                    WindowElement *we = &wes->WESet[0];
+
+                    b = (ManagedBitmap*) GetWindowLong(game->pictWin, 0);
+
+                    for(i = 0; i < b->pixels->length; i += 4)
+                    {
+                        Put4Bytes(b->pixels, i, game->Pals[0][0]);
+                    }
+
+                    GetWindowRect(game->pictWin, &r);
+
+                    for(i = 0; ((HWND) we->handle != game->pictWin) && i < wes->numElements; ++i, we = &wes->WESet[i])
+                        continue;
+
+                    if(i != wes->numElements)
+                    {
+                        if(o->largeArea)
+                                we->nHeight = we->nWidth = 1024;
+                        else
+                                we->nHeight = we->nWidth = 512;
+
+                        MoveWindow(game->pictWin, we->x, we->y, we->nWidth, we->nHeight, TRUE);
+                    }
+                }
+
+                DrawOW(game, b, o->map8Buf);
+
+                break;
             }
+            case PICTURE_PAINT:
+            {        
+                picDC = (HDC) lp;
+                memDC = (HDC) wp;
+
+                if(wp == 1)
+                {
+
+
+
+                }
         
-            game->aniTimer++;
+                OwOnPicturePaint(game, picDC, memDC);    
+
+                break;
+            }
+            case WM_KEYDOWN:
+            {
+                OwOnPictureKeydown(hwnd, wp, lp, game); break;
+            }
+            case WM_SETCURSOR:
+            {
+                return TRUE;
+
+                break;
+            }
+            case WM_CHAR:
+            {
+                OwOnPictureChar(hwnd, wp, lp, game); break;
+            }
+            case PICTURE_MOUSEMOVE:
+            {
+                OwOnPictureMouseMove(hwnd, wp, lp, game); break;
+            }
+            case PICTURE_LBUTTON_DOWN:
+            {
+                OwOnPictureLButtonDown(hwnd, b, lp, game); break;
+            }
+            case PICTURE_LBUTTON_UP:
+            {
+                OwOnPictureLButtonUp(hwnd, b, lp, game); break;
+            }
+            case PICTURE_RBUTTON_DOWN:
+            {
+                OwOnPictureRButtonDown(hwnd, b, lp, game);
+
+                u16 x = LOWORD(lp) >> 3;
+                u16 y = HIWORD(lp) >> 3;
+
+                /** game->overData->value = Get2Bytes(game->overData->map8Buf,
+                                                  (x*2) + (y*0x100));*/
+
+                break;
+            }
+            case BM_TEARDOWN:
+            {
+                o->allEntr[o->area]     = o->areaEntr;
+                o->allHoles[o->area]    = o->areaHoles;
+                o->allExits[o->area]    = o->areaExits;
+                o->allItems[0][o->area] = o->areaItems;
+                o->allSpr[1][o->area]   = o->areaSpr;
+
+                break;
+            }
+            case PICTURE_TIMER:
+            {
+                if(!game->pictWin)
+                {
+                    break;
+                }
+
+                if(!game->active)
+                {
+                    MessageBox(0, "hurp", "a durp", MB_OK);
+                    break;
+                }
+
+                game->aniTimer %= 9;
+
+                if(game->aniTimer == 0)
+                { 
+                    // Blit 0x20 animated tiles to vram
+                    CopyBuffer(game->vram, game->aniVram,
+                               0x7800,      (0x1680) + (0x400 * game->aniFrame),
+                               0x400);
+            
+                    // Then decode them so we can actually use them
+                    DecodeTiles(game, 0x1C0, 0x1DF); 
+
+                    game->aniFrame++;
+                    game->aniFrame %= 3;
+
+                    DrawOW(game, b, game->overData->map8Buf);
+
+                    i = (u32) InvalidateRect(game->pictWin, NULL, TRUE);
+                }
         
-            break;
+                game->aniTimer++;
+        
+                break;
+            }
+
+            default:
+
+                break;
         }
 
-        default:
-
-            break;
-    }
-
-    return 0;
+        return 0;
     }
 
 // ===============================================================
@@ -718,7 +718,7 @@
                 }
                 
                 obj = o->selObj;
-
+                
                 if(obj->forming == true)
                 {
                     SetCursor(crossCurs);
@@ -1269,7 +1269,7 @@
         OverItem *item = NULL;
 
         Entrance *entr = NULL;
-
+        
         MarkerList *m = NULL;
 
         OverData *o = game->overData;
@@ -1421,10 +1421,10 @@
                             case mode_entrance:
                                 entr = (Entrance*) m;
 
-                                if(value >= game->numEntrances)
-                                    sprintf( (char*) buf, "%02X", entr->entrance);
-                                else
-                                    entr->entrance = value;
+                        if(value >= game->numEntrances)
+                            sprintf( (char*) buf, "%02X", entr->entrance);
+                        else
+                            entr->entrance = value;
 
                                 break;
 
@@ -1452,8 +1452,8 @@
                 }
 
                 break;
+            }
         }
-    }
 
 
 // ===============================================================
@@ -2110,13 +2110,13 @@
     {
         u16 tile = 0;
         u32 i, j = 0;
-
+    
         HDC dc;
 
         OverObj *obj = NULL;
 
         OverData *o  = game->overData;
-
+  
         // --------------------------
 
         obj = o->selObj2;

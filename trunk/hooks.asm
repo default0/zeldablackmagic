@@ -244,7 +244,7 @@
         LDA.l holeEntranceNumbers, X : STA $010E                
         STZ $010F
 
-        RTL        
+        RTL
     }
 
 ; =====================================================
@@ -356,24 +356,24 @@
 		; Make Link face the downwards direction
     	LDA.w #$0002 : STA $2F
     	
-		LDA $E367, X : STA $0696
-    
+    	LDA $E367, X : STA $0696
+    	
     	LDA $E405, X : STA $0698
     	
-		TXA : LSR A : TAX
+    	TXA : LSR A : TAX
     	
-		SEP #$20
+    	SEP #$20
     	
 		; These are the overworld areas that the exits lead to.
-		LDA $DE28, X : STA $8A : STA $040A
-		STZ $8B : STZ $040B
-		
-		LDA $E2C9, X : STA $0624 : STZ $0625 : ASL A
-		
+    	LDA $DE28, X : STA $8A : STA $040A
+    	STZ $8B : STZ $040B
+    	
+    	LDA $E2C9, X : STA $0624 : STZ $0625 : ASL A
+    	
     	BCC .gamma
 
-		DEC $0625   ; sign extends to 16-bit
-		
+    	DEC $0625   ; sign extends to 16-bit
+    	
     .gamma
 
     	LDA $E318, X : STA $0628 : STZ $0629 : ASL A
@@ -570,7 +570,7 @@
     
         PLP
     
-    	RTL        
+    	RTL
     }
         
 ; =====================================================

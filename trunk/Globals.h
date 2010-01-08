@@ -403,20 +403,20 @@
 
 
     // Dungeon window template
-        extern WindowElement dungTemp[];
-        extern WindowElement overTemp[];
+    extern WindowElement dungTemp[];
+    extern WindowElement overTemp[];
 
-        extern u32 entranceBufSizes[];
-        extern char* SprStrings[];
-        extern char* OverStrings[];
-        extern char* ItemStrings[];
+    extern u32 entranceBufSizes[];
+    extern char* SprStrings[];
+    extern char* OverStrings[];
+    extern char* ItemStrings[];
 
-        extern RGBQUAD mainPalette[];
+    extern RGBQUAD mainPalette[];
 
-        extern DungeonFile portFile;
+    extern DungeonFile portFile;
 
-	    extern OverObj over_stock_objs[];
-
+    extern OverObj over_stock_objs[];
+    
     void stupidFunc();
 
 #endif

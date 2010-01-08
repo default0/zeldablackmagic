@@ -51,7 +51,7 @@
 
             x = 0;
             y = 0;
-
+            
             anchor.x = anchor.y = 0;
 
             bData = NULL;
@@ -60,9 +60,9 @@
             // parameters that can be set with the constructor
             this->width     = width;
             this->height    = height;
-            this->mapData   = mapData;
-            this->id        = id;
-            this->mapType   = mapType;
+            this->mapData    = mapData;
+            this->id         = id;
+            this->mapType    = mapType;
         }
 
     // **************************************************

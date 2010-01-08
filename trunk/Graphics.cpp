@@ -1205,8 +1205,6 @@
     {
         u32 base    = CpuToRomAddr(bm_Header.sprGfxOffset);
         u32 defBase = CpuToRomAddr(default_spr_gfx_ptr);
-
-        u32 c       = bm_Header.sprGfxCount;
         u32 source  = 0;
 
         // -------------------------------------
@@ -1235,8 +1233,6 @@
     {
         u32 base    = CpuToRomAddr(bm_Header.bgGfxOffset);
         u32 defBase = CpuToRomAddr(default_bg_gfx_ptr);
-
-        u32 c       = bm_Header.bgGfxCount;
         u32 source  = 0;
 
         // -------------------------------------
@@ -1270,18 +1266,18 @@
         bufPtr decomp = NULL;
 
         // ----------------------------------
-
+        
         numPacks = (bm_Header.sprGfxOffset == default_spr_gfx_ptr) ? 0x73 : 0x100;
 
         // dump all sprite graphics
         for(i = 0; i < 0x100; ++i)
-        { 
+        {
             if(i >= numPacks)
             {
                 this->sprPacks[i] = CreateBuffer(0x600); 
 
                 continue;
-            }               
+            }
 
             offset = GetSprGfxPtr(i);
 

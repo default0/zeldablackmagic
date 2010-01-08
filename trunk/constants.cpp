@@ -41,37 +41,37 @@
     };
 
     /*
-u32 over_stock_map16[0x10] = 
-{
-    stock_bush,         
-    stock_bush2,
-    stock_rock_sl,
-    stock_rock_sh,
-    stock_peg,
-    stock_rock_bl0,
-    stock_rock_bh0,
-    stock_warp,
-    stock_rockpile0,
-    stock_sign,
-    stock_grass,
-    stock_jumpPoint
+    u32 over_stock_map16[0x10] = 
+    {
+        stock_bush,         
+        stock_bush2,
+        stock_rock_sl,
+        stock_rock_sh,
+        stock_peg,
+        stock_rock_bl0,
+        stock_rock_bh0,
+        stock_warp,
+        stock_rockpile0,
+        stock_sign,
+        stock_grass,
+        stock_jumpPoint
     };
     */
 
     /*
-int over_stock_ids[0x10] = 
-{
-    IDC_STOCK_BUSH,  
-    IDC_STOCK_BUSH2,    
-    IDC_STOCK_ROCK_SL,
-    IDC_STOCK_ROCK_SH,
-    IDC_STOCK_PEG,      
-    IDC_STOCK_ROCK_BL,  
-    IDC_STOCK_ROCK_BH,  
-    IDC_STOCK_WARP,     
-    IDC_STOCK_ROCKPILE, 
-    IDC_STOCK_SIGN,     
-    IDC_STOCK_GRASS,    
-    IDC_STOCK_JUMPPOINT
+    int over_stock_ids[0x10] = 
+    {
+        IDC_STOCK_BUSH,  
+        IDC_STOCK_BUSH2,    
+        IDC_STOCK_ROCK_SL,
+        IDC_STOCK_ROCK_SH,
+        IDC_STOCK_PEG,      
+        IDC_STOCK_ROCK_BL,  
+        IDC_STOCK_ROCK_BH,  
+        IDC_STOCK_WARP,     
+        IDC_STOCK_ROCKPILE, 
+        IDC_STOCK_SIGN,     
+        IDC_STOCK_GRASS,    
+        IDC_STOCK_JUMPPOINT
     };
     */
