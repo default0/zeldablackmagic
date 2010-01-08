@@ -41,7 +41,7 @@
         static MarkerList* GetSelected(MarkerList *m)
         {
             // ----------------------
-                           
+            
             if(m)
             {
                 for(m = MarkerList::GetHead(m); m != NULL; m = m->GetNext())
@@ -55,56 +55,56 @@
         // ********************************
 
         static MarkerList* GetDragging(MarkerList *list)
-            {
+        {
             MarkerList *m = GetSelected(list);
 
             // -----------------------
 
             // marker must be selected in addition to being dragged.
             if(m)
-                    {
+            {
                 if(m->dragging == false) 
                     m = NULL;
-                }
-
-            return m;
             }
 
-        // ********************************
+            return m;
+        }
+    
+    // ********************************
 
         static MarkerList* GetClicked(MarkerList *list, u16 x, u16 y)
-            {
+        {
             MarkerList *m = NULL;
-
+            
             // ------------------------
 
             for(m = MarkerList::GetTail(list); m != NULL; m = m->GetPrev())
-                {
+            {
                 if(m->IsClick(x, y))
                     break;
-                }
-
-            return m;
-            }
-
-        // ********************************
-
-        MarkerList* GetAt(u16 x, u16 y)
-            {
-            MarkerList *m = NULL;
-                
-                // ------------------------
-
-            for(m = MarkerList::GetHead(this); m != NULL; m = m->GetNext())
-                {
-                if(m->IsPos(x, y))
-                        break;
-                }
-                
-            return m;
             }
             
-            // wrapper functions to get the most of List functionality
+            return m;
+        }
+
+    // ********************************
+       
+        MarkerList* GetAt(u16 x, u16 y)
+        {
+            MarkerList *m = NULL;
+            
+            // ------------------------
+
+            for(m = MarkerList::GetHead(this); m != NULL; m = m->GetNext())
+            {
+                if(m->IsPos(x, y))
+                    break;
+            }
+            
+            return m;
+        }
+    
+        // wrapper functions to get the most of List functionality
         MarkerList* GetNext() {   return (MarkerList*) this->next;     }
         MarkerList* GetPrev() {   return (MarkerList*) this->prev;     }
         static MarkerList* GetHead(MarkerList *exit) { return exit ? (MarkerList*) exit->head : exit;    }
@@ -120,7 +120,7 @@
 
             u16 area;
             u16 entrance;
-
+            
         // operators 
 
             operator MarkerList*() { return (MarkerList*) this; }
@@ -181,7 +181,7 @@
                 this->doorType = type;
 
                 door = new Marker(0, 0, 16);
-
+    
                 SetPos(x, y);
             }
 

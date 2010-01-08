@@ -698,7 +698,7 @@
                 IncMapCounts(map16Val, usingMap16);
             }
         }
-
+        
         // Make sure to protect the map16 tiles that have special purposes
         for(i = 0; i < numReserved; ++i)
             IncMapCounts(reservedMap16[i], usingMap16);

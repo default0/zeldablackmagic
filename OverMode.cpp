@@ -436,7 +436,7 @@
         // should optionally use this or 0x01 or 0x0A depending on whether you're in the dark world or not.
         
         // Decompress them using a special method
-        index = 0x8800;
+        index  = 0x8800;
         index4 = 0;
 
         Do3To4High(game->vram, game->sprPacks[gi->spriteGfx1], &index, &index4, 0x600);

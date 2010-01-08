@@ -3,9 +3,9 @@
 // All new all powerful Zelda 3 editing machine!!!
 // Author MathOnNapkins, Copyright 2005, 2006
 
-//includes
+    //includes
 
-// 1. #include "Black Magic.h"
+    // 1. #include "Black Magic.h"
 
     #include "Globals.h"
     #include "Strings.h"
@@ -1123,34 +1123,34 @@
 
 // ===============================================================
 
-int IsDuplicateRom(char compareBuf[MAX_PATH])
-{
-    int counter = 0;
-
-    zgPtr game;
-    HWND  gameWindow;
-    
-    for( counter; counter < numGames; counter++)
+    int IsDuplicateRom(char compareBuf[MAX_PATH])
     {
-        gameWindow = windowList[counter];
+        int counter = 0;
 
-        if(!gameWindow)
-            return 0;
-
-        game = (zgPtr) GetWindowLong(gameWindow, 0);
-
-        if(strcmp(compareBuf, (const char*) game->romName->contents) == 0)
+        zgPtr game;
+        HWND  gameWindow;
+    
+        for( counter; counter < numGames; counter++)
         {
-            SetActiveWindow(gameWindow);
+            gameWindow = windowList[counter];
 
-            // indicate we already know this file and it is currently open.
-            return 1;
+            if(!gameWindow)
+                return 0;
+
+            game = (zgPtr) GetWindowLong(gameWindow, 0);
+
+            if(strcmp(compareBuf, (const char*) game->romName->contents) == 0)
+            {
+                SetActiveWindow(gameWindow);
+
+                // indicate we already know this file and it is currently open.
+                return 1;
+            }
         }
-    }
 
-    // by default it is not duplicate. Innocent until proven guilty.
-    return 0;
-}
+        // by default it is not duplicate. Innocent until proven guilty.
+        return 0;
+    }
 
 // ===============================================================
 
@@ -1227,7 +1227,7 @@ int IsDuplicateRom(char compareBuf[MAX_PATH])
 
         OffsetWindowIds(newGamePtr->dungeonWE);
         OffsetWindowIds(newGamePtr->overWE);
-
+   
         // When the window comes up, nothing will happen until we go into an editing mode first   
         newGamePtr->currentFunc = do_nothing;
     
@@ -1241,92 +1241,92 @@ int IsDuplicateRom(char compareBuf[MAX_PATH])
 
 // ===============================================================
 
-void OffsetWindowIds(WindowElement *we)
-{
-    int counter = 0;
-    int temp = (newGamePtr->index) * 0x100;
+    void OffsetWindowIds(WindowElement *we)
+    {
+        int counter = 0;
+        int temp = (newGamePtr->index) * 0x100;
 
         // --------------------------------------
 
-    for(counter = 0; ; counter++)
-    {
-        we[counter].hMenu = (HMENU) ((int) we[counter].hMenu + temp);
+        for(counter = 0; ; counter++)
+        {
+            we[counter].hMenu = (HMENU) ((int) we[counter].hMenu + temp);
 
-        // So the point of this is that the ID_DungPaletteNum, for 
-        // example, for the first game opened will have value
-        // 2000. The next game will have an hMenu value of 2100
-        if((we[counter].endflag & END_FLAG) == END_FLAG)
-            break;
+            // So the point of this is that the ID_DungPaletteNum, for 
+            // example, for the first game opened will have value
+            // 2000. The next game will have an hMenu value of 2100
+            if((we[counter].endflag & END_FLAG) == END_FLAG)
+                break;
+        }
+
+        return;
     }
-
-    return;
-}
 
 // ===============================================================
 
-void AssignCurrentWES(WindowElement *we)
-{
-    zgPtr game = (zgPtr) GetWindowLong(windowList[zgIndex], 0);
+    void AssignCurrentWES(WindowElement *we)
+    {
+        zgPtr game = (zgPtr) GetWindowLong(windowList[zgIndex], 0);
 
         // -------------------------------------------
 
-    game->currentWES.WESet = we;
-    game->currentWES.numElements = we[0].endflag & 0xFFF;
+        game->currentWES.WESet = we;
+        game->currentWES.numElements = we[0].endflag & 0xFFF;
 
-    SendMessage(windowList[zgIndex], WM_SIZE, 0, 0);
+        SendMessage(windowList[zgIndex], WM_SIZE, 0, 0);
 
-    return;
-}
+        return;
+    }
 
 // ===============================================================
 
-void ActivateCurrentWES(WEStruct *currentWES, HWND parent)
-{
-    unsigned int i = 0;
+    void ActivateCurrentWES(WEStruct *currentWES, HWND parent)
+    {
+        unsigned int i = 0;
 
         // --------------------------------------------
 
-    for( i = 0; i < currentWES->numElements; i++)
-    {
-        if(currentWES->WESet[i].handle != NULL)
-            continue;
+        for( i = 0; i < currentWES->numElements; i++)
+        {
+            if(currentWES->WESet[i].handle != NULL)
+                continue;
 
-        currentWES->WESet[i].parent = parent;
+            currentWES->WESet[i].parent = parent;
 
-        currentWES->WESet[i].handle = CreateWindowEx(
-                                            currentWES->WESet[i].exStyle,
-                                            currentWES->WESet[i].className,
-                                            currentWES->WESet[i].windowCaption,
-                                            currentWES->WESet[i].style,
-                                            currentWES->WESet[i].x,
-                                            currentWES->WESet[i].y,
-                                            currentWES->WESet[i].nWidth,
-                                            currentWES->WESet[i].nHeight,
-                                            currentWES->WESet[i].parent,
-                                            currentWES->WESet[i].hMenu,
-                                            thisProg,
-                                            (LPVOID) &currentWES->WESet[i]);
+            currentWES->WESet[i].handle = CreateWindowEx(
+                                                currentWES->WESet[i].exStyle,
+                                                currentWES->WESet[i].className,
+                                                currentWES->WESet[i].windowCaption,
+                                                currentWES->WESet[i].style,
+                                                currentWES->WESet[i].x,
+                                                currentWES->WESet[i].y,
+                                                currentWES->WESet[i].nWidth,
+                                                currentWES->WESet[i].nHeight,
+                                                currentWES->WESet[i].parent,
+                                                currentWES->WESet[i].hMenu,
+                                                thisProg,
+                                                (LPVOID) &currentWES->WESet[i]);
 
-         if(currentWES->WESet[i].handle == NULL)
-             MessageBox(parent, "problem", "problem", MB_OK);
+             if(currentWES->WESet[i].handle == NULL)
+                 MessageBox(parent, "problem", "problem", MB_OK);
                
-    }   
+        }   
 
-    return;
-}
+        return;
+    }
 
 // ===============================================================
 
-// imported from SNESDisasm.cpp
-// opens a file dialog and retrieves an openfilename structure.
-// look out for a bug in WindowsNT 4.0 and the lStructSize of *ofn.
+    // imported from SNESDisasm.cpp
+    // opens a file dialog and retrieves an openfilename structure.
+    // look out for a bug in WindowsNT 4.0 and the lStructSize of *ofn.
 
     int GetFile(OPENFILENAME *ofn, HWND win)
     {
         char tempFileName[MAX_PATH];
 
         u32 fLength = 0; 
-        u32 i = 0; // nothing but a work variable
+        u32 i       = 0; // nothing but a work variable
         
         unsigned long dummyRead = 0; // Tells us how many bytes are read.
 
@@ -1586,7 +1586,7 @@ void ActivateCurrentWES(WEStruct *currentWES, HWND parent)
 
         numGames--;
     }
-    
+
 // ===============================================================
 
     int SaveDataToFile(zgPtr game)
@@ -1767,6 +1767,9 @@ void ActivateCurrentWES(WEStruct *currentWES, HWND parent)
 
         // Save Overworld Data
         SaveOverworldData(game, &offset2);
+
+        // Compress any graphics that have been modified (via importing)
+        SaveGraphics(game, &offset);        
         
         // Finally, write the updated BH_Header to file
         temp1.contents = (unsigned char*) &(game->bm_Header);
@@ -1846,7 +1849,7 @@ void ActivateCurrentWES(WEStruct *currentWES, HWND parent)
 // ===============================================================
 
     // Write in the Sprite data
-
+    
     bool SaveSprites(zgPtr game, u32 *romOffset)
     {
 
@@ -2036,103 +2039,103 @@ void ActivateCurrentWES(WEStruct *currentWES, HWND parent)
 
 // ===============================================================
 
-void ExpandRom(int *argument, int force)
-{
-    int newSize = *argument;
-    int oldSize = 0;
-    int newSizeMegabits = 0;
-    int sizeDifference = 0;
-    bufPtr gameImage;
+    void ExpandRom(int *argument, int force)
+    {
+        int newSize = *argument;
+        int oldSize = 0;
+        int newSizeMegabits = 0;
+        int sizeDifference = 0;
+        bufPtr gameImage;
     
-    zgPtr game = (zgPtr) GetWindowLong(windowList[zgIndex], 0);
+        zgPtr game = (zgPtr) GetWindowLong(windowList[zgIndex], 0);
     
-    newSizeMegabits = newSize / _MEGABIT;
+        newSizeMegabits = newSize / _MEGABIT;
              
-    gameImage = game->image;
-    oldSize = game->image->length;
+        gameImage = game->image;
+        oldSize = game->image->length;
                 
-    if( newSize > oldSize )
-    {
-        wsprintf(msgBuffer, "Expand ROM to %u Megabits?",newSizeMegabits);
-
-        if(force)
-            goto forceExpansion;
-
-        if( MessageBox(0, msgBuffer, "Expand", MB_YESNO) == IDYES)
+        if( newSize > oldSize )
         {
-forceExpansion:
+            wsprintf(msgBuffer, "Expand ROM to %u Megabits?",newSizeMegabits);
 
-            sizeDifference = newSize - oldSize;
+            if(force)
+                goto forceExpansion;
 
-            if(ResizeBuffer(gameImage, newSize))
-                memset( (gameImage->contents) + oldSize, 0xFF, sizeDifference);
+            if( MessageBox(0, msgBuffer, "Expand", MB_YESNO) == IDYES)
+            {
+            forceExpansion:
 
+                sizeDifference = newSize - oldSize;
+
+                if(ResizeBuffer(gameImage, newSize))
+                    memset( (gameImage->contents) + oldSize, 0xFF, sizeDifference);
+
+            }
         }
-    }
-    else if( newSize == oldSize )
-    {
-        wsprintf(msgBuffer, "ROM is already %u Megabits", newSizeMegabits);
+        else if( newSize == oldSize )
+        {
+            wsprintf(msgBuffer, "ROM is already %u Megabits", newSizeMegabits);
 
-        MessageBox(0, msgBuffer, "Expand", MB_OK);
-    }
-    else
-    {
-        wsprintf(msgBuffer, "Shrink ROM to %u Megabits?",newSizeMegabits);
+            MessageBox(0, msgBuffer, "Expand", MB_OK);
+        }
+        else
+        {
+            wsprintf(msgBuffer, "Shrink ROM to %u Megabits?",newSizeMegabits);
 
-        if( MessageBox(0, msgBuffer, "Expand", MB_YESNO) == IDYES || force)
-            ResizeBuffer(game->image, newSize);
+            if( MessageBox(0, msgBuffer, "Expand", MB_YESNO) == IDYES || force)
+                ResizeBuffer(game->image, newSize);
 
-                // RATSSearch( )
-                // Add code here later to make sure critical data isn't being
+                    // RATSSearch( )
+                    // Add code here later to make sure critical data isn't being
                     // deleted. Probably use RATS tags to do that.
-    }
+        }
     
-    *argument = game->image->length;
+        *argument = game->image->length;
     }
 
 // ===============================================================
 
-void ChangeWES(WindowElement* we, HWND win, zgPtr game)
-{
-    WEStruct *currentWES = &(game->currentWES);
-
-    unsigned int index = 0;
-
-    // Destroy all the old windows and controls.
-    for( index = 0; index < currentWES->numElements; index++)
-    {  
-       DestroyWindow(currentWES->WESet[index].handle);
-       currentWES->WESet[index].handle = NULL;               
-    }
-
-    currentWES->WESet = 0;
-    currentWES->numElements = 0;
-
-    AssignCurrentWES(we);
-   
-    ActivateCurrentWES(currentWES, win);  
-}
-
-// ===============================================================
-
-void PopulateCombobox(HWND combobox, char** stringList)
-{
-    unsigned int index = 0;
-
-    // The empty string "" is used in my char**'s as a makeshift
-    // null terminator.
-    while(strcmp(stringList[index], "") != 0)
+    void ChangeWES(WindowElement* we, HWND win, zgPtr game)
     {
-        SendMessage(combobox,
-                    CB_ADDSTRING,
-                    0,
-                    (LPARAM) stringList[index]);
+        WEStruct *currentWES = &(game->currentWES);
 
-        index++;
+        unsigned int index = 0;
+
+        // Destroy all the old windows and controls.
+        for( index = 0; index < currentWES->numElements; index++)
+        {  
+           DestroyWindow(currentWES->WESet[index].handle);
+           currentWES->WESet[index].handle = NULL;               
+        }
+
+        currentWES->WESet = 0;
+        currentWES->numElements = 0;
+
+        AssignCurrentWES(we);
+   
+        ActivateCurrentWES(currentWES, win);  
     }
 
-    return;
-}
+// ===============================================================
+
+    void PopulateCombobox(HWND combobox, char** stringList)
+    {
+        unsigned int index = 0;
+
+        // The empty string "" is used in my char**'s as a makeshift
+        // null terminator.
+        while(strcmp(stringList[index], "") != 0)
+        {
+            SendMessage(combobox,
+                        CB_ADDSTRING,
+                        0,
+                        (LPARAM) stringList[index]);
+
+            index++;
+        }
+
+        return;
+    }
 
 // ===============================================================
 // End of Black Magic.cpp
