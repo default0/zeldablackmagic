@@ -56,6 +56,7 @@
 #define IDR_OVER_SELECT                 157
 #define IDR_OVER_OBJECT                 158
 #define IDR_HOOKS_ASM                   160
+#define IDR_GRAPHICS_ASM                161
 #define _TAX                            0xAA
 #define _PLB                            0xAB
 #define IDC_8MB                         1003
@@ -239,7 +240,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        161
+#define _APS_NEXT_RESOURCE_VALUE        162
 #define _APS_NEXT_COMMAND_VALUE         40116
 #define _APS_NEXT_CONTROL_VALUE         1070
 #define _APS_NEXT_SYMED_VALUE           101

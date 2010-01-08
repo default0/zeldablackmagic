@@ -794,7 +794,7 @@
 
                 // -----------------------------
 
-                chdir( (const char*) ToString(game->image) );
+                chdir( (const char*) ToString(game->romName) );
 
                 i = _mkdir("gfx");
         
@@ -833,7 +833,8 @@
 
                 // ------------------------------
 
-                chdir( (const char*) ToString(game->image) );
+                chdir( (const char*) ToString(game->romName) );
+                _getcwd(path, MAX_PATH);
 
                 // import all sprite packs
                 for(i = 0; i < 0x100; ++i)
@@ -848,7 +849,11 @@
                 {
                     sprintf(path, "gfx\\bg_gfx_%x.bin", i);
 
-                    FromFile(game->bgPacks[i], path);
+                    if(FromFile(game->bgPacks[i], path) == 0)
+                    {
+                        i = i;
+
+                    }
                 }
 
                 FromFile(game->fontGfx,  "gfx\\font_gfx.bin");
@@ -1591,7 +1596,14 @@
 
     int SaveDataToFile(zgPtr game)
     {
+        char commandLine[0x400] = "";
+
         unsigned long numBytesWritten;
+
+        STARTUPINFO sInfo;
+        PROCESS_INFORMATION pi;
+
+        // ------------------------------
     
         game->zgFileHandle = CreateFile((char*) game->romName->contents,
                                         GENERIC_WRITE,
@@ -1606,7 +1618,7 @@
 
         SaveExtendedDataToFile(game);    
 
-        if( game->hasHeader)
+        if(game->hasHeader)
             WriteFile(game->zgFileHandle,
                       game->headerBuf->contents,
                       game->headerBuf->length,
@@ -1623,17 +1635,15 @@
         SetEndOfFile(game->zgFileHandle);
 
         CloseHandle(game->zgFileHandle);
-
-        STARTUPINFO sInfo;
-        PROCESS_INFORMATION pi;
     
-        char commandLine[0x400] = "";
-
         memset(&sInfo, 0, sizeof(sInfo));
-        memset(&pi, 0, sizeof(pi));
+        memset(&pi,    0, sizeof(pi));
+
         sInfo.cb = sizeof(sInfo); 
 
-        sprintf(commandLine, "xkas.exe \".\\overworld\\owData.asm\" \"%s\"", (const char*) ToString(game->romName));
+        chdir( (const char*) ToString(game->romName) );
+
+        sprintf(commandLine, "xkas.exe \".\\hooks.asm\" \"%s\"", (const char*) ToString(game->romName));
 
         if(CreateProcess(NULL, commandLine, NULL, NULL, FALSE, 0, NULL, NULL, &sInfo, &pi))
         {
@@ -1642,8 +1652,6 @@
         else
         {
             int i = GetLastError();
-
-
         }
 
         return 1;
@@ -1669,6 +1677,11 @@
     
         u32 index1 = 0;
         u32 index2 = 0;
+
+        // --------------------------------------------
+
+        // Output hooks.asm and rom-specific configurations.
+        SetupAsmPatching(game);
 
         // Write the headers and update each pointer in the table
   
@@ -1728,7 +1741,7 @@
             offset2 += temp2->length;
         }
 
-    // Write in the entrance Data
+        // Write in the entrance Data
 
         // This is easy :)
         CopyBuffer(game->image, 
@@ -1737,7 +1750,7 @@
                    0,
                    dngFile->entrances.entranceBuffer.length);
    
-    // Write in the chest data
+        // Write in the chest data
 
         // The size of the Buffer
         index2 = dngFile->chestLocationData.length;
@@ -1769,7 +1782,7 @@
         SaveOverworldData(game, &offset2);
 
         // Compress any graphics that have been modified (via importing)
-        SaveGraphics(game, &offset);        
+        game->SaveGraphics(&offset2);
         
         // Finally, write the updated BH_Header to file
         temp1.contents = (unsigned char*) &(game->bm_Header);
@@ -1784,60 +1797,48 @@
 
     bool SaveText(zgPtr game, u32 *romOffset)
     {
-        u32 b = 0;
-        u32 textLen = 0;
-        u32 pointerCpu = 0;
-        u32 pointerRom = *romOffset;
-        u32 dataCpu = 0;
-        u32 dataRom = 0;
+        u32 b                = 0;
+        u32 textLen          = 0;
+        u32 pointerCpu       = 0;
+        u32 pointerRom       = *romOffset;
+        u32 dataCpu          = 0;
+        u32 dataRom          = 0;
         u32 pointerTableSize = 0;
-        u32 dummy = 0;
+        u32 dummy            = 0;
+
         bufPtr text = NULL;
+
+        // -----------------------------------
+
+        (*romOffset) = RomToCpuAddr(*romOffset);
 
         // calculate the pointer table size (each is 3 bytes)
         pointerTableSize = game->dialogueFile.numMsgs * 3;
-        pointerCpu = RomToCpuAddr(pointerRom);
 
-        if( IsBankChange(pointerCpu, pointerTableSize) )
-        {
-            pointerCpu = ( (GetBank(pointerCpu) + 1 ) << 0x10) | 0x8000;
-            pointerRom = CpuToRomAddr(pointerCpu);
-        }
+        pointerCpu = AdvancePointer(game, romOffset, pointerTableSize);
+        pointerRom = CpuToRomAddr(pointerCpu);
 
-        game->bm_Header.textOffset = pointerCpu;
+        game->bm_Header.textOffset  = pointerCpu;
         game->bm_Header.textNumMsgs = game->dialogueFile.numMsgs;
 
-        Put3Bytes(game->image,
-                  asm_text_ref,
-                  pointerCpu);
-
-        Put3Bytes(game->image,
-                  asm_text_ref2,
-                  pointerCpu + 2);
-
-        dataRom = pointerRom + pointerTableSize;
-        dataCpu = RomToCpuAddr(dataRom);
+        // perform a small mod to the asm of the game (changes a 2 3-byte pointers)
+        Put3Bytes(game->image, asm_text_ref,  pointerCpu);
+        Put3Bytes(game->image, asm_text_ref2, pointerCpu + 2);
 
         for(b = 0; b < game->dialogueFile.numMsgs; b++, pointerRom += 3)
         {
-            text = game->dialogueFile.data[b];
+            text    = game->dialogueFile.data[b];
             textLen = text->length;
-            dataCpu = RomToCpuAddr(dataRom);
-            dummy = 0;
+            dummy   = 0;
 
-            if( IsBankChange(dataCpu, textLen) )
-            {
-                // move into the next (program) bank
-                dataCpu     = ( (GetBank( dataCpu ) + 1) << 0x10) | 0x8000;
-                dataRom    = CpuToRomAddr(dataCpu);
-            }
+            dataCpu = AdvancePointer(game, romOffset, textLen);
+            dataRom = CpuToRomAddr(dataCpu);
 
-            //store the CPU address to the pointer table
+            // store the CPU address to the data in the pointer table
             Put3Bytes(game->image, pointerRom, dataCpu);
 
-            CopyBufferWB(game->image,   text,
-                         &dataRom,   &dummy,
-                         text->length);        
+            // Copy the text data to its location in the rom
+            CopyBuffer(game->image, text, dataRom, 0, text->length);        
         }
 
         *romOffset = dataRom;
@@ -1962,6 +1963,74 @@
         *romOffset = dataRom;
 
         return true;
+    }
+
+// ===============================================================
+
+    char* GetAsmTextResource(int resourceID)
+    { 
+        char *textBuf      = NULL;
+
+        u32 textSize       = 0;
+
+        HRSRC textRsrc     = NULL;
+    
+        HGLOBAL textHandle = NULL;
+
+        // -----------------------------------------
+
+        // output the embedded file hooks.asm
+        textRsrc   = FindResource(thisProg, MAKEINTRESOURCE(resourceID), "TEXT");
+
+        if(!textRsrc) return NULL;
+
+        textSize   = SizeofResource(thisProg, textRsrc);
+
+        if(!textSize) return NULL;
+
+        textHandle = LoadResource(thisProg, textRsrc);
+
+        if(!textHandle) return NULL;
+
+        textBuf    = (char*) LockResource(textHandle);
+
+        return textBuf;
+    }
+
+// ===============================================================
+
+    void SetupAsmPatching(zgPtr game)
+    {
+        char *hooksText = NULL;
+
+        FILE *f = NULL;
+
+        // ------------------------------------
+
+        // output the embedded file hooks.asm
+        hooksText = GetAsmTextResource(IDR_HOOKS_ASM);
+
+        if(!hooksText)
+        {
+            return;
+        }
+
+        chdir( (const char*) ToString(game->romName) );
+
+        f = fopen("hooks.asm", "wb");
+
+        if(f)
+        {
+            // initialize the ASM file with basic information about the ROM and a couple basic macros.
+            if(game->hasHeader)
+                fprintf(f, "\nheader\n");
+
+            fprintf(f, "%s", hooksText);
+
+            fclose(f);
+        }
+
+        return;
     }
 
 // ===============================================================

@@ -390,9 +390,17 @@ SOURCE=.\Core.h
 SOURCE=.\Graphics.cpp
 # End Source File
 # End Group
+# Begin Group "Assembly Files"
+
+# PROP Default_Filter "*.asm"
+# Begin Source File
+
+SOURCE=.\graphics.asm
+# End Source File
 # Begin Source File
 
 SOURCE=.\hooks.asm
 # End Source File
+# End Group
 # End Target
 # End Project

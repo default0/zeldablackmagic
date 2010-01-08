@@ -360,10 +360,12 @@
 
         public:
 
-            void LoadAllGfx();
+            void    LoadAllGfx();
 
-            int GetSprGfxPtr(int index);
-            int GetBgGfxPtr(int index);
+            int     GetSprGfxPtr(int index);
+            int     GetBgGfxPtr(int index);
+
+            bool    SaveGraphics(u32 *offset);
 
         };
         //ZeldaGame, *zgPtr;

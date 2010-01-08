@@ -655,6 +655,7 @@ END
 //
 
 IDR_HOOKS_ASM           TEXT    DISCARDABLE     "hooks.asm"
+IDR_GRAPHICS_ASM        TEXT    DISCARDABLE     "graphics.asm"
 
 /////////////////////////////////////////////////////////////////////////////
 //
