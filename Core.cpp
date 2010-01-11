@@ -22,7 +22,7 @@
 
 
         holderLong = ( (holderLong & 0x7F0000) >> 1 ) + (holderLong & 0x7FFF);
-
+	    
 
         return holderLong;
     }
@@ -30,18 +30,18 @@
 // ===============================================================
 
     int RomToCpuAddr(int holderLong)
-	{
+    {
         // converts a ROM Address to a CPU Address
-		    
+        
         holderLong &= 0x7FFFFF;
-		    
+        
         holderLong = ( (holderLong & 0x3F8000) << 1 ) + ( holderLong & 0x7FFF ) | 0x8000;
         
         return holderLong;
     }
-			    
+
 // ===============================================================
- 
+
     void Create_BM_Header(zgPtr game)
     {
         int newLength = 0x200000;
@@ -58,21 +58,21 @@
 
         // initialize the header's memory entirely
         ZeroMemory(h, sizeof(BM_Header));
-
+        
         h->header_version = current_header_version;
 
         strcpy(h->designation, "BM_HEADER");
 
         h->dngHeaderOffset  = Get3Bytes(rom, asm_header_ref);
-            
+        
         h->dngHeaderBank    = GetByte(rom, asm_header_bank);
-		    
+        
         h->dngObjOffset     = Get3Bytes(rom, asm_object_ref);
-    
+        
         h->dngLayoutOffset  = Get3Bytes(rom, asm_layout_ref);
-
+        
         h->dngEntranceOffset = asm_entrance_ref;
-            
+        
         h->dngChestOffset   = Get3Bytes(rom, asm_chest_ref);
 
         h->dngNumChests     = Get2Bytes(rom, asm_num_chests) / 3;
@@ -83,13 +83,13 @@
         h->map32To16UR      = Get3Bytes(rom, asm_map32To16UR);
         h->map32To16LL      = Get3Bytes(rom, asm_map32To16LL);
         h->map32To16LR      = Get3Bytes(rom, asm_map32To16LR);
-                        
+        
         // Check to see if there is a hooked JML to extended regions
         // If there is a hook, this will be the offset in-rom for the bank table
         if(GetByte(rom, asm_sprite_hook) == 0x5C)
             h->dngSpriteBanks = CpuToRomAddr(Get3Bytes(rom, asm_sprite_hook + 1)) + 0x0E;
         // In this case there isn't ;) And in that case the sprite data is all in bank 09
-                else 
+        else
             h->dngSpriteBanks = 0x090000;
 
         h->overHoleOffset   = 0x1BB800;
@@ -120,9 +120,9 @@
     }
 
 // ===============================================================
-	    
+
     void Check_BM_Header(zgPtr game)
-	{
+    {
         Buffer temp;
 
         // This is the alleged header offset.
@@ -136,7 +136,7 @@
 
         InitBuffer(12, &temp);
         CopyBuffer(&temp, game->image, 0, offset, 12);
-    
+        
         if(strcmp((const char*) temp.contents, "BM_HEADER") == 0)
         {
             // Add version support for headers! soon!
@@ -155,7 +155,6 @@
         temp.length = sizeof(BM_Header);
 
         CopyBuffer(&temp, game->image, 0, offset, temp.length);
-
         
     }
 
@@ -180,17 +179,17 @@
 
         y_reg = 0x40;
 
-        nextSegment:
+    nextSegment:
 
         x_reg = 0x0E;
 
-        loop1:
+    loop1:
 
         a_reg = Get2Bytes(inputBuf, source); // lda [$00]
-  
+        
         Put2Bytes(storeBuf, target, a_reg);
         target += 2; // sta $2118
-   
+        
         a_reg = XBA(a_reg); // xba
 
         a_reg |= Get2Bytes(inputBuf, source); // ora [$00]
@@ -201,10 +200,10 @@
         source += 2; x_reg -= 2; // inc $00, inc $00, x--, x--;
 
         a_reg = Get2Bytes(inputBuf, source); // lda [$00]
-  
+        
         Put2Bytes(storeBuf, target, a_reg);
         target += 2; // sta $2118
-   
+        
         a_reg = XBA(a_reg); // xba
 
         a_reg |= Get2Bytes(inputBuf, source); // ora [$00]
@@ -216,15 +215,15 @@
 
         if(x_reg >= 0)
             goto loop1; // bpl loop1
-    
+        
         x_reg = 0x0E;
 
-        loop2:
+    loop2:
 
         a_reg = Get2Bytes(inputBuf, source);
         a_reg &= 0x00FF;
         dummy = a_reg;
-    
+        
         a_reg |= (infoArray[x_reg] | (infoArray[x_reg+1] << 8));
         a_reg = XBA(a_reg);
         a_reg |= dummy;
@@ -237,7 +236,7 @@
         a_reg = Get2Bytes(inputBuf, source);
         a_reg &= 0x00FF;
         dummy = a_reg;
-    
+        
         a_reg |= (infoArray[x_reg] | (infoArray[x_reg+1] << 8));
         a_reg = XBA(a_reg);
         a_reg |= dummy;
@@ -264,484 +263,483 @@
 
     int XBA(int value)
     {
-    int temp = (value >> 0x08) & 0xFF;
+        int temp = (value >> 0x08) & 0xFF;
 
-    value <<= 0x08;
-    value &= 0xFF00;
+        value <<= 0x08;
+        value &= 0xFF00;
 
-    value |= temp;
+        value |= temp;
 
-    return value;
+        return value;
     }
 
 // ===============================================================
 
-// Import/Export routines
+    // Import/Export routines
 
     void ImportDungeons(zgPtr game, HINSTANCE prog)
     {
 
-    DialogBoxParam(prog,
-                   MAKEINTRESOURCE(IDD_PORTDUNG),
-                   game->subWindow,
-                   PortDungProc,
-                   IMPORT_MODE);
+        DialogBoxParam(prog,
+                       MAKEINTRESOURCE(IDD_PORTDUNG),
+                       game->subWindow,
+                       PortDungProc,
+                       IMPORT_MODE);
 
-    // 1. Load dungeon file.
-    // Bring up a dialog similar to how the export dialog works.
+        // 1. Load dungeon file.
+        // Bring up a dialog similar to how the export dialog works.
 
 
-    // 2. Load dungeon headers
+        // 2. Load dungeon headers
     
     
 
-    // 3. Load dungeon object data
-    // 4. Load dungeon entrance data
-    // 5. Assemble them to a free location in expanded rom.
+        // 3. Load dungeon object data
+        // 4. Load dungeon entrance data
+        // 5. Assemble them to a free location in expanded rom.
     }
 
 // ===============================================================
 
     void ExportDungeons(zgPtr game, HINSTANCE prog)
     {
-    // Bring up a dialog requesting which entrances and rooms' data will be extracted.
-    // 
+        // Bring up a dialog requesting which entrances and rooms' data will be extracted.
+        // 
 
-    // Dump all this info plus any parsable strings into a header portion. The header will contain
-    // A pointer to the data in the rest of the file. The header will itself start off with a 32bit value
-    // of how long it is.
+        // Dump all this info plus any parsable strings into a header portion. The header will contain
+        // A pointer to the data in the rest of the file. The header will itself start off with a 32bit value
+        // of how long it is.
 
 
-    DialogBoxParam(prog,
-                   MAKEINTRESOURCE(IDD_PORTDUNG),
-                   game->subWindow,
-                   PortDungProc,
-                   EXPORT_MODE);
+        DialogBoxParam(prog,
+                       MAKEINTRESOURCE(IDD_PORTDUNG),
+                       game->subWindow,
+                       PortDungProc,
+                       EXPORT_MODE);
 
-    return;
+        return;
     }
 
 // ===============================================================
 
     int CALLBACK PortDungProc(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
     {
-    static int mode = 0;
-    bool test = 0;
+        static int mode = 0;
+        bool test = 0;
 
-    int headerLoc = 0;
-    int roomNum = 0;
+        int headerLoc = 0;
+        int roomNum = 0;
     
-    zgPtr game = (zgPtr) GetWindowLong(windowList[zgIndex], 0);
+        zgPtr game = (zgPtr) GetWindowLong(windowList[zgIndex], 0);
 
-    switch(msg)
-    {
-        case WM_INITDIALOG:
+        switch(msg)
+        {
+            case WM_INITDIALOG:
                         
-            mode = lp; // modes are 0 or 1
+                mode = lp; // modes are 0 or 1
             
-            mode ? SetWindowText(dlg, "Import Dungeons") :
-                   SetWindowText(dlg, "Export Dungeons");
+                mode ? SetWindowText(dlg, "Import Dungeons") :
+                       SetWindowText(dlg, "Export Dungeons");
 
-            break;
+                break;
 
-        case WM_COMMAND:
+            case WM_COMMAND:
 
-            if(wp == IDC_PORTDUNG)
-            {
-                if(mode == EXPORT_MODE)
+                if(wp == IDC_PORTDUNG)
                 {
-                    ExportDungeonFile(game);
+                    if(mode == EXPORT_MODE)
+                    {
+                        ExportDungeonFile(game);
 
-                    EndDialog(dlg, -1);               
+                        EndDialog(dlg, -1);               
+                    }
+                    else
+                    {
+                        ImportDungeonFile(game);
+
+                        EndDialog(dlg, -1);
+                    }
                 }
-                else
-                {
-                    ImportDungeonFile(game);
 
+                if(wp == IDCANCEL)
+                {
                     EndDialog(dlg, -1);
                 }
-            }
 
-            if(wp == IDCANCEL)
-            {
-                EndDialog(dlg, -1);
+                break;
 
-            }
+            case 0:
 
-            break;
-
-        case 0:
-
-            break;
+                break;
 
 
 
 
-        default:
+            default:
 
-            break;
+                break;
 
-    }
+        }
 
-    return 0; // do the default handling anyways.
+        return 0; // do the default handling anyways.
     }
 
 // ===============================================================
 
     void LoadDungeonFile(zgPtr game, DungeonFile* file)
     {
-    unsigned int headerBase = CpuToRomAddr(game->bm_Header.dngHeaderOffset);
-    unsigned int headerBank = (game->bm_Header.dngHeaderBank) << 0x10;
-    unsigned int objectBase = CpuToRomAddr(game->bm_Header.dngObjOffset);
-    unsigned int layoutBase = CpuToRomAddr(game->bm_Header.dngLayoutOffset);
+        unsigned int headerBase = CpuToRomAddr(game->bm_Header.dngHeaderOffset);
+        unsigned int headerBank = (game->bm_Header.dngHeaderBank) << 0x10;
+        unsigned int objectBase = CpuToRomAddr(game->bm_Header.dngObjOffset);
+        unsigned int layoutBase = CpuToRomAddr(game->bm_Header.dngLayoutOffset);
 
-    unsigned int entranceBase = game->bm_Header.dngEntranceOffset; 
-    // This is the default entrance data location
-    // The plan is to later maybe expand entrance data but for now there's enough.
+        unsigned int entranceBase = game->bm_Header.dngEntranceOffset; 
+        // This is the default entrance data location
+        // The plan is to later maybe expand entrance data but for now there's enough.
 
-    unsigned int chestLocationBase = game->bm_Header.dngChestOffset;
+        unsigned int chestLocationBase = game->bm_Header.dngChestOffset;
 
-    // Also remember to change not only $E9FB, but $EA0C, and $EC10
-    // Also, $EBF6 is the max number of chests * 3 from the game's perspective.
+        // Also remember to change not only $E9FB, but $EA0C, and $EC10
+        // Also, $EBF6 is the max number of chests * 3 from the game's perspective.
 
-    u32 spritePtrBase = game->bm_Header.dngSpriteOffset;
-    u32 currentPtr = 0;
-    u32 spritePtrBank = game->bm_Header.dngSpriteBanks;
-    u32 spritePtrTbl  = GetBank(spritePtrBank) << 0x10;
+        u32 spritePtrBase = game->bm_Header.dngSpriteOffset;
+        u32 currentPtr = 0;
+        u32 spritePtrBank = game->bm_Header.dngSpriteBanks;
+        u32 spritePtrTbl  = GetBank(spritePtrBank) << 0x10;
 
-    u32 roomNum = 0;
-    u32 roomOffset = 0;
-    u32 nextRoomOffset = 0;
-    u32 size = 0;
-    u32 objectSize = 0;
-    u32 index = 0;
-    u32 index2 = 0;
-    u32 sum = 0;
-    u32 headerLength = 0;
-    u32 i;
+        u32 roomNum = 0;
+        u32 roomOffset = 0;
+        u32 nextRoomOffset = 0;
+        u32 size = 0;
+        u32 objectSize = 0;
+        u32 index = 0;
+        u32 index2 = 0;
+        u32 sum = 0;
+        u32 headerLength = 0;
+        u32 i;
 
-    bufPtr      temp1;
-    bufPtr      temp3;
+        bufPtr      temp1;
+        bufPtr      temp3;
     
-    // Note that not the whole buffer will be filled up in all cases
-    InitBuffer(320*14, &(file->headerData) );
+        // Note that not the whole buffer will be filled up in all cases
+        InitBuffer(320*14, &(file->headerData) );
 
-    /*
-    if(_CrtCheckMemory() == FALSE)
-        MessageBox(0, "crt failure", "write headers", MB_OK);
+        /*
+        if(_CrtCheckMemory() == FALSE)
+            MessageBox(0, "crt failure", "write headers", MB_OK);
 
-    */
+        */
   
-    // 1. write the headers to the file structure
-    for(roomNum = 0; roomNum < 320 ; roomNum++)
-    {
-        roomOffset = Get2Bytes(game->image, headerBase + (roomNum * 2));
-
-        file->headerLengths[roomNum] = 0x0E;
-
-        for(i = 0; i < 320; i++)
+        // 1. write the headers to the file structure
+        for(roomNum = 0; roomNum < 320 ; roomNum++)
         {
-            if(i == roomNum)
-                continue;
+            roomOffset = Get2Bytes(game->image, headerBase + (roomNum * 2));
 
-            nextRoomOffset = Get2Bytes(game->image, headerBase + (i*2));
-            headerLength = nextRoomOffset - roomOffset;
+            file->headerLengths[roomNum] = 0x0E;
 
-            if(!headerLength)
-                continue;
-
-            if(headerLength == 5)
-                headerLength = 5;
-
-            if( (headerLength) < 0x0E )
+            for(i = 0; i < 320; i++)
             {
-                file->headerLengths[roomNum] = (headerLength);
-                break;
+                if(i == roomNum)
+                    continue;
+
+                nextRoomOffset = Get2Bytes(game->image, headerBase + (i*2));
+                headerLength = nextRoomOffset - roomOffset;
+
+                if(!headerLength)
+                    continue;
+
+                if(headerLength == 5)
+                    headerLength = 5;
+
+                if( (headerLength) < 0x0E )
+                {
+                    file->headerLengths[roomNum] = (headerLength);
+                    break;
+                }
             }
         }
-    }
 
-    // 1b. write the headers with the given size.
-    for(roomNum = 0 ; roomNum < 320 ; roomNum++)
-    {
-        roomOffset = Get2Bytes(game->image, headerBase + (roomNum * 2)) | headerBank;
+        // 1b. write the headers with the given size.
+        for(roomNum = 0 ; roomNum < 320 ; roomNum++)
+        {
+            roomOffset = Get2Bytes(game->image, headerBase + (roomNum * 2)) | headerBank;
         
-        roomOffset = CpuToRomAddr(roomOffset);
+            roomOffset = CpuToRomAddr(roomOffset);
 
-        CopyBuffer(&(file->headerData),
-                   game->image,
-                   roomNum*14,
-                   roomOffset,
-                   file->headerLengths[roomNum]);
-    }
+            CopyBuffer(&(file->headerData),
+                       game->image,
+                       roomNum*14,
+                       roomOffset,
+                       file->headerLengths[roomNum]);
+        }
    
-    unsigned int layer = 0; // Overlooked this the first time I implemented object handling
-    // Unfortunately this proved to be a catastrophic mistake as you'd get rooms with objects from
-    // three different rooms upon importing. As you can tell from a cursory glance at 
-    // HM's dungeon editor there are 3 layers of objects. >_> d'oh. I only originally looked
-    // for one.
+        unsigned int layer = 0; // Overlooked this the first time I implemented object handling
+        // Unfortunately this proved to be a catastrophic mistake as you'd get rooms with objects from
+        // three different rooms upon importing. As you can tell from a cursory glance at 
+        // HM's dungeon editor there are 3 layers of objects. >_> d'oh. I only originally looked
+        // for one.
 
-    // 2. write the dungeon object data to the file structure
-    for(roomNum = 0; roomNum < 320 ; roomNum++)
-    {   
-        // provides a cpu address for this particular room's data
-        roomOffset = Get3Bytes(game->image, objectBase + (roomNum * 3));
+        // 2. write the dungeon object data to the file structure
+        for(roomNum = 0; roomNum < 320 ; roomNum++)
+        {   
+            // provides a cpu address for this particular room's data
+            roomOffset = Get3Bytes(game->image, objectBase + (roomNum * 3));
 
-        // convert that to an in-rom address.
-        roomOffset = CpuToRomAddr(roomOffset);
+            // convert that to an in-rom address.
+            roomOffset = CpuToRomAddr(roomOffset);
 
-        // the temp1 pointer will be used to shorten the size of the code
-        // Basically it saves from having to write out the whole name of the particular
-        // bufPtr and all its modifications like -> and ., etc.
-        temp1 = &(file->objectData[roomNum]);
+            // the temp1 pointer will be used to shorten the size of the code
+            // Basically it saves from having to write out the whole name of the particular
+            // bufPtr and all its modifications like -> and ., etc.
+            temp1 = &(file->objectData[roomNum]);
         
-        // index 2 is used as placeholder so we remember where the data started at.
-        index2 = roomOffset; 
+            // index 2 is used as placeholder so we remember where the data started at.
+            index2 = roomOffset; 
 
-        // start off with the size of the object data being 2 bytes long
-        // This accounts for the two properties entries
-        size = 2;
-        roomOffset += 2;
-        layer = 0;
+            // start off with the size of the object data being 2 bytes long
+            // This accounts for the two properties entries
+            size = 2;
+            roomOffset += 2;
+            layer = 0;
 
     nextLayer:
 
-        // we start by reading 3 byte objects
-        objectSize = 3;
+            // we start by reading 3 byte objects
+            objectSize = 3;
         
-        // next determine the size (length) of this object data before we copy the data to a buffer.
-        while(1)
-        {
-            // minor precaution to avoid crashes
-            if(size > 0xFFFF)
+            // next determine the size (length) of this object data before we copy the data to a buffer.
+            while(1)
             {
-                exit(-1); // might comment out if I start experiencing crashes
-            }
+                // minor precaution to avoid crashes
+                if(size > 0xFFFF)
+                {
+                    exit(-1); // might comment out if I start experiencing crashes
+                }
 
-            // 0xFFFF is the terminator for each room's object data.
-            if(Get2Bytes(game->image, roomOffset) == 0xFFFF)
-            {
-                // since roomOffset double functions as size, we increment by 2.
-                roomOffset += 2;
-                size += 2;
-
-                // and end the loop
-                goto end;
-            }
-
-            // check to see if we are going to switch to door objects
-            // which are two byte objects rather than three byte
-            // not all rooms have them >_>
-            if(Get2Bytes(game->image, roomOffset) == 0xFFF0)
-            {
-                if(objectSize == 3)
-                {   
-                    objectSize = 2;
+                // 0xFFFF is the terminator for each room's object data.
+                if(Get2Bytes(game->image, roomOffset) == 0xFFFF)
+                {
+                    // since roomOffset double functions as size, we increment by 2.
                     roomOffset += 2;
                     size += 2;
-                    continue;
+
+                    // and end the loop
+                    goto end;
                 }
-            }            
 
-            roomOffset += objectSize;
-            size += objectSize;
-        }
+                // check to see if we are going to switch to door objects
+                // which are two byte objects rather than three byte
+                // not all rooms have them >_>
+                if(Get2Bytes(game->image, roomOffset) == 0xFFF0)
+                {
+                    if(objectSize == 3)
+                    {   
+                        objectSize = 2;
+                        roomOffset += 2;
+                        size += 2;
+                        continue;
+                    }
+                }            
 
-    end:
-
-        layer++;
-
-        // Layers range from 0 to 2
-        if(layer <= 2)
-            goto nextLayer;
-
-        InitBuffer(size, temp1);
-
-        CopyBuffer(temp1,
-                   game->image,
-                   0,
-                   index2,
-                   size);
-
-        
-    }
-
-    // 2.5 (inserted) layout data which is similar to object data but easier :)
-    //if(layoutBase == 0x26F2F)
-        index = 8;
-   // else
-        //index = 64;
-
-    for( i = 0; i < index; i++)
-    {
-        roomOffset = Get3Bytes(game->image, layoutBase + (i*3));
-        roomOffset = CpuToRomAddr(roomOffset);
-
-        size = 0;
-        index2 = roomOffset;
-        objectSize = 3;
-
-        temp1 = &(file->layoutData[i]);
-
-        while(1)
-        {
-            if(size > 0xFFFF)
-                exit(-1);
-
-            if(Get2Bytes(game->image, roomOffset) == 0xFFFF)
-            {
-                roomOffset += 2;
-                size += 2;
-
-                goto doneLayout;
+                roomOffset += objectSize;
+                size += objectSize;
             }
 
-            if(Get2Bytes(game->image, roomOffset) == 0xFFF0)
+        end:
+
+            layer++;
+
+            // Layers range from 0 to 2
+            if(layer <= 2)
+                goto nextLayer;
+
+            InitBuffer(size, temp1);
+
+            CopyBuffer(temp1,
+                       game->image,
+                       0,
+                       index2,
+                       size);
+
+        
+        }
+
+        // 2.5 (inserted) layout data which is similar to object data but easier :)
+        //if(layoutBase == 0x26F2F)
+            index = 8;
+       // else
+            //index = 64;
+
+        for( i = 0; i < index; i++)
+        {
+            roomOffset = Get3Bytes(game->image, layoutBase + (i*3));
+            roomOffset = CpuToRomAddr(roomOffset);
+
+            size = 0;
+            index2 = roomOffset;
+            objectSize = 3;
+
+            temp1 = &(file->layoutData[i]);
+
+            while(1)
             {
-                if(objectSize == 3)
-                {   
-                    objectSize = 2;
+                if(size > 0xFFFF)
+                    exit(-1);
+
+                if(Get2Bytes(game->image, roomOffset) == 0xFFFF)
+                {
                     roomOffset += 2;
                     size += 2;
-                    continue;
-                }
-            }            
 
-            roomOffset += objectSize;
-            size += objectSize;
-        }
+                    goto doneLayout;
+                }
+
+                if(Get2Bytes(game->image, roomOffset) == 0xFFF0)
+                {
+                    if(objectSize == 3)
+                    {   
+                        objectSize = 2;
+                        roomOffset += 2;
+                        size += 2;
+                        continue;
+                    }
+                }            
+
+                roomOffset += objectSize;
+                size += objectSize;
+            }
 
     doneLayout:
 
-        InitBuffer(size, temp1);
+            InitBuffer(size, temp1);
 
-        CopyBuffer(temp1,
-                   game->image,
-                   0,
-                   index2,
-                   size);
-    }
-    
-
-
-    // 3. next handle the entrance data
-    InitBuffer( game->numEntrances * ENTRANCE_BASE_SIZE,
-                &(file->entrances.entranceBuffer)
-                );
-
-        temp3 = &(file->entrances.roomNumber);
-
-        index = 0;
-        sum = 0;
-
-        // Set up the structure of the entrance data in its underlying buffers
-        while(1)
-        {
-            temp3[index].unit = entranceBufSizes[index];
-            temp3[index].error = 0;
-            temp3[index].length = ( game->numEntrances * entranceBufSizes[index] );
-            temp3[index].contents = (file->entrances.entranceBuffer.contents) + sum;
-
-            sum += temp3[index].length;
-
-            if( &(temp3[index]) == &(file->entrances.musicValue) )
-                break;
-
-            if( sum >= file->entrances.entranceBuffer.length )
-                break;
-
-            index++;
+            CopyBuffer(temp1,
+                       game->image,
+                       0,
+                       index2,
+                       size);
         }
-
-        // determine where the entrance data resides.
-            // insert this procedure later b/c we're not going to fuck with it now.
-
-    index = 0;
-
-    temp3 = &(file->entrances.entranceBuffer);
-
-    CopyBuffer(temp3, game->image, 0, entranceBase, temp3->length);
-
-    // 4. Handle the chest location data.
-    temp3 = &(file->chestLocationData);
-
-    InitBuffer( game->bm_Header.dngNumChests * 3, temp3);
-
-    index = 0;
-
-    // Retrieve the rom address of this data.
-    chestLocationBase = CpuToRomAddr(chestLocationBase);
-
-    CopyBuffer(temp3,
-               game->image,
-               0,
-               chestLocationBase,
-               temp3->length);
     
-    //MessageBox(0, "sprites!", "sprites!", MB_OK);
 
-    // 5. Finally go for the sprite data.
-    
-    if(spritePtrBank == 0x090000)
-        spritePtrBase |= spritePtrBank;
-    else
-        spritePtrBase = RomToCpuAddr(spritePtrBase);
 
-    for( index = 0 ; index < 0x140; index++)
-    {
-        // This will provide the bank the data is stored in.
-        // Do not confuse this with spritePtrTbl, which says which bank
-        // the sprite pointer table is in. The latter never changes
-        if(spritePtrBank != 0x090000)
-        {   
-            spritePtrBank = GetByte(game->image,
-                                    game->bm_Header.dngSpriteBanks + index);
-            spritePtrBank <<= 0x10;            
-        }
+        // 3. next handle the entrance data
+        InitBuffer( game->numEntrances * ENTRANCE_BASE_SIZE,
+                    &(file->entrances.entranceBuffer)
+                    );
 
-        // Get the rom address of the current room's sprites
-        currentPtr = Get2Bytes( game->image, asm_sprite_local + (index*2) );
-        currentPtr |= spritePtrBank;
-        currentPtr = CpuToRomAddr(currentPtr);
-       
-        temp3 = &(file->spriteData[index]);
+            temp3 = &(file->entrances.roomNumber);
 
-        // temporarily save the current position for use later
-        index2 = currentPtr;
+            index = 0;
+            sum = 0;
 
-        // account for the fact that the first byte is always there.
-        currentPtr++;
+            // Set up the structure of the entrance data in its underlying buffers
+            while(1)
+            {
+                temp3[index].unit = entranceBufSizes[index];
+                temp3[index].error = 0;
+                temp3[index].length = ( game->numEntrances * entranceBufSizes[index] );
+                temp3[index].contents = (file->entrances.entranceBuffer.contents) + sum;
 
-        // The size check is kind of arbirtary. Just to make sure
-        // our data doesn't go crazy.
-        for( size = 1 ; size < 0xFFFF ; currentPtr += 3)
-        {
-            if( GetByte(game->image, currentPtr) == 0x000000FF)
-            {  
-               size++;
-               currentPtr++;
+                sum += temp3[index].length;
 
-               break;
+                if( &(temp3[index]) == &(file->entrances.musicValue) )
+                    break;
+
+                if( sum >= file->entrances.entranceBuffer.length )
+                    break;
+
+                index++;
             }
 
-            size += 3;
-        }
-        
-        InitBuffer(size, temp3);
+            // determine where the entrance data resides.
+                // insert this procedure later b/c we're not going to fuck with it now.
 
-        // retrieve the start of this room's sprite data
-        currentPtr = index2;
+        index = 0;
 
-        CopyBuffer(temp3, 
+        temp3 = &(file->entrances.entranceBuffer);
+
+        CopyBuffer(temp3, game->image, 0, entranceBase, temp3->length);
+
+        // 4. Handle the chest location data.
+        temp3 = &(file->chestLocationData);
+
+        InitBuffer( game->bm_Header.dngNumChests * 3, temp3);
+
+        index = 0;
+
+        // Retrieve the rom address of this data.
+        chestLocationBase = CpuToRomAddr(chestLocationBase);
+
+        CopyBuffer(temp3,
                    game->image,
                    0,
-                   currentPtr,
+                   chestLocationBase,
                    temp3->length);
-    }
+    
+        //MessageBox(0, "sprites!", "sprites!", MB_OK);
 
-    // Need to insert secrets (part 6 :( )
+        // 5. Finally go for the sprite data.
+    
+        if(spritePtrBank == 0x090000)
+            spritePtrBase |= spritePtrBank;
+        else
+            spritePtrBase = RomToCpuAddr(spritePtrBase);
 
-    // End of LoadDungeonFile( )
+        for( index = 0 ; index < 0x140; index++)
+        {
+            // This will provide the bank the data is stored in.
+            // Do not confuse this with spritePtrTbl, which says which bank
+            // the sprite pointer table is in. The latter never changes
+            if(spritePtrBank != 0x090000)
+            {   
+                spritePtrBank = GetByte(game->image,
+                                        game->bm_Header.dngSpriteBanks + index);
+                spritePtrBank <<= 0x10;            
+            }
+
+            // Get the rom address of the current room's sprites
+            currentPtr = Get2Bytes( game->image, asm_sprite_local + (index*2) );
+            currentPtr |= spritePtrBank;
+            currentPtr = CpuToRomAddr(currentPtr);
+       
+            temp3 = &(file->spriteData[index]);
+
+            // temporarily save the current position for use later
+            index2 = currentPtr;
+
+            // account for the fact that the first byte is always there.
+            currentPtr++;
+
+            // The size check is kind of arbirtary. Just to make sure
+            // our data doesn't go crazy.
+            for( size = 1 ; size < 0xFFFF ; currentPtr += 3)
+            {
+                if( GetByte(game->image, currentPtr) == 0x000000FF)
+                {  
+                   size++;
+                   currentPtr++;
+
+                   break;
+                }
+
+                size += 3;
+            }
+        
+            InitBuffer(size, temp3);
+
+            // retrieve the start of this room's sprite data
+            currentPtr = index2;
+
+            CopyBuffer(temp3, 
+                       game->image,
+                       0,
+                       currentPtr,
+                       temp3->length);
+        }
+
+        // Need to insert secrets (part 6 :( )
+
+        // End of LoadDungeonFile( )
 
     }
 
@@ -749,461 +747,461 @@
 
     void ExportDungeonFile(zgPtr game)
     {
-    // first, set up the stuff to save the file
+        // first, set up the stuff to save the file
 
-    Buffer exportName;
-    DungeonFile* file = &(game->dungeonFile);
-    bufPtr temp3;
+        Buffer exportName;
+        DungeonFile* file = &(game->dungeonFile);
+        bufPtr temp3;
 
-    unsigned int index, index2 = 0;
+        unsigned int index, index2 = 0;
 
-    InitBuffer(game->romName->length, &exportName);
+        InitBuffer(game->romName->length, &exportName);
 
-    CopyBuffer(&exportName,
-               game->romName,
-               0,
-               0,
-               exportName.length);
+        CopyBuffer(&exportName,
+                   game->romName,
+                   0,
+                   0,
+                   exportName.length);
 
-    // change the extension to *.dng
-    index = strlen((const char*) exportName.contents) - 3;
-    PutByte(&exportName, index++, 'd');
-    PutByte(&exportName, index++, 'n');
-    PutByte(&exportName, index++, 'g');
+        // change the extension to *.dng
+        index = strlen((const char*) exportName.contents) - 3;
+        PutByte(&exportName, index++, 'd');
+        PutByte(&exportName, index++, 'n');
+        PutByte(&exportName, index++, 'g');
 
-    bmOFN.lStructSize = sizeof(OPENFILENAME);
-	bmOFN.hwndOwner = NULL;
-	bmOFN.hInstance = thisProg;
-	bmOFN.lpstrFilter = NULL;
-	bmOFN.lpstrCustomFilter = NULL;
-	bmOFN.nFilterIndex = 0;
-	bmOFN.nMaxFile = MAX_PATH;
-    bmOFN.lpstrFile = (LPSTR) exportName.contents;
-	//bmOFN.lpstrFile[0] = 0; // a particularity of using the open file dialogs.
-	bmOFN.lpstrFileTitle = NULL;
-	bmOFN.lpstrInitialDir = 0; // Sets to a default directory. (my documents?)
-	bmOFN.lpstrTitle = "Save Dungeon Data";
-	bmOFN.Flags = OFN_OVERWRITEPROMPT;
-    bmOFN.lpstrDefExt = "dng";
+        bmOFN.lStructSize = sizeof(OPENFILENAME);
+	    bmOFN.hwndOwner = NULL;
+	    bmOFN.hInstance = thisProg;
+	    bmOFN.lpstrFilter = NULL;
+	    bmOFN.lpstrCustomFilter = NULL;
+	    bmOFN.nFilterIndex = 0;
+	    bmOFN.nMaxFile = MAX_PATH;
+        bmOFN.lpstrFile = (LPSTR) exportName.contents;
+	    //bmOFN.lpstrFile[0] = 0; // a particularity of using the open file dialogs.
+	    bmOFN.lpstrFileTitle = NULL;
+	    bmOFN.lpstrInitialDir = 0; // Sets to a default directory. (my documents?)
+	    bmOFN.lpstrTitle = "Save Dungeon Data";
+	    bmOFN.Flags = OFN_OVERWRITEPROMPT;
+        bmOFN.lpstrDefExt = "dng";
 
-    if(GetSaveFileName(&bmOFN))
+        if(GetSaveFileName(&bmOFN))
 
-    game->portFileHandle = CreateFile(bmOFN.lpstrFile,
-                           GENERIC_WRITE,
-                           0,
-                           0,
-                           OPEN_ALWAYS,
-                           0,
-                           0);
+        game->portFileHandle = CreateFile(bmOFN.lpstrFile,
+                               GENERIC_WRITE,
+                               0,
+                               0,
+                               OPEN_ALWAYS,
+                               0,
+                               0);
 
-    index = 0;
+        index = 0;
 
-    unsigned long numBytesWritten;
+        unsigned long numBytesWritten;
 
-    temp3 = &(file->headerData);
+        temp3 = &(file->headerData);
 
-    index2 = temp3->length;
+        index2 = temp3->length;
 
-    // write the header data to file
-    WriteFile(game->portFileHandle,
-              (char*)(&index2),
-              4,
-              &numBytesWritten,
-              0);
+        // write the header data to file
+        WriteFile(game->portFileHandle,
+                  (char*)(&index2),
+                  4,
+                  &numBytesWritten,
+                  0);
 
-    WriteFile(game->portFileHandle,
-              temp3->contents,
-              index2,
-              &numBytesWritten,
-              0);
+        WriteFile(game->portFileHandle,
+                  temp3->contents,
+                  index2,
+                  &numBytesWritten,
+                  0);
 
-    // write the object data to file.
-    for(index = 0, index2 = 0 ; index < 0x140; index++)
-        index2 += file->objectData[index].length;
+        // write the object data to file.
+        for(index = 0, index2 = 0 ; index < 0x140; index++)
+            index2 += file->objectData[index].length;
 
-    WriteFile(game->portFileHandle,
-              (char*)(&index2),
-              4,
-              &numBytesWritten,
-              0);    
+        WriteFile(game->portFileHandle,
+                  (char*)(&index2),
+                  4,
+                  &numBytesWritten,
+                  0);    
 
-    for(index = 0 ; index < 0x140; index++)
-    {
-        temp3 = &(file->objectData[index]);
+        for(index = 0 ; index < 0x140; index++)
+        {
+            temp3 = &(file->objectData[index]);
+
+            WriteFile(game->portFileHandle,
+                      temp3->contents,
+                      temp3->length,
+                      &numBytesWritten,
+                      0);
+        }
+
+        // write the entrance data to file
+
+        temp3 = &(file->entrances.entranceBuffer);
+
+        index2 = temp3->length;
+
+        WriteFile(game->portFileHandle,
+                  (char*)(&index2),
+                  4,
+                  &numBytesWritten,
+                  0);
+
+        WriteFile(game->portFileHandle,
+                      temp3->contents,
+                      temp3->length,
+                      &numBytesWritten,
+                      0);
+
+        // write the chest data to file
+        temp3 = &(file->chestLocationData);
+
+        index2 = temp3->length;
+
+        WriteFile(game->portFileHandle,
+                  (char*)(&index2),
+                  4,
+                  &numBytesWritten,
+                  0);
 
         WriteFile(game->portFileHandle,
                   temp3->contents,
                   temp3->length,
                   &numBytesWritten,
                   0);
-    }
 
-    // write the entrance data to file
-
-    temp3 = &(file->entrances.entranceBuffer);
-
-    index2 = temp3->length;
-
-    WriteFile(game->portFileHandle,
-              (char*)(&index2),
-              4,
-              &numBytesWritten,
-              0);
-
-    WriteFile(game->portFileHandle,
-                  temp3->contents,
-                  temp3->length,
-                  &numBytesWritten,
-                  0);
-
-    // write the chest data to file
-    temp3 = &(file->chestLocationData);
-
-    index2 = temp3->length;
-
-    WriteFile(game->portFileHandle,
-              (char*)(&index2),
-              4,
-              &numBytesWritten,
-              0);
-
-    WriteFile(game->portFileHandle,
-                  temp3->contents,
-                  temp3->length,
-                  &numBytesWritten,
-                  0);
-
-    //write the sprite data to file
-    for(index = 0, index2 = 0 ; index < 0x140; index++)
-        index2 += file->spriteData[index].length;
-
-    WriteFile(game->portFileHandle,
-              (char*)(&index2),
-              4,
-              &numBytesWritten,
-              0);    
-
-    for(index = 0 ; index < 0x140; index++)
-    {
-        temp3 = &(file->spriteData[index]);
+        //write the sprite data to file
+        for(index = 0, index2 = 0 ; index < 0x140; index++)
+            index2 += file->spriteData[index].length;
 
         WriteFile(game->portFileHandle,
-                  temp3->contents,
-                  temp3->length,
+                  (char*)(&index2),
+                  4,
                   &numBytesWritten,
-                  0);
-    }
+                  0);    
+
+        for(index = 0 ; index < 0x140; index++)
+        {
+            temp3 = &(file->spriteData[index]);
+
+            WriteFile(game->portFileHandle,
+                      temp3->contents,
+                      temp3->length,
+                      &numBytesWritten,
+                      0);
+        }
     
-    SetEndOfFile(game->portFileHandle);
-    CloseHandle(game->portFileHandle);
+        SetEndOfFile(game->portFileHandle);
+        CloseHandle(game->portFileHandle);
 
-    DestroyBuffer(&exportName);
+        DestroyBuffer(&exportName);
 
-    return;
+        return;
     }
 
 // ===============================================================
 
     void ImportDungeonFile(zgPtr game)
     {
-    Buffer importName;
-    Buffer importBuffer;
+        Buffer importName;
+        Buffer importBuffer;
 
-    bufPtr temp1;
-    bufPtr temp2;
+        bufPtr temp1;
+        bufPtr temp2;
 
-    unsigned int bufLength;
-    unsigned int offset;
-    unsigned int nextBlock;
+        unsigned int bufLength;
+        unsigned int offset;
+        unsigned int nextBlock;
 
-    unsigned int loopIndex;
-    unsigned int loopIndex2;
+        unsigned int loopIndex;
+        unsigned int loopIndex2;
     
-    unsigned int spriteOffset = 0;
+        unsigned int spriteOffset = 0;
 
-    unsigned int layer = 0;
+        unsigned int layer = 0;
 
-    unsigned long dummy; // just used for the ReadFile() call
+        unsigned long dummy; // just used for the ReadFile() call
 
-    // declare some extra needed variables
-    unsigned int objectSize;
-    unsigned int objectOffset;
-    unsigned int blockSize = 0;
+        // declare some extra needed variables
+        unsigned int objectSize;
+        unsigned int objectOffset;
+        unsigned int blockSize = 0;
     
-    char errorBuf[256];
+        char errorBuf[256];
 
 
-    DungeonFile* file;
+        DungeonFile* file;
 
-    file = &(game->portFile);
+        file = &(game->portFile);
 
-    InitBuffer(MAX_PATH, &importName);
+        InitBuffer(MAX_PATH, &importName);
 
-    bmOFN.lStructSize = sizeof(OPENFILENAME);
-	bmOFN.hwndOwner = NULL;
-	bmOFN.hInstance = thisProg;
-	bmOFN.lpstrFilter = "Dungeon Files\0*.dng\0All files\0*.*\0";
-	bmOFN.lpstrCustomFilter = NULL;
-	bmOFN.nFilterIndex = 0;
-	bmOFN.nMaxFile = MAX_PATH;
-    bmOFN.lpstrFile = (LPSTR) importName.contents;
-	bmOFN.lpstrFile[0] = 0; // a particularity of using the open file dialogs.
-	bmOFN.lpstrFileTitle = NULL;
-	bmOFN.lpstrInitialDir = 0; // Sets to a default directory. (my documents?)
-	bmOFN.lpstrTitle = "Load Dungeon Data";
-	bmOFN.Flags = OFN_FILEMUSTEXIST;
-    bmOFN.lpstrDefExt = "dng";
+        bmOFN.lStructSize = sizeof(OPENFILENAME);
+	    bmOFN.hwndOwner = NULL;
+	    bmOFN.hInstance = thisProg;
+	    bmOFN.lpstrFilter = "Dungeon Files\0*.dng\0All files\0*.*\0";
+	    bmOFN.lpstrCustomFilter = NULL;
+	    bmOFN.nFilterIndex = 0;
+	    bmOFN.nMaxFile = MAX_PATH;
+        bmOFN.lpstrFile = (LPSTR) importName.contents;
+	    bmOFN.lpstrFile[0] = 0; // a particularity of using the open file dialogs.
+	    bmOFN.lpstrFileTitle = NULL;
+	    bmOFN.lpstrInitialDir = 0; // Sets to a default directory. (my documents?)
+	    bmOFN.lpstrTitle = "Load Dungeon Data";
+	    bmOFN.Flags = OFN_FILEMUSTEXIST;
+        bmOFN.lpstrDefExt = "dng";
 
-    if( !GetOpenFileName(&bmOFN) ) 
-	{
-        // if opening the file failed.
-		char* buffer = 0;
+        if( !GetOpenFileName(&bmOFN) ) 
+	    {
+            // if opening the file failed.
+		    char* buffer = 0;
 
-		DWORD i = CommDlgExtendedError();
+		    DWORD i = CommDlgExtendedError();
 
-		if(i)
-		{
-			wsprintf(buffer,"GUI error. Error: %08X",i);
-			MessageBox(0,buffer,"Bad error happened",MB_OK);
-		}
+		    if(i)
+		    {
+			    wsprintf(buffer,"GUI error. Error: %08X",i);
+			    MessageBox(0,buffer,"Bad error happened",MB_OK);
+		    }
 
-        return;
-	}
+            return;
+	    }
 
-    game->portFileHandle = CreateFile(bmOFN.lpstrFile,
-                                      GENERIC_READ,
-                                      FILE_SHARE_READ,
-                                      0,
-                                      OPEN_EXISTING,
-                                      FILE_ATTRIBUTE_NORMAL,
-                                      0);
+        game->portFileHandle = CreateFile(bmOFN.lpstrFile,
+                                          GENERIC_READ,
+                                          FILE_SHARE_READ,
+                                          0,
+                                          OPEN_EXISTING,
+                                          FILE_ATTRIBUTE_NORMAL,
+                                          0);
 
 
-    InitBuffer(GetFileSize(game->portFileHandle,0),
-               &importBuffer
-               );
+        InitBuffer(GetFileSize(game->portFileHandle,0),
+                   &importBuffer
+                   );
 
-    ReadFile(game->portFileHandle,
-             importBuffer.contents,
-             importBuffer.length,
-             &dummy,
-             0);
+        ReadFile(game->portFileHandle,
+                 importBuffer.contents,
+                 importBuffer.length,
+                 &dummy,
+                 0);
 
-    CloseHandle(game->portFileHandle);
+        CloseHandle(game->portFileHandle);
 
-    // Do some file diagnostics to see if it's the proper size and structure.
-    importBuffer.error = 0;
+        // Do some file diagnostics to see if it's the proper size and structure.
+        importBuffer.error = 0;
 
-    offset = 0;
-    temp1 = &importBuffer;
+        offset = 0;
+        temp1 = &importBuffer;
 
-    // check the header data length
-    bufLength = Get4Bytes(temp1, 0);
-    offset += (bufLength + 4);
+        // check the header data length
+        bufLength = Get4Bytes(temp1, 0);
+        offset += (bufLength + 4);
 
-    // check the length of the object data
-    bufLength = Get4Bytes(temp1, offset);
-    offset += (bufLength + 4);
+        // check the length of the object data
+        bufLength = Get4Bytes(temp1, offset);
+        offset += (bufLength + 4);
 
-    // check the entrance data length
-    bufLength = Get4Bytes(temp1, offset);
-    offset += (bufLength + 4);
+        // check the entrance data length
+        bufLength = Get4Bytes(temp1, offset);
+        offset += (bufLength + 4);
 
-    // check the chest data length
-    bufLength = Get4Bytes(temp1, offset);
-    offset += (bufLength + 4);
+        // check the chest data length
+        bufLength = Get4Bytes(temp1, offset);
+        offset += (bufLength + 4);
 
-    // check the sprite data length
-    bufLength = Get4Bytes(temp1, offset);
-    offset += (bufLength + 4);
+        // check the sprite data length
+        bufLength = Get4Bytes(temp1, offset);
+        offset += (bufLength + 4);
    
 
-    if(offset != importBuffer.length || temp1->error == 1)
-    {
-        MessageBox(0, "Incorrect file format!", "Not a .dng file", MB_OK);
+        if(offset != importBuffer.length || temp1->error == 1)
+        {
+            MessageBox(0, "Incorrect file format!", "Not a .dng file", MB_OK);
         
-        goto cleanup;
-    }
+            goto cleanup;
+        }
 
-    // Otherwise we're in the clear.
+        // Otherwise we're in the clear.
 
-    bufLength = offset = 0;
-    nextBlock = offset + 4;
-    temp2 = &(file->headerData);
+        bufLength = offset = 0;
+        nextBlock = offset + 4;
+        temp2 = &(file->headerData);
 
-    // See how long the header data is for real now.
-    bufLength = Get4Bytes(temp1, 0);
-    offset += (bufLength + 4);
+        // See how long the header data is for real now.
+        bufLength = Get4Bytes(temp1, 0);
+        offset += (bufLength + 4);
 
-    InitBuffer(bufLength, temp2);
-    CopyBuffer(temp2, temp1, 0, nextBlock, bufLength); 
+        InitBuffer(bufLength, temp2);
+        CopyBuffer(temp2, temp1, 0, nextBlock, bufLength); 
 
-    // next load up the object data
-    nextBlock = offset + 4; // the next actual data starts after its length indicator.
+        // next load up the object data
+        nextBlock = offset + 4; // the next actual data starts after its length indicator.
    
-    objectOffset = nextBlock;
+        objectOffset = nextBlock;
 
-    bufLength = Get4Bytes(temp1, offset);
-    offset += (bufLength + 4);
+        bufLength = Get4Bytes(temp1, offset);
+        offset += (bufLength + 4);
 
-    layer = 0;
-
-    for(loopIndex = 0; loopIndex < 320; loopIndex++)
-    {
-        // point to the next available object buffer
-        temp2 = &(file->objectData[loopIndex]);
-       
-        // loopIndex2 is being used here as a temporary variable
-        // so when we copy the buffer we can remember where we started from
-        loopIndex2 = objectOffset;
-
-        // accounts for extra two properties items.
-        blockSize = 2;
-        objectOffset += 2; 
         layer = 0;
+
+        for(loopIndex = 0; loopIndex < 320; loopIndex++)
+        {
+            // point to the next available object buffer
+            temp2 = &(file->objectData[loopIndex]);
+       
+            // loopIndex2 is being used here as a temporary variable
+            // so when we copy the buffer we can remember where we started from
+            loopIndex2 = objectOffset;
+
+            // accounts for extra two properties items.
+            blockSize = 2;
+            objectOffset += 2; 
+            layer = 0;
 
     nextLayer:
 
-        // the first objects to look for are 3 byte objects
-        objectSize = 3;
+            // the first objects to look for are 3 byte objects
+            objectSize = 3;
 
-        temp2->error = 0;
+            temp2->error = 0;
 
-        if( (objectOffset - nextBlock) > (bufLength + 0x1))
-        {
-            itoa(objectOffset - nextBlock, errorBuf, 16);
+            if( (objectOffset - nextBlock) > (bufLength + 0x1))
+            {
+                itoa(objectOffset - nextBlock, errorBuf, 16);
 
-            MessageBox(0, "Object Data is longer than stated in the file", errorBuf, MB_OK);
+                MessageBox(0, "Object Data is longer than stated in the file", errorBuf, MB_OK);
             
-            //goto cleanup;
-        }        
+                //goto cleanup;
+            }        
 
-        // the < 0xFFFF check is pretty much just a precaution
-        while(blockSize < 0xFFFF)
-        {
-            // 0xFFFF is the terminating signal
-            if( Get2Bytes(temp1, objectOffset) == 0xFFFF)
+            // the < 0xFFFF check is pretty much just a precaution
+            while(blockSize < 0xFFFF)
             {
-                blockSize += 2; 
-                objectOffset += 2;
-                
-                goto endloop;
-            }
-
-            if( Get2Bytes(temp1, objectOffset) == 0xFFF0)
-            {
-                if(objectSize == 3)
+                // 0xFFFF is the terminating signal
+                if( Get2Bytes(temp1, objectOffset) == 0xFFFF)
                 {
-                    blockSize += 2;
-                    objectSize = 2;
+                    blockSize += 2; 
                     objectOffset += 2;
-                    continue;
+                
+                    goto endloop;
                 }
-            }
-            
-            objectOffset += objectSize;
-            blockSize += objectSize;
 
-        }
+                if( Get2Bytes(temp1, objectOffset) == 0xFFF0)
+                {
+                    if(objectSize == 3)
+                    {
+                        blockSize += 2;
+                        objectSize = 2;
+                        objectOffset += 2;
+                        continue;
+                    }
+                }
+            
+                objectOffset += objectSize;
+                blockSize += objectSize;
+
+            }
 
     endloop:
 
-        layer++;
+            layer++;
 
-        if(layer <= 2)
-            goto nextLayer;
+            if(layer <= 2)
+                goto nextLayer;
 
-        InitBuffer(blockSize, temp2);
-        CopyBuffer(temp2, temp1, 0, loopIndex2, blockSize);
+            InitBuffer(blockSize, temp2);
+            CopyBuffer(temp2, temp1, 0, loopIndex2, blockSize);
 
-    }
+        }
 
-    // next load up the entrance
-    nextBlock = offset + 4;
+        // next load up the entrance
+        nextBlock = offset + 4;
 
-    itoa(nextBlock, errorBuf, 16);
+        itoa(nextBlock, errorBuf, 16);
 
-    //MessageBox(0, errorBuf, "_", MB_OK);
+        //MessageBox(0, errorBuf, "_", MB_OK);
 
 
   
 
-    bufLength = Get4Bytes(temp1, offset);
-    offset += (bufLength + 4);
+        bufLength = Get4Bytes(temp1, offset);
+        offset += (bufLength + 4);
 
-    temp2 = &(file->entrances.entranceBuffer);
+        temp2 = &(file->entrances.entranceBuffer);
 
-    InitBuffer(bufLength, temp2);
-    CopyBuffer(temp2, temp1, 0, nextBlock, bufLength);
-
-    
-
-    // next load up the chest data
-    nextBlock = offset + 4; 
-    bufLength = Get4Bytes(temp1, offset);
-    offset += (bufLength + 4);
-
-    temp2 = &(file->chestLocationData);
-
-    InitBuffer(bufLength, temp2);
-    CopyBuffer(temp2, temp1, 0, nextBlock, bufLength);
+        InitBuffer(bufLength, temp2);
+        CopyBuffer(temp2, temp1, 0, nextBlock, bufLength);
 
     
 
-    // next load up the sprite data
-    nextBlock = offset + 4;
-    bufLength = Get4Bytes(temp1, offset);
-    offset += (bufLength + 4);
+        // next load up the chest data
+        nextBlock = offset + 4; 
+        bufLength = Get4Bytes(temp1, offset);
+        offset += (bufLength + 4);
 
-    spriteOffset = nextBlock;
+        temp2 = &(file->chestLocationData);
 
-    for(loopIndex = 0; loopIndex < 0x140; loopIndex++)
-    {
-        temp2 = &(file->spriteData[loopIndex]);
+        InitBuffer(bufLength, temp2);
+        CopyBuffer(temp2, temp1, 0, nextBlock, bufLength);
 
-        loopIndex2 = spriteOffset;
+    
 
-        // account for the properties byte at the start of each segment.
-        spriteOffset++;
+        // next load up the sprite data
+        nextBlock = offset + 4;
+        bufLength = Get4Bytes(temp1, offset);
+        offset += (bufLength + 4);
 
-        for( blockSize = 1 ; blockSize < 0xFFFF; )
+        spriteOffset = nextBlock;
+
+        for(loopIndex = 0; loopIndex < 0x140; loopIndex++)
         {
-            if( GetByte(temp1, spriteOffset) == 0x000000FF)
-            {
-                if(temp1->error == 1)
-                {
-                    itoa(spriteOffset, errorBuf, 16);
+            temp2 = &(file->spriteData[loopIndex]);
 
-                    //MessageBox(0, errorBuf, "?", MB_OK);
+            loopIndex2 = spriteOffset;
+
+            // account for the properties byte at the start of each segment.
+            spriteOffset++;
+
+            for( blockSize = 1 ; blockSize < 0xFFFF; )
+            {
+                if( GetByte(temp1, spriteOffset) == 0x000000FF)
+                {
+                    if(temp1->error == 1)
+                    {
+                        itoa(spriteOffset, errorBuf, 16);
+
+                        //MessageBox(0, errorBuf, "?", MB_OK);
+                    }
+
+                    spriteOffset++;
+                    blockSize++;
+                
+                    break;
                 }
 
-                spriteOffset++;
-                blockSize++;
-                
-                break;
+                spriteOffset += 3;
+                blockSize += 3; 
             }
 
-            spriteOffset += 3;
-            blockSize += 3; 
+            InitBuffer(blockSize, temp2);
+            CopyBuffer(temp2, temp1, 0, loopIndex2, blockSize);
         }
 
-        InitBuffer(blockSize, temp2);
-        CopyBuffer(temp2, temp1, 0, loopIndex2, blockSize);
-    }
+        // At this point we are done moving the data into an import buffer
+        // Now we must figure out how the extended data in this rom is organized.
+        // This requires us to look at the BM_Header structure
 
-    // At this point we are done moving the data into an import buffer
-    // Now we must figure out how the extended data in this rom is organized.
-    // This requires us to look at the BM_Header structure
-
-    if(MessageBox(0, "Overwrite existing dungeon data?", "warning", MB_YESNO) == IDYES)
-        game->currentFile = &(game->portFile);
+        if(MessageBox(0, "Overwrite existing dungeon data?", "warning", MB_YESNO) == IDYES)
+            game->currentFile = &(game->portFile);
                                       
     // clean up
 
     cleanup:
 
-    DestroyBuffer(&importBuffer);
-    DestroyBuffer(&importName);
+        DestroyBuffer(&importBuffer);
+        DestroyBuffer(&importName);
     }
 
 // ===============================================================
@@ -1305,7 +1303,7 @@
     }
 
 // ===============================================================
- 
+
     void LoadTileMap(zgPtr game)
     {
         u32 room = game->currentDungRoom;
@@ -1470,7 +1468,7 @@
                 }
                 else
                 {
-        alreadySize2:
+                alreadySize2:
                     type2[c]->numObj++;
                     index += objectSize;
                 }
@@ -1948,7 +1946,7 @@
             vFlip = (entry & 0x8000) ? true : false;
         
             BlitTile(b, i*0x10 + j, &game->BGTiles[chrNum], &game->Pals[palette], hFlip, vFlip);  
-         }
+        }
 
         // now draw BG1
         BG_Map = game->BG_Map[1];
@@ -2162,22 +2160,22 @@
 
         int testLen = 0;
 
-        u32 index = 0;
-        u32 gfxNum = game->bm_dung_header.paletteIndex;
+        u32 index   = 0;
+        u32 gfxNum  = game->bm_dung_header.paletteIndex;
         u32 targPtr = 0, srcPtr = 0;
-        u32 x = 0;
-        u32 i = 0;
-        u32 j = game->currentDungRoom;
+        u32 x       = 0;
+        u32 i       = 0;
+        u32 j       = game->currentDungRoom;
 
         DungeonFile *dFile = game->currentFile;
 
         bufPtr rom      = game->image;
         bufPtr aniV     = game->aniVram;
-        bufPtr headers = &dFile->headerData;
-        bufPtr durp = NULL;
-        bufPtr durp2 = NULL;
-        bufPtr durp3 = NULL;
-        bufPtr durp4 = NULL;
+        bufPtr headers  = &dFile->headerData;
+        bufPtr durp     = NULL;
+        bufPtr durp2    = NULL;
+        bufPtr durp3    = NULL;
+        bufPtr durp4    = NULL;
 
         BM_DungeonHeader tempHeader;
 
@@ -2608,13 +2606,13 @@
         bg++;
     }
 
-    //after the while loop ends reassign all these pointers back to the doPtr itself.
-    doPtr->chr0 = chr[0];
-    doPtr->chr1 = chr[1];
-    doPtr->above0 = aboves[0];
-    doPtr->above1 = aboves[1];
-    doPtr->below0 = belows[0];
-    doPtr->below1 = belows[1];
+        //after the while loop ends reassign all these pointers back to the doPtr itself.
+        doPtr->chr0 = chr[0];
+        doPtr->chr1 = chr[1];
+        doPtr->above0 = aboves[0];
+        doPtr->above1 = aboves[1];
+        doPtr->below0 = belows[0];
+        doPtr->below1 = belows[1];
     }
 
 // ===============================================================
