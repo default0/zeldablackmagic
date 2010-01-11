@@ -790,11 +790,13 @@
                 u32 a = 0, b = 0;
                 u32 c = 0;
 
+                PathName *p = new PathName( (const char*) ToString(game->romName) );
+
                 HANDLE dumpFH;
 
                 // -----------------------------
 
-                chdir( (const char*) ToString(game->romName) );
+                chdir( (const char*) p->GetDirectory() );
 
                 i = _mkdir("gfx");
         
@@ -824,6 +826,8 @@
                 ToFile(game->mode7Gfx, "gfx\\mode7_gfx.bin");
 
                 MessageBox(mainHwnd, "Finished exporting", "success", MB_OK);
+
+                delete p;
             
                 break;
             }
@@ -831,10 +835,11 @@
             {
                 char path[MAX_PATH];
 
+                PathName *p = new PathName( (const char*) ToString(game->romName) );
+
                 // ------------------------------
 
-                chdir( (const char*) ToString(game->romName) );
-                _getcwd(path, MAX_PATH);
+                chdir( (const char*) p->GetDirectory() );
 
                 // import all sprite packs
                 for(i = 0; i < 0x100; ++i)
@@ -861,6 +866,8 @@
                 FromFile(game->mode7Gfx, "gfx\\mode7_gfx.bin");
 
                 MessageBox(mainHwnd, "Finished importing", "success", MB_OK);
+
+                delete p;
 
                 break;
             }
@@ -1600,6 +1607,8 @@
 
         unsigned long numBytesWritten;
 
+        PathName *p = NULL;
+
         STARTUPINFO sInfo;
         PROCESS_INFORMATION pi;
 
@@ -1641,7 +1650,11 @@
 
         sInfo.cb = sizeof(sInfo); 
 
-        chdir( (const char*) ToString(game->romName) );
+        p = new PathName( (const char*) ToString(game->romName) );
+
+        chdir( (const char*) p->GetDirectory() );
+
+        delete p;
 
         sprintf(commandLine, "xkas.exe \".\\hooks.asm\" \"%s\"", (const char*) ToString(game->romName));
 
@@ -1653,6 +1666,9 @@
         {
             int i = GetLastError();
         }
+
+        // ------------------------------
+
 
         return 1;
     }
@@ -2003,6 +2019,8 @@
     {
         char *hooksText = NULL;
 
+        PathName *p = NULL;
+
         FILE *f = NULL;
 
         // ------------------------------------
@@ -2015,7 +2033,9 @@
             return;
         }
 
-        chdir( (const char*) ToString(game->romName) );
+        p = new PathName( (const char*) ToString(game->romName) );
+
+        chdir( (const char*) p->GetDirectory() );
 
         f = fopen("hooks.asm", "wb");
 
@@ -2029,6 +2049,8 @@
 
             fclose(f);
         }
+
+        delete p;
 
         return;
     }

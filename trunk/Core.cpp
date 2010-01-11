@@ -22,8 +22,7 @@
 
 
         holderLong = ( (holderLong & 0x7F0000) >> 1 ) + (holderLong & 0x7FFF);
-	    
-
+        
         return holderLong;
     }
 

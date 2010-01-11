@@ -270,6 +270,20 @@
 
 // ==========================================================
     
+    void PathName::MakeDirectory()
+    {
+        char c = separator;
+
+        if(unixStyle)
+            sprintf(fullPath, "%c%s%c%s%c", c, drive, c, dir, c);
+        else if(onNetwork)
+            sprintf(fullPath, "%c%c%s%c%s%c", c, c, drive, c, dir, c);
+        else
+            sprintf(fullPath, "%s%c%s%c", drive, c, dir, c);
+    }
+
+// ==========================================================
+    
     void PathName::MakePath()
     {
         char c = separator;
@@ -284,6 +298,15 @@
     
 // ==========================================================
     
+    char* PathName::GetDirectory()
+    {
+        MakeDirectory();
+    
+        return fullPath;
+    }
+
+// ==========================================================
+
     char* PathName::GetFullPath()
     {
         MakePath();
