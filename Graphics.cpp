@@ -1353,6 +1353,9 @@
 
         Compresch_LTTP *lt  = new Compresch_LTTP(false);
 
+        // set the current directory to the directory that the rom was found in.
+        PathName *p = new PathName( (const char*) ToString(romName) );
+
         // ---------------------
 
         gfxText = GetAsmTextResource(IDR_GRAPHICS_ASM);
@@ -1364,16 +1367,7 @@
 
         (*offset) = RomToCpuAddr(*offset);
 
-        // set the current directory to the directory that the rom was found in.
-        PathName *p = new PathName( (const char*) ToString(romName) );
-
-        p->SetName("");
-        p->SetExt("");
-
-        chdir( (const char*) p->GetFullPath() );
-
-        char path[MAX_PATH];
-        _getcwd(path, MAX_PATH);
+        chdir( (const char*) p->GetDirectory() );
 
         f = fopen("graphics.asm", "wt");
 
@@ -1427,6 +1421,8 @@
         (*offset) = CpuToRomAddr(*offset);
 
         // clean up ------------------------------------------
+
+        delete p;
 
         delete lt;
 

@@ -1353,15 +1353,21 @@
         OverData *o       = NULL;
         OverSpr  *sprite  = NULL;
 
+        PathName *p       = NULL;
+
         Compresch_LTTP *lt = new Compresch_LTTP(true);
 
         FILE *f = NULL;
 
         // -------------------------------------------------------------
 
-        chdir( (const char*) ToString(game->romName) );
+        p = new PathName( (const char*) ToString(game->romName) );
+
+        chdir( (const char*) p->GetDirectory() );
         mkdir("overworld");
         chdir("overworld");
+
+        delete p;
 
         f = fopen("owData.asm", "wt");
 

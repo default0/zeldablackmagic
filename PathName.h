@@ -43,8 +43,11 @@
 
             char*   GetExt();
             void    SetExt(const char *newExt);
-            void    MakePath();
 
+            void    MakeDirectory();
+            void    MakePath();
+            
+            char*   GetDirectory();
             char*   GetFullPath();
 
             PathName* Duplicate();
