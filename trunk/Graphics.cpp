@@ -1351,8 +1351,6 @@
 
         FILE *f         = NULL;
 
-        Compresch_LTTP *lt  = new Compresch_LTTP(false);
-
         // set the current directory to the directory that the rom was found in.
         PathName *p = new PathName( (const char*) ToString(romName) );
 
@@ -1394,7 +1392,7 @@
                 }
                 else
                 {
-                    size = lt->Compress(sprPacks[i]->contents, sprPacks[i]->length, compBuf->contents);
+                    size = Compresch_LTTP::Compress(sprPacks[i]->contents, sprPacks[i]->length, compBuf->contents, true);
                 }
     
                 cpuOffset = AdvancePointer(this, offset, size);
@@ -1412,7 +1410,7 @@
 
             for(i = 0; i < 0x100; ++i)
             {
-                size      = lt->Compress(bgPacks[i]->contents, bgPacks[i]->length, compBuf->contents);
+                size      = Compresch_LTTP::Compress(bgPacks[i]->contents, bgPacks[i]->length, compBuf->contents, true);
                 cpuOffset = AdvancePointer(this, offset, size);
 
                 fprintf(f, "\n        dl $%06X", cpuOffset);
@@ -1433,8 +1431,6 @@
         // clean up ------------------------------------------
 
         delete p;
-
-        delete lt;
 
         DeallocBuffer(compBuf);
 

@@ -1356,7 +1356,7 @@
 
         PathName *p       = NULL;
 
-        Compresch_LTTP *lt = new Compresch_LTTP(true);
+        Compresch_LTTP *lt = new Compresch_LTTP();
 
         FILE *f = NULL;
 
@@ -1450,7 +1450,7 @@
             }
     
             sprintf(path2, "owMap32Ptr_1_%X.bin", i);
-            size = lt->Compress(data1->contents, 0x100, comp1->contents);
+            size = lt->Compress(data1->contents, 0x100, comp1->contents, false);
             
             if(size > comp1->length)
                 j = j;
@@ -1462,7 +1462,7 @@
             fprintf(f, "\n        incbin overworld/%s", path2);
 
             sprintf(path2, "owMap32Ptr_2_%X.bin", i);
-            size = lt->Compress(data2->contents, 0x100, comp2->contents);
+            size = lt->Compress(data2->contents, 0x100, comp2->contents, false);
 
             if(size > comp1->length)
                 j = j;

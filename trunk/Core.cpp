@@ -2302,7 +2302,7 @@
         u32 i = 0, j = 0;
         bufPtr decomp = NULL;
 
-        Compresch_LTTP *lt = new Compresch_LTTP(true);
+        /// Compresch_LTTP *lt = new Compresch_LTTP(true);
 
         u8* test  = new u8[0x2000];
         u8* test2 = new u8[0x2000];
