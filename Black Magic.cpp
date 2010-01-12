@@ -16,6 +16,8 @@
     #include "OverMode.h"
     #include "OverModeGui.h"
     #include "Music.h"
+    #include "PathName.h"
+
     #include <windows.h>
     #include "Limits.h"
     #include <direct.h>

@@ -1227,7 +1227,7 @@
         else
         {
             // new school method
-            source = Get3Bytes(image, index * 3);
+            source = CpuToRomAddr( Get3Bytes(image, base + (index * 3) ) );
         }
 
         return source;
@@ -1255,7 +1255,7 @@
         else
         {
             // new school method
-            source = Get3Bytes(image, index * 3);
+            source = CpuToRomAddr( Get3Bytes(image, base + (index * 3) ) );
         }
 
         return source;
@@ -1367,7 +1367,7 @@
 
         (*offset) = RomToCpuAddr(*offset);
 
-        chdir( (const char*) p->GetDirectory() );
+        i = chdir( (const char*) p->GetDirectory() );
 
         f = fopen("graphics.asm", "wt");
 
@@ -1386,7 +1386,17 @@
 
             for(i = 0; i < 0x100; ++i)
             {
-                size      = lt->Compress(sprPacks[i]->contents, sprPacks[i]->length, compBuf->contents);
+                if(i < 0x0C)
+                {
+                    // These graphics don't get compressed
+                    size = sprPacks[i]->length;
+                    CopyBuffer(compBuf, sprPacks[i], 0, 0, size);
+                }
+                else
+                {
+                    size = lt->Compress(sprPacks[i]->contents, sprPacks[i]->length, compBuf->contents);
+                }
+    
                 cpuOffset = AdvancePointer(this, offset, size);
 
                 fprintf(f, "\n        dl $%06X", cpuOffset);

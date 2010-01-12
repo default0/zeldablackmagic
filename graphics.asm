@@ -28,6 +28,8 @@
     
         ; restore all the settings we changed.
         PLB : PLP : PLY : PLX
+
+        RTL
     }
 
     GetBgGfxPtr:
@@ -57,5 +59,7 @@
     
         ; restore all the settings we changed.
         PLB : PLP : PLY : PLX
+
+        RTL
     }
  
