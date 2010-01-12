@@ -6,6 +6,7 @@
 	#include "OverMode.h"
 	#include "OverModeGui.h"
 	#include "Sprites.h"
+    #include "PathName.h"
 
     #include "compresch_lttp.h"
     
