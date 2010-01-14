@@ -113,9 +113,11 @@
 
                 // Load up graphics info
                 gi->backGfx1   = GetByte(game->image, CpuToRomAddr(0x00FC9C) + o->area);
-                
-                sprintf(temp, "%0X", gi->backGfx1);
-                SetDlgItemText(game->toolDlg, ID_AUX_BG_GFX, temp);
+
+                SendMessage(GetDlgItem(game->toolDlg, ID_AUX_BG_GFX),
+                            CB_SETCURSEL,
+                            (WPARAM) gi->backGfx1,
+                            0);
 
                 gi->spriteGfx0 = GetByte(game->image, CpuToRomAddr(0x00FA41) + o->area);
 
@@ -2371,6 +2373,7 @@
         HBITMAP buttonBitmaps[numCommands];
         HWND    buttonWindows[numCommands];
         HWND    tileSizeCombo = GetDlgItem(hwnd, IDC_TILE_SIZE);
+        HWND    auxGfxCombo   = GetDlgItem(hwnd, ID_AUX_BG_GFX);
 
         // ---------------------------------------------
 
@@ -2380,6 +2383,8 @@
         {
             case WM_INITDIALOG:
             {
+                PopulateCombobox(auxGfxCombo, (char**) auxGfxStrings);
+
                 SendMessage(tileSizeCombo, CB_ADDSTRING, 0, (LPARAM) "8x8 Tiles");
                 SendMessage(tileSizeCombo, CB_ADDSTRING, 0, (LPARAM) "16x16 Tiles");
                 SendMessage(tileSizeCombo, CB_ADDSTRING, 0, (LPARAM) "32x32 Tiles");

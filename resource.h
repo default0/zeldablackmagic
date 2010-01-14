@@ -126,6 +126,7 @@
 #define IDC_CUSTOM2                     1066
 #define ID_AUX_BG_GFX                   1068
 #define ID_AUX_SPR_GFX                  1069
+#define IDC_PROGRESS1                   1072
 #define END_FLAG                        0x1000
 #define asm_object_ref_2                0x8746
 #define asm_object_ref                  0x874C
@@ -242,7 +243,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        162
 #define _APS_NEXT_COMMAND_VALUE         40116
-#define _APS_NEXT_CONTROL_VALUE         1070
+#define _APS_NEXT_CONTROL_VALUE         1074
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

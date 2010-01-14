@@ -120,7 +120,7 @@
         ""
     };
 
-    char*  SprStrings[0xF4] =
+    char* SprStrings[0xF4] =
     {
         "Raven",
         "Vulture",
@@ -522,69 +522,99 @@
     // 0x23 - title screen / menus
     // 0x24 - triforce room
 
+    char* auxGfxStrings[] =
+    {
+        "Unknown",                          // 0x00 - unknown
+        "Unknown",                          // 0x01 - unknown
+        "Hyrule Castle 2",                  // 0x02 - hyrule castle part 2
+        "Houses",                           // 0x03 - houses
+        "sanctuary",                        // 0x04 - sanctuary
+        "L. World Palaces",                 // 0x05 - desert palace / eastern palace (dungeon) / tower of hera
+        "Caves",                            // 0x06 - cave interior
+        "Unknown",                          // 0x07 - ????
+        "Swamp Palace",                     // 0x08 - swamp palace / watergate
+        "Skull Woods Palace",               // 0x09 - skull woods palace
+        "Blind's Hideout",                  // 0x0A - gargoyle's domain / blind's old hideout
+        "Ice Palace",                       // 0x0B - ice palace (dungeon)
+        "Misery Mire",                      // 0x0C - misery mire
+        "Turtle Rock",                      // 0x0D - turtle rock
+        "Ganon's tower",                    // 0x0E - Ganon's tower
+        "Sahasralah's hideout",             // 0x0F - Sahasralah's hideout
+                                        
+        "Cape Room",                        // 0x10 - cape room
+        "Fortune Teller",                   // 0x11 - fortune teller / bow & arrow game
+        "Unknown",                          // 0x12 - ????
+        "Ganon's room",                     // 0x13 - Ganon's room
+        "Shops / storytellers",             // 0x14 - shopkeeper / storytellers
+        "unknown",                          // 0x15 - unknown
+        "unknown",                          // 0x16 - unknown
+        "unknown",                          // 0x17 - unknown
+        "unknown",                          // 0x18 - unknown
+        "unknown",                          // 0x19 - unknown
+        "unknown",                          // 0x1A - unknown
+        "unknown",                          // 0x1B - unknown
+        "unknown",                          // 0x1C - unknown
+        "unknown",                          // 0x1D - unknown
+        "unknown",                          // 0x1E - unknown
+        "unknown",                          // 0x1F - unknown
+                                        
+        "L. World - Basic",                 // 0x20 - default light world
+        "L. World - Lost Woods",            // 0x21 - forest
+        "L. World - Death Mountain",        // 0x22 - light world death mountain
+        "L. World - Village",               // 0x23 - village / fortune teller
+        "L. World - Hyrule Castle",         // 0x24 - hyrule castle
+        "L. World - Eastern Palace",        // 0x25 - eastern palace (ruins)
+        "L. World - Near Desert",           // 0x26 - desert area / village area
+        "L. World - Bridges",               // 0x27 - wood bridge and stone bridge near hyrule castle
+        "Unused",                           // 0x28 - unused
+        "L. World - Sanctuary",             // 0x29 - sanctuary / graveyard / witch hut
+        "L. World - Library",               // 0x2A - library
+        "L. World - Desert",                // 0x2B - desert area
+        "Unused",                           // 0x2C - unused
+        "Unused",                           // 0x2D - unused
+        "Unused",                           // 0x2E - unused
+        "Special Areas",                    // 0x2F - master sword / under bridge / zora falls
+
+        "D. World - Basic",                 // 0x30 - default dark world
+        "Unused",                           // 0x31 - forest (repeated)
+        "Unused",                           // 0x32 - light world death mountain (repeated)
+        "Unused",                           // 0x33 - village / fortune teller (repeated)
+        "Unused",                           // 0x34 - hyrule castle (repeated)
+        "Unused",                           // 0x35 - eastern palace (ruins) (repeated)
+        "Unused",                           // 0x36 - desert area / village area (repeated)
+        "Unused",                           // 0x37 - wood bridge / stone bridge near hyrule castle (repeated)
+        "Unused",                           // 0x38 - unused
+        "Unused",                           // 0x39 - sanctuary / graveyard / witch hut
+        "Library (no village)",             // 0x3A - library (without village elements)
+        "D. World - Pyramid of Power",      // 0x3B - pyramid of power
+        "D. World - Turtle Rock",           // 0x3C - turtle rock
+        "D. World - Dark Palace Maze",      // 0x3D - maze / dark palace area
+        "D. World - Skull Woods",           // 0x3E - skull forest
+        "D. World - Village of Outcasts",   // 0x3F - dark world village
+
+        "D. World - Graveyard / Misc.",     // 0x40 - lake of ill omen / dark world graveyard / map screen
+        "D. World - Death Mountain",        // 0x41 - dark world death mountain
+        "D. World - Swamp of Evil",         // 0x42 - swamp of evil / dark world lake hylia
+        "Unused",                           // 0x43 - unused
+        "Unused",                           // 0x44
+        "Unused",                           // 0x45
+        "Unused",                           // 0x46
+        "Unused",                           // 0x47
+        "Unused",                           // 0x48
+        "Unused",                           // 0x49
+        "Unused",                           // 0x4A
+        "Unused",                           // 0x4B
+        "Unused",                           // 0x4C
+        "Unused",                           // 0x4D
+        "Unused",                           // 0x4E
+        "Unused",                           // 0x4F
+                                            
+        "2bpp Graphics",                    // 0x50 - 2bpp graphics
+        "Startup / Triforce Room",          // 0x51 - triforce room
+        ""                                  // null terminator string
+    };
 
     // List of what values of $0AA2 correspond to
-
-    // 0x02 - hyrule castle part 2
-    // 0x03 - houses
-    // 0x04 - sanctuary
-    // 0x05 - desert palace / eastern palace (dungeon) / tower of hera
-    // 0x06 - cave interior
-    // 0x08 - swamp palace / watergate
-    // 0x09 - skull woods palace
-    // 0x0A - gargoyle's domain / blind's old hideout
-    // 0x0B - ice palace (dungeon)
-    // 0x0C - misery mire
-    // 0x0D - turtle rock
-    // 0x0E - Ganon's tower
-    // 0x0F - sahashralah's
-
-    // 0x10 - cape room
-    // 0x11 - fortune teller / bow & arrow game
-    // 0x13 - Ganon's room
-    // 0x14 - shopkeeper / storytellers
-
-    // 0x20 - default light world
-    // 0x21 - forest
-    // 0x22 - light world death mountain
-    // 0x23 - village / fortune teller
-    // 0x24 - hyrule castle
-    // 0x25 - eastern palace (ruins)
-    // 0x26 - desert area / village area
-    // 0x27 - wood bridge and stone bridge near hyrule castle
-    // 0x28 - unused
-    // 0x29 - sanctuary / graveyard / witch hut
-    // 0x2A - library
-    // 0x2B - desert area
-    // 0x2C - unused
-    // 0x2D - unused
-    // 0x2E - unused
-    // 0x2F - master sword / under bridge / zora falls
-
-    // 0x30 - default dark world
-    // 0x31 - forest (repeated)
-    // 0x32 - light world death mountain (repeated)
-    // 0x33 - village / fortune teller (repeated)
-    // 0x34 - hyrule castle (repeated)
-    // 0x35 - eastern palace (ruins) (repeated)
-    // 0x36 - desert area / village area (repeated)
-    // 0x37 - wood bridge / stone bridge near hyrule castle (repeated)
-    // 0x38 - unused
-    // 0x39 - sanctuary / graveyard / witch hut
-    // 0x3A - library (without village elements)
-    // 0x3B - pyramid of power
-    // 0x3C - turtle rock
-    // 0x3D - maze / dark palace area
-    // 0x3E - skull forest
-    // 0x3F - dark world village
-
-    // 0x40 - lake of ill omen / dark world graveyard / map screen
-    // 0x41 - dark world death mountain
-    // 0x42 - swamp of evil / dark world lake hylia
-    // 0x43 - unused
-    // 0x44 to 0x4F - unused
-    // 0x50 - 2bpp graphics
-    // 0x51 - triforce room
 
     unsigned long numBytesRead;
 

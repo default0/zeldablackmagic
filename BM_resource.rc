@@ -163,20 +163,22 @@ BEGIN
     LTEXT           "Door / Staircase 4",IDC_STATIC,13,210,62,13
 END
 
-IDD_DIALOG1 DIALOGEX 0, 0, 186, 95
+IDD_DIALOG1 DIALOG DISCARDABLE  0, 0, 236, 57
 STYLE DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Dialog"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
+CAPTION "Progress"
+FONT 8, "MS Shell Dlg"
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,129,7,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,129,24,50,14
+    CONTROL         "Progress1",IDC_PROGRESS1,"msctls_progress32",WS_BORDER,
+                    7,7,222,15
+    CONTROL         "",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,7,26,
+                    222,16
 END
 
 IDD_TESTTOOL DIALOGEX 0, 0, 187, 68
 STYLE DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
 EXSTYLE WS_EX_PALETTEWINDOW | WS_EX_CONTEXTHELP
 CAPTION "Dialog"
-FONT 8, "MS Shell Dlg", 0, 0, 0x1
+FONT 8, "MS Shell Dlg"
 BEGIN
     CONTROL         "Floor 1",IDR_FLOOR1,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP,100,48,38,10
@@ -199,7 +201,7 @@ IDD_OVER_TILES DIALOGEX 0, 0, 267, 294
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_VSCROLL
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Overworld Toolbar"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
     CONTROL         "Custom1",IDC_MAPTILES,"PICTURE",WS_CLIPSIBLINGS,7,26,87,
                     87
@@ -211,11 +213,11 @@ BEGIN
     EDITTEXT        ID_OW_EDIT3,225,52,25,12,ES_AUTOHSCROLL
     COMBOBOX        IDC_TILE_SIZE,97,69,60,57,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    CONTROL         "Edit Overlay",ID_EDIT_OVERLAY,"Button",BS_AUTOCHECKBOX | 
-                    WS_GROUP | WS_TABSTOP,168,85,82,13
-    CONTROL         "Custom1",IDC_CUSTOM1,"PICTURE",WS_CLIPSIBLINGS,7,118,
+    CONTROL         "Edit Event Overlay",ID_EDIT_OVERLAY,"Button",
+                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,98,84,82,13
+    CONTROL         "Custom1",IDC_CUSTOM1,"PICTURE",WS_CLIPSIBLINGS,7,245,
                     196,35
-    EDITTEXT        ID_OW_EDIT4,225,143,25,12,ES_AUTOHSCROLL
+    EDITTEXT        ID_OW_EDIT4,225,68,25,12,ES_AUTOHSCROLL
     CONTROL         "3",IDC_STOCK,"Button",BS_AUTOCHECKBOX | BS_BITMAP | 
                     BS_PUSHLIKE | WS_GROUP | WS_TABSTOP,8,5,16,16
     CONTROL         "3",IDC_CUSTOM,"Button",BS_AUTOCHECKBOX | BS_BITMAP | 
@@ -234,11 +236,12 @@ BEGIN
                     BS_PUSHLIKE | WS_TABSTOP,120,5,16,16
     CONTROL         "3",IDC_HOLE,"Button",BS_AUTOCHECKBOX | BS_BITMAP | 
                     BS_PUSHLIKE | WS_TABSTOP,136,5,16,16
-    EDITTEXT        ID_AUX_BG_GFX,67,156,30,18,ES_AUTOHSCROLL
-    EDITTEXT        ID_AUX_SPR_GFX,157,156,29,17,ES_AUTOHSCROLL
-    LTEXT           "Aux Spr Gfx Set",IDC_STATIC,101,156,55,14,
-                    SS_CENTERIMAGE
-    LTEXT           "Aux Bg Gfx Set",IDC_STATIC,7,156,54,15,SS_CENTERIMAGE
+    LTEXT           "Aux Spr Gfx Set",IDC_STATIC,7,132,55,14,SS_CENTERIMAGE
+    LTEXT           "Aux Bg Gfx Set",IDC_STATIC,7,115,54,15,SS_CENTERIMAGE
+    COMBOBOX        ID_AUX_BG_GFX,67,116,183,56,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        ID_AUX_SPR_GFX,67,131,183,52,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
 END
 
 
@@ -285,9 +288,9 @@ BEGIN
     IDD_DIALOG1, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 179
+        RIGHTMARGIN, 229
         TOPMARGIN, 7
-        BOTTOMMARGIN, 88
+        BOTTOMMARGIN, 50
     END
 
     IDD_TESTTOOL, DIALOG
@@ -610,8 +613,8 @@ IDB_ITEM                BITMAP  DISCARDABLE     "bmp00006.bmp"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,1,0,0
- PRODUCTVERSION 0,1,0,0
+ FILEVERSION 0,0,9,1
+ PRODUCTVERSION 0,0,9,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -629,14 +632,14 @@ BEGIN
             VALUE "Comments", "Zelda 3 Editor\0"
             VALUE "CompanyName", "arc-nova\0"
             VALUE "FileDescription", "Black Magic\0"
-            VALUE "FileVersion", "0, 1, 0, 0\0"
+            VALUE "FileVersion", "0, 0, 9, 1\0"
             VALUE "InternalName", "Black Magic\0"
             VALUE "LegalCopyright", "Copyright © 2009\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "Black Magic.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Black Magic\0"
-            VALUE "ProductVersion", "0, 1, 0, 0\0"
+            VALUE "ProductVersion", "0, 0, 9, 1\0"
             VALUE "SpecialBuild", "\0"
         END
     END
