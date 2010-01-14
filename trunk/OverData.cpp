@@ -1243,7 +1243,7 @@
         
         u8 opcode = 0;
 
-        POINT min = {0, 0};
+        POINT min = {0,    0};
         POINT max = {0x3F, 0x3F};
         
         u32 i;
@@ -1368,8 +1368,8 @@
                     
                         if(!lay->SetTile(map16Addr - 0x2000, map16Val))
                             done = true;                            
-                        else
-                            IncMapCounts(map16Val, false);
+                        
+                        IncMapCounts(map16Val, false);
                     }
                 }
 		    }
