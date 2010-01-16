@@ -8,7 +8,7 @@
     bool        PlaceObject(zgPtr game, OverData *o, OverObj *obj);
             
     void        InitOverMode(zgPtr game);
-    void        DrawOW(zgPtr game, ManagedBitmap *b, bufPtr map8Buf);
+    void        DrawOW(zgPtr game, ManagedBitmap *b, bufPtr map8Buf, bool justAnimated = false);
     void        LoadMapFlags(zgPtr game);
 
     void        DrawSprite(zgPtr game, ManagedBitmap *b, u16 spriteVal, u32 x = 0, u32 y = 0, u8 palette = 0, u8 large = 0, bool hFlip = false, bool vFlip = false);

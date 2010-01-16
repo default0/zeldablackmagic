@@ -23,21 +23,23 @@
     u32 sign[]       = { stock_sign };
     u32 grass[]      = { stock_grass };
     u32 jumpPoint[]  = { stock_jumpPoint };
+    u32 burrow[]     = { stock_burrow0, stock_burrow1, stock_burrow2, stock_burrow3 };
 
-    OverObj over_stock_objs[12] = 
+    OverObj over_stock_objs[13] = 
     {
-        OverObj(bush,      1, 1, IDC_STOCK_BUSH,      fromMap16),
-        OverObj(bush2,     1, 1, IDC_STOCK_BUSH2,     fromMap16),
-        OverObj(rock_sl,   1, 1, IDC_STOCK_ROCK_SL,   fromMap16),
-        OverObj(rock_sh,   1, 1, IDC_STOCK_ROCK_SH,   fromMap16),
-        OverObj(peg,       1, 1, IDC_STOCK_PEG,       fromMap16),
-        OverObj(rock_bl,   2, 2, IDC_STOCK_ROCK_BL,   fromMap16),
-        OverObj(rock_bh,   2, 2, IDC_STOCK_ROCK_BH,   fromMap16),
-        OverObj(warp,      1, 1, IDC_STOCK_WARP,      fromMap16),
-        OverObj(rockPile,  2, 2, IDC_STOCK_ROCKPILE,  fromMap16),
-        OverObj(sign,      1, 1, IDC_STOCK_SIGN,      fromMap16),
-        OverObj(grass,     1, 1, IDC_STOCK_GRASS,     fromMap16),
-        OverObj(jumpPoint, 1, 1, IDC_STOCK_JUMPPOINT, fromMap16)
+        OverObj(bush,       1, 1, IDC_STOCK_BUSH,      fromMap16),
+        OverObj(bush2,      1, 1, IDC_STOCK_BUSH2,     fromMap16),
+        OverObj(rock_sl,    1, 1, IDC_STOCK_ROCK_SL,   fromMap16),
+        OverObj(rock_sh,    1, 1, IDC_STOCK_ROCK_SH,   fromMap16),
+        OverObj(peg,        1, 1, IDC_STOCK_PEG,       fromMap16),
+        OverObj(rock_bl,    2, 2, IDC_STOCK_ROCK_BL,   fromMap16),
+        OverObj(rock_bh,    2, 2, IDC_STOCK_ROCK_BH,   fromMap16),
+        OverObj(warp,       1, 1, IDC_STOCK_WARP,      fromMap16),
+        OverObj(rockPile,   2, 2, IDC_STOCK_ROCKPILE,  fromMap16),
+        OverObj(sign,       1, 1, IDC_STOCK_SIGN,      fromMap16),
+        OverObj(grass,      1, 1, IDC_STOCK_GRASS,     fromMap16),
+        OverObj(jumpPoint,  1, 1, IDC_STOCK_JUMPPOINT, fromMap16),
+        OverObj(burrow,     2, 2, IDC_STOCK_BURROW,    fromMap16)
     };
 
     /*

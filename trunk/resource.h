@@ -231,6 +231,7 @@
 #define ID_GRAPHICS_IMPORT              40112
 #define ID_FALLING_ROCKS                40113
 #define ID_OWSPRITECONTEXT              40114
+#define IDC_STOCK_BURROW                40116
 #define asm_header_ref                  0xB5DD
 #define asm_header_bank                 0xB5E7
 #define asm_num_chests                  0xEBF6
@@ -242,7 +243,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        162
-#define _APS_NEXT_COMMAND_VALUE         40116
+#define _APS_NEXT_COMMAND_VALUE         40117
 #define _APS_NEXT_CONTROL_VALUE         1074
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

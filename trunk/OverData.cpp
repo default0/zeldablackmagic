@@ -102,7 +102,7 @@
             j &= (bool) this->map32Data[i];
         }
 
-        for(i = 0; i < 12; ++i)
+        for(i = 0; i < 13; ++i)
         {
             this->bStock[i] = NULL;
             this->hStock[i] = NULL;

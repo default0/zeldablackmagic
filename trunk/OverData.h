@@ -90,7 +90,7 @@
         u16 numMap16Tiles;
 
         u16 tile8, tile16, tile32;
-            
+        
         bufPtr map16Buf;        // 0x2000 byte array for a full map16 tilemap
         bufPtr map8Buf;         // 0x8000 byte array for a full 1024x1024 area
 
