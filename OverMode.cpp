@@ -93,7 +93,7 @@
         Do3To4Low(ani, gfx2, &targPtr, &srcPtr, 0x20);
 
         ToFile(ani, "C:\\aniTestOver.smc");
-}
+    }
 
 // **************************************************
 
@@ -320,7 +320,7 @@
         rChild->bottom  -= rParent.bottom;
 
         return TRUE;
-   }
+    }
 
 // ****************************************
 
@@ -555,18 +555,24 @@
 
 // ===============================================================
 
-    void DrawOW(zgPtr game, ManagedBitmap* b, bufPtr map8Buf)
+    void DrawOW(zgPtr game, ManagedBitmap* b, bufPtr map8Buf, bool justAnimated)
     {
         u32 x       = 0, y = 0;
         u32 entry   = 0;
+        u32 chr     = 0;
  
         for(x = 0; x < 0x80; ++x)
         {
             for(y = 0; y < 0x80; ++y)
             {
                 entry = Get2Bytes(map8Buf, x, y);
+                chr   = entry & 0x3FF;
 
-                DrawMap8(game, b, entry, x, y);
+                // bounds check so we only redraw tiles that are meant to be animated.
+                if(!justAnimated)
+                    DrawMap8(game, b, entry, x, y);
+                else if( (chr >= 0x1C0) && (chr < 0x1E0))
+                    DrawMap8(game, b, entry, x, y);
             }
         }
     }
@@ -1263,6 +1269,7 @@
                         {
                             value = Get2Bytes(tempMap16, i, j);
                             Put2Bytes(o->map16Buf, i + xBase, j + yBase, value);
+                            DrawMap16(game, b, value, i + xBase, j + yBase);
                         }
                     }
 

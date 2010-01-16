@@ -430,7 +430,10 @@ BEGIN
             MENUITEM "Jump Point",                  IDC_STOCK_JUMPPOINT
             MENUITEM "Warp Tile",                   IDC_STOCK_WARP
         END
-        MENUITEM "Entrance",                    ID_STOCK_ENTRANCE
+        POPUP "Entrance"
+        BEGIN
+            MENUITEM "Burrow",                      IDC_STOCK_BURROW
+        END
     END
 END
 

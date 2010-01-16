@@ -158,9 +158,9 @@
                     if(i != wes->numElements)
                     {
                         if(o->largeArea)
-                                we->nHeight = we->nWidth = 1024;
+                            we->nHeight = we->nWidth = 1024;
                         else
-                                we->nHeight = we->nWidth = 512;
+                            we->nHeight = we->nWidth = 512;
 
                         MoveWindow(game->pictWin, we->x, we->y, we->nWidth, we->nHeight, TRUE);
                     }
@@ -262,7 +262,7 @@
                     game->aniFrame++;
                     game->aniFrame %= 3;
 
-                    DrawOW(game, b, game->overData->map8Buf);
+                    DrawOW(game, b, game->overData->map8Buf, true);
 
                     i = (u32) InvalidateRect(game->pictWin, NULL, TRUE);
                 }
@@ -1225,7 +1225,7 @@
                     InvalidateTile(game, (x & 0xFFFE) + 0, (y & 0xFFFE) + 1);
                     InvalidateTile(game, (x & 0xFFFE) + 1, (y & 0xFFFE) + 1);
 
-                    //DrawMap16(game, b, o->tile16, x16, y16);
+                    DrawMap16(game, b, o->tile16, x16, y16);
 
                     SendMessage(game->pictWin, WM_PAINT, 0, 0);
 
@@ -1855,7 +1855,7 @@
 
             case mode_stock:
             {
-                for(i = 0; i < 12; i++)
+                for(i = 0; i < 13; i++)
                 {
                     if(over_stock_objs[i].id == k)
                     {
@@ -2526,7 +2526,7 @@
 
         hdc = GetDC(hwnd);
 
-        for(i = 0; i < 12; i++)
+        for(i = 0; i < 13; i++)
         {
             obj = &(over_stock_objs[i]);
             tileData = FromString((char*) obj->mapData, obj->width, obj->height, sizeof(u32));

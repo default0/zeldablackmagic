@@ -258,6 +258,11 @@
         stock_stump2    = 0x0098,
         stock_stump3    = 0x0099,
 
+        stock_burrow0   = 0x0918,
+        stock_burrow1   = 0x0919,
+        stock_burrow2   = 0x091A,
+        stock_burrow3   = 0x091B
+
     } stockMap16;
 
 #endif
