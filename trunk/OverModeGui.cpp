@@ -2458,7 +2458,7 @@
                                 o->editOverlay = !o->editOverlay;
 
                                 // refresh the screen after the overlay setting has changed.
-                                PostMessage(game->pictWin, OVER_EVENT_OVERLAY, 0, 0);
+                                PostMessage(GetParent(hwnd), OVER_EVENT_OVERLAY, 0, 0);
 
                                 break;
                             }
