@@ -39,7 +39,7 @@
         this->map8Buf       = CreateBuffer(0x80, 0x80, 2);
 
         this->map16Buf      = CreateBuffer(0x40, 0x40, 2);
-        // this->map16Backup   = CreateBuffer(0x40, 0x40, 2);
+        this->map16Backup   = CreateBuffer(0x40, 0x40, 2);
 
         this->map16Flags    = CreateBuffer(0x10000 / 8);
         this->map32Flags    = CreateBuffer(0x10000 / 8);
@@ -1460,7 +1460,7 @@
 
         // -----------------------
 
-        CopyBuffer(map16Backup, map16Buf, map16Buf->length);
+        CopyBuffer(map16Backup, map16Buf, 0, 0, map16Buf->length);
 
         for(i = 0; i < 0x40; ++i)
         { 
@@ -1474,6 +1474,8 @@
                 SetMap16Tile(map16Buf, map16Val, i, j);
             }
         }
+
+        LoadMap8();
 
         return true;
     }
@@ -1490,7 +1492,8 @@
 
         // -----------------------
 
-        CopyBuffer(map16Backup, map16Buf, map16Buf->length);
+        i = CompareBuffer(map16Buf, map16Backup);
+        CopyBuffer(map16Buf, map16Backup, 0, 0, map16Backup->length);
 
         /*
         for(i = 0; i < 0x40; ++i)
@@ -1505,6 +1508,8 @@
                 SetMap16Tile(map16Buf, map16Val, i, j);
             }
         }*/
+
+        LoadMap8();
 
         return true;
     }
