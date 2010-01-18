@@ -40,8 +40,6 @@
     u32         SetMap32Tile(bufPtr map32Buf, u16 value, u16 x, u16 y);
     u32         SetMap8Tile(bufPtr map8Buf, u16 value, u16 x, u16 y);
 
-    u32         Map16To8(zgPtr game, u16 map16Val, u16 map8Vals[]);
-
     u32         SaveOverworldData(zgPtr game, u32 *offset);
 
 #endif

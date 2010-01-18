@@ -29,24 +29,6 @@
         return ( ((x >> 3) & 0x007E) | ((y << 3) & 0x1F80) );
     }
 
-// **************************************************
-
-    u32 Map16To8(zgPtr game, u16 map16Val, u16 map8Vals[4])
-    {
-        u32 index = map16Val * 8;
-        OverData *o = game->overData;
-
-        map8Vals[0] = Get2Bytes(o->map16To8, index + 0);
-        map8Vals[1] = Get2Bytes(o->map16To8, index + 2);
-        map8Vals[2] = Get2Bytes(o->map16To8, index + 4);
-        map8Vals[3] = Get2Bytes(o->map16To8, index + 6);
-
-        if(game->image->error)
-            return 0;
-
-        return 1;
-    }
-
 // ***********************************************
 
     void AniDecompressOverworld(zgPtr game)
@@ -604,7 +586,7 @@
         // ----------------------------------
 
         // acquire the tilemap entry values needed
-        Map16To8(game, map16Val, map8Vals);
+        game->overData->Map16To8(map16Val, map8Vals);
 
         x <<= 1; 
         y <<= 1;
@@ -973,7 +955,7 @@
                             if(value == -1)
                             {        
                                 // map16 value was not found for that map8 combination, so we'll have to find a new one.
-                                value = AllocateMap16(o->map16Counts, map8Vals, oldMap16, threshold);
+                                value = o->AllocateMap16(map8Vals, oldMap16, threshold);
 
                                 if(value == -1)
                                     map16Failure = true;
@@ -1018,7 +1000,7 @@
                                                                         
                                 if(value == -1)
                                 {                            
-                                    value = AllocateMap32(o->map32Counts, map16Vals, oldMap32, threshold);
+                                    value = o->AllocateMap32(map16Vals, oldMap32, threshold);
 
                                     if(value == -1)
                                     {
@@ -1220,7 +1202,7 @@
                                                                         
                             if(value == -1)
                             {                            
-                                value = AllocateMap32(o->map32Counts, map16Vals, oldMap32, threshold);
+                                value = o->AllocateMap32(map16Vals, oldMap32, threshold);
 
                                 if(value == -1)
                                     map32Failure = true;
