@@ -36,8 +36,10 @@
 
         this->editMode      = mode_drawtile;
 
-        this->map16Buf      = CreateBuffer(0x40, 0x40, 2);
         this->map8Buf       = CreateBuffer(0x80, 0x80, 2);
+
+        this->map16Buf      = CreateBuffer(0x40, 0x40, 2);
+        // this->map16Backup   = CreateBuffer(0x40, 0x40, 2);
 
         this->map16Flags    = CreateBuffer(0x10000 / 8);
         this->map32Flags    = CreateBuffer(0x10000 / 8);
@@ -131,6 +133,21 @@
         j &= !!this->map16Flags; 
         j &= !!this->map8Buf;
     }
+
+// ===============================================================
+
+    OverData::~OverData()
+    {
+        u32 i = 0;
+
+        delete gi;
+        
+        for(i = 0; i < 0xA0; ++i)
+            DestroyBuffer(this->map32Data[i]);
+    }
+
+    static FILE* mapCountFile = fopen("C:\\map32log.log", "wt");
+
 
 // ===============================================================
 
@@ -346,25 +363,145 @@
         map8Vals[2] = Get2Bytes(this->map16To8, index + 4);
         map8Vals[3] = Get2Bytes(this->map16To8, index + 6);
 
-        if(this->rom->error)
-            return 0;
+        return 1;
+    }
+
+// ===============================================================
+
+    u32 OverData::Map32To16(u16 map32Val, u16 map16Vals[4])
+    {
+        u32 index = map32Val * 8;
+
+        map16Vals[0] = Get2Bytes(this->map32To16, index);
+        map16Vals[1] = Get2Bytes(this->map32To16, index + 2);
+        map16Vals[2] = Get2Bytes(this->map32To16, index + 4);
+        map16Vals[3] = Get2Bytes(this->map32To16, index + 6);
 
         return 1;
     }
 
 // ===============================================================
 
-    OverData::~OverData()
+    u32 OverData::FindMap32(u16 map16Vals[4])
     {
-        u32 i = 0;
+        u16 i = 0;
 
-        delete gi;
-        
-        for(i = 0; i < 0xA0; ++i)
-            DestroyBuffer(this->map32Data[i]);
+        const u16 theEnd = 0x22A8;
+
+        u16* search = (u16*) this->map32To16->contents;
+
+        // shouldn't ever happen if the rom is the right size
+        if(this->map32To16->length < 0x2AA00)
+            return -1;
+
+        for(i = 0; i < 0x5554; i++, search += 4)
+        {
+            if(i == theEnd) // Eureka Seven reference
+                return -1;
+
+            if(search[0] != map16Vals[0])
+                continue;
+            else if(search[1] != map16Vals[1])
+                continue;
+            else if(search[2] != map16Vals[2])
+                continue;
+            else if(search[3] != map16Vals[3])
+                continue;
+            else
+                return (((u32) i) & 0x0000FFFF);
+        }
+
+        return -1;
     }
 
-    static FILE* mapCountFile = fopen("C:\\map32log.log", "wt");
+// ===============================================================
+
+    u32 OverData::FindMap16(u16 map8Vals[4])
+    {
+        u16 i = 0;
+
+        const u16 theEnd = 0x0DF4;
+
+        u16* search = (u16*) this->map16To8->contents;
+
+        for(i = 0; i < 0x3000; i++, search += 4)
+        {
+            if(i == theEnd) // Eureka Seven reference
+                return -1;
+
+            if(search[0] != map8Vals[0])
+                continue;
+            else if(search[1] != map8Vals[1])
+                continue;
+            else if(search[2] != map8Vals[2])
+                continue;
+            else if(search[3] != map8Vals[3])
+                continue;
+            else
+                return (((u32) i) & 0x0000FFFF);
+        }
+
+        return -1;
+    }
+
+// ===============================================================
+
+    u32 OverData::AllocateMap16(u16 map8Vals[4], u16 oldMap16, u16 threshold)
+    {
+        u32 a = 0;
+        u32 i = 0;
+
+        for(i = threshold; i < 0x4000; i++)
+        {
+            // Get the number of times this particular map16 value occurs in the rom.
+            a = Get4Bytes(map16Counts, i * 4);
+
+            if(a > 1)
+                continue;
+            else if(a == 1)
+            {
+                // in this case the new map16 tile would replace the old
+                if( (u16) i == oldMap16 )
+                    return i;
+
+                continue;
+            }
+            else
+                return i;
+        }
+
+        return -1;
+    }
+
+// ===============================================================
+
+    u32 OverData::AllocateMap32(u16 map16Vals[4], u16 oldMap32, u16 threshold)
+    {
+        u32 a = 0;
+        u32 i = 0;
+
+        for(i = threshold; i < 0x4000; i++)
+        {
+            a = Get4Bytes(map32Counts, i * 4);
+
+            if(a > 1)
+                continue;
+            else if(a == 1)
+            {
+                // in this case the new map16 tile would replace the old
+                if( (u16) i == oldMap32 )
+                    return i;
+
+                continue;
+            }
+            else
+                return i;
+        }
+
+        return -1;
+    }
+
+// ===============================================================
 
 // ===============================================================
 
@@ -813,71 +950,6 @@
         }
 
         return map16Buf; 
-    }
-
-
-// ===============================================================
-
-    u32 OverData::FindMap32(u16 map16Vals[4])
-    {
-        u16 i = 0;
-
-        const u16 theEnd = 0x22A8;
-
-        u16* search = (u16*) this->map32To16->contents;
-
-        // shouldn't ever happen if the rom is the right size
-        if(this->map32To16->length < 0x2AA00)
-            return -1;
-
-        for(i = 0; i < 0x5554; i++, search += 4)
-        {
-            if(i == theEnd) // Eureka Seven reference
-                return -1;
-
-            if(search[0] != map16Vals[0])
-                continue;
-            else if(search[1] != map16Vals[1])
-                continue;
-            else if(search[2] != map16Vals[2])
-                continue;
-            else if(search[3] != map16Vals[3])
-                continue;
-            else
-                return (((u32) i) & 0x0000FFFF);
-        }
-
-        return -1;
-    }
-
-// ===============================================================
-
-    u32 OverData::FindMap16(u16 map8Vals[4])
-    {
-        u16 i = 0;
-
-        const u16 theEnd = 0x0DF4;
-
-        u16* search = (u16*) this->map16To8->contents;
-
-        for(i = 0; i < 0x3000; i++, search += 4)
-        {
-            if(i == theEnd) // Eureka Seven reference
-                return -1;
-
-            if(search[0] != map8Vals[0])
-                continue;
-            else if(search[1] != map8Vals[1])
-                continue;
-            else if(search[2] != map8Vals[2])
-                continue;
-            else if(search[3] != map8Vals[3])
-                continue;
-            else
-                return (((u32) i) & 0x0000FFFF);
-        }
-
-        return -1;
     }
 
 // ===============================================================
@@ -1388,7 +1460,7 @@
 
         // -----------------------
 
-        ///return false;
+        CopyBuffer(map16Backup, map16Buf, map16Buf->length);
 
         for(i = 0; i < 0x40; ++i)
         { 
@@ -1405,5 +1477,38 @@
 
         return true;
     }
+
+// ===============================================================
+
+    bool OverData::UnloadOverlay()
+    {
+        u32 i        = 0;
+        u32 j        = 0;
+        u32 map16Val = 0;
+
+        OwOverlay *lay = overlays[area];
+
+        // -----------------------
+
+        CopyBuffer(map16Backup, map16Buf, map16Buf->length);
+
+        /*
+        for(i = 0; i < 0x40; ++i)
+        { 
+            for(j = 0; j < 0x40; ++j)
+            {
+                map16Val = lay->GetTile(i, j);
+
+                if(map16Val == 0xFFFF)
+                    continue;
+
+                SetMap16Tile(map16Buf, map16Val, i, j);
+            }
+        }*/
+
+        return true;
+    }
+
+
 
 // ===============================================================

@@ -55,7 +55,7 @@
         itoa(allocations, errorBuf, 10);
 
         if(_CrtCheckMemory() == FALSE)
-            MessageBox(0, errorBuf, "initbuff", MB_OK);
+            MessageBox(0, errorBuf, "initbuf", MB_OK);
 
         try{
             allocations++;

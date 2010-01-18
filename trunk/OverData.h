@@ -54,7 +54,10 @@
         //void    DeleteAreaHoleData();
 
         bool    LoadArea();
+
         bool    LoadOverlay();
+        bool    UnloadOverlay();
+
         bool    LoadAllEntranceData();
         bool    LoadAllHoleData();
         bool    LoadAllExitData();
@@ -65,10 +68,16 @@
         bool    DeleteAreaHole(u32 index);
 
         u16     GetMap32Tile(u32 x, u32 y);
+        
         u32     PutMap32Tile(u32 x, u32 y, u32 value);
         u32     FindMap32(u16 map16Vals[4]);
         u32     FindMap16(u16 map8Vals[4]);
+
         u32     Map16To8(u16 map16Val, u16 map8Vals[4]);
+        u32     Map32To16(u16 map32Val, u16 map16Vals[4]);
+
+        u32     AllocateMap16(u16 map8Vals[4], u16 oldMap16, u16 threshold = 0);
+        u32     AllocateMap32(u16 map16Vals[4], u16 oldMap32, u16 threshold = 0);
 
         bufPtr  LoadMap8();
         bufPtr  LoadMap16(u32 index, map16Pos p);
@@ -92,6 +101,10 @@
         u16 tile8, tile16, tile32;
         
         bufPtr map16Buf;        // 0x2000 byte array for a full map16 tilemap
+
+        bufPtr map16Backup;     // used for backing up the map16 buffer when event overlay editing is enabled
+        
+        
         bufPtr map8Buf;         // 0x8000 byte array for a full 1024x1024 area
 
         owEditMode editMode;

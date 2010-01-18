@@ -170,6 +170,17 @@
 
                 break;
             }
+            case OVER_EVENT_OVERLAY:
+            {
+                if(o->editOverlay == true)
+                    o->LoadOverlay();
+                else
+                    o->UnloadOverlay();
+
+                DrawOW(game, b, o->map8Buf);
+
+                break;
+            }
             case PICTURE_PAINT:
             {        
                 picDC = (HDC) lp;
@@ -895,9 +906,6 @@
         u16 x32 = x >> 2;       // map32 aligned coordinates
         u16 y32 = y >> 2;       // map32 aligned coordinates
 
-        u16 addr16       = ((x & 0xFFFE) * 2) + ((y & 0xFFFE) * 0x100);
-        u16 addr32       = ((x16 & 0xFFFE) * 2) + ((y16 & 0xFFFE) * 0x80);
-
         u16 map8Vals[4]  = {0, 0, 0, 0};
         u16 map16Vals[4] = {0, 0, 0, 0};
     
@@ -908,8 +916,6 @@
                     
         u16 oldMap16     = 0;
         u16 oldMap32     = 0;
-
-        u32 area         = o->area;
 
         OverObj *obj     = NULL;
         Entrance *entr   = NULL;
@@ -1108,35 +1114,17 @@
             }
             case mode_drawtile:
             {
-                if(x32 >= 0x10)
-                {
-                    x32 -= 0x10;
-                    area++;
-                }
+                oldMap16 = GetMap16Tile(o->map16Buf, x16, y16);
+                oldMap32 = o->GetMap32Tile(x32, y32);
 
-                if(y32 >= 0x10)
-                {
-                    y32 -= 0x10;
-                    area += 0x08;
-                }
-
-                oldMap16 = GetMap16Tile(game->overData->map16Buf, x16, y16);
-                oldMap32 = GetMap32Tile(game->overData->map32Data[area], x32, y32);
+                o->Map16To8(oldMap16, map8Vals);
+                o->Map32To16(oldMap32, map16Vals);
 
                 index = (x & 0x01) + ((y & 0x01) << 1);
 
-                map8Vals[0] = Get2Bytes(game->overData->map8Buf, addr16); 
-                map8Vals[1] = Get2Bytes(game->overData->map8Buf, addr16 + 0x02);
-                map8Vals[2] = Get2Bytes(game->overData->map8Buf, addr16 + 0x100);
-                map8Vals[3] = Get2Bytes(game->overData->map8Buf, addr16 + 0x102);
-                map8Vals[index] = game->overData->tile8;                
+                map8Vals[index] = o->tile8;                
 
                 index = ((x & 0x02) >> 1) + (y & 0x02); 
-
-                map16Vals[0] = Get2Bytes(o->map16Buf, addr32); 
-                map16Vals[1] = Get2Bytes(o->map16Buf, addr32 + 0x02);
-                map16Vals[2] = Get2Bytes(o->map16Buf, addr32 + 0x80);
-                map16Vals[3] = Get2Bytes(o->map16Buf, addr32 + 0x82);
 
                 if(o->tileSize == fromMap8)
                 {
@@ -1144,7 +1132,7 @@
 
                     // failure. attempt to allocate a new map16 value
                     if(newMap16 == -1)
-                            newMap16 = AllocateMap16(o->map16Counts, map8Vals, oldMap16);
+                        newMap16 = o->AllocateMap16(map8Vals, oldMap16);
 
                     if(newMap16 == -1)
                     {
@@ -1154,30 +1142,33 @@
 
                     map16Vals[index] = newMap16; 
 
-                    // now we need to figure out whether we can find an existing map32 tile
-                    // and if not, generate a new one if space is available
-                    newMap32 = o->FindMap32(map16Vals);                    
-
-                    // failure. try to allocate a map32 file
-                    if(newMap32 == -1)
-                        newMap32 = AllocateMap32(o->map32Counts, map16Vals, oldMap32);
-
-                    if(newMap32 == -1)
+                    if(o->editOverlay == false)
                     {
-                        MessageBox(hwnd, "No more map32 tiles can be allocated.", "error", MB_OK);
-                        return;
+                        // now we need to figure out whether we can find an existing map32 tile
+                        // and if not, generate a new one if space is available
+                        newMap32 = o->FindMap32(map16Vals);                    
+
+                        // failure. try to allocate a map32 file
+                        if(newMap32 == -1)
+                            newMap32 = o->AllocateMap32(map16Vals, oldMap32);
+
+                        if(newMap32 == -1)
+                        {
+                            MessageBox(hwnd, "No more map32 tiles can be allocated.", "error", MB_OK);
+                            return;
+                        }
+
+                        o->PutMap32Tile(x32, y32, newMap32);
+                        o->DecMapCounts(oldMap32, usingMap32);
+                        o->IncMapCounts(newMap32, usingMap32, map16Vals);
                     }
-    
-                    SetMap8Tile(o->map8Buf, o->tile8, x, y);
+
+                    SetMap8Tile(o->map8Buf,   o->tile8, x,   y);
                     SetMap16Tile(o->map16Buf, newMap16, x16, y16);
-                    SetMap32Tile(o->map32Data[area], newMap32, x32, y32);
-   
+
                     // increment resource counts for map16 and map32 tiles
                     o->DecMapCounts(oldMap16, usingMap16);
-                    o->DecMapCounts(oldMap32, usingMap32);
-
                     o->IncMapCounts(newMap16, usingMap16, map8Vals);
-                    o->IncMapCounts(newMap32, usingMap32, map16Vals);
 
                     DrawMap8(game, b, o->tile8, x, y);
                     InvalidateTile(game, x, y);
@@ -1189,31 +1180,34 @@
                 {
                     newMap16 = o->tile16;
     
-                    map16Vals[index] = newMap16;                
+                    map16Vals[index] = newMap16;
 
-                    newMap32 = o->FindMap32(map16Vals);                    
-
-                    // failure. try to allocate a map32 file
-                    if(newMap32 == -1)
-                            newMap32 = AllocateMap32(o->map32Counts, map16Vals, oldMap32);
-
-                    if(newMap32 == -1)
+                    if(o->editOverlay == false)
                     {
-                        MessageBox(hwnd, "No more map32 tiles can be allocated.", "error", MB_OK);
-                        return;
+                        newMap32 = o->FindMap32(map16Vals);                    
+                        
+                        // failure. try to allocate a map32 file
+                        if(newMap32 == -1)
+                            newMap32 = o->AllocateMap32(map16Vals, oldMap32);
+                        
+                        if(newMap32 == -1)
+                        {
+                            MessageBox(hwnd, "No more map32 tiles can be allocated.", "error", MB_OK);
+                            return;
+                        }
+
+                        o->PutMap32Tile(x32, y32, newMap32);
+                        o->DecMapCounts(oldMap32, usingMap32);
+                        o->IncMapCounts(newMap32, usingMap32, map16Vals);
                     }
 
                     SetMap16Tile(o->map16Buf, newMap16, x16, y16);
-                    SetMap32Tile(o->map32Data[area], newMap32, x32, y32);
 
-                        // increment resource counts for map16 and map32 tiles
+                    // update resource counts for map16 tiles
                     o->DecMapCounts(oldMap16, usingMap16);
-                    o->DecMapCounts(oldMap32, usingMap32);
-
                     o->IncMapCounts(newMap16, usingMap16, map8Vals);
-                    o->IncMapCounts(newMap32, usingMap32, map16Vals);
 
-                    Map16To8(game, newMap16, map8Vals);
+                    o->Map16To8(newMap16, map8Vals);
 
                     SetMap8Tile(o->map8Buf, map8Vals[0], (x & 0xFFFE) + 0, (y & 0xFFFE) + 0);
                     SetMap8Tile(o->map8Buf, map8Vals[1], (x & 0xFFFE) + 1, (y & 0xFFFE) + 0);
@@ -2446,6 +2440,11 @@
                         {
                             o->tileSize = (objMapType) (8 * 1 << SendMessage(tileSizeCombo, CB_GETCURSEL, 0, 0));
                         }
+                        else if(LOWORD(wp) == ID_AUX_BG_GFX)
+                        {
+                            
+
+                        }
 
                         break;
                     }
@@ -2455,14 +2454,14 @@
                         switch(LOWORD(wp))
                         {
                             case ID_EDIT_OVERLAY:
-
+                            {
                                 o->editOverlay = !o->editOverlay;
 
                                 // refresh the screen after the overlay setting has changed.
-                                SendMessage(game->pictWin, PICTURE_PAINT, 1, 0);
+                                PostMessage(game->pictWin, OVER_EVENT_OVERLAY, 0, 0);
 
                                 break;
-
+                            }
                             default:
 
                                 for(i = 0; i < numCommands; ++i)
