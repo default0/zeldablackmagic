@@ -1486,28 +1486,31 @@
     {
         u32 i        = 0;
         u32 j        = 0;
-        u32 map16Val = 0;
+        u32 newMap16 = 0;
+        u32 oldMap16 = 0;
 
         OwOverlay *lay = overlays[area];
 
         // -----------------------
-
-        i = CompareBuffer(map16Buf, map16Backup);
-        CopyBuffer(map16Buf, map16Backup, 0, 0, map16Backup->length);
-
-        /*
+        
+        // figure out what the differences are between the map
+        // with the overlay enabled and the overlay not enabled.
         for(i = 0; i < 0x40; ++i)
         { 
             for(j = 0; j < 0x40; ++j)
             {
-                map16Val = lay->GetTile(i, j);
+                newMap16 = GetMap16Tile(map16Buf, i, j);
+                oldMap16 = GetMap16Tile(map16Backup, i, j);
 
-                if(map16Val == 0xFFFF)
-                    continue;
-
-                SetMap16Tile(map16Buf, map16Val, i, j);
+                if(newMap16 == oldMap16)
+                    lay->SetTile(0xFFFF, i, j);
+                else
+                    lay->SetTile(newMap16, i, j);
             }
-        }*/
+        }
+        
+        // restore the map16 buffer to the way it was before the overlay was activated
+        CopyBuffer(map16Buf, map16Backup, 0, 0, map16Backup->length);
 
         LoadMap8();
 

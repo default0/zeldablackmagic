@@ -101,9 +101,7 @@
         u16 tile8, tile16, tile32;
         
         bufPtr map16Buf;        // 0x2000 byte array for a full map16 tilemap
-
         bufPtr map16Backup;     // used for backing up the map16 buffer when event overlay editing is enabled
-        
         
         bufPtr map8Buf;         // 0x8000 byte array for a full 1024x1024 area
 
