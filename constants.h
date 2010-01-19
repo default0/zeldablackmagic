@@ -167,7 +167,7 @@
 
                 OVER_INIT,
                 OVER_CHANGE,
-                OVER_SAVE,          
+                OVER_SAVE,
                 OVER_EVENT_OVERLAY
             };
 
