@@ -54,6 +54,7 @@
         //void    DeleteAreaHoleData();
 
         bool    LoadArea();
+        bool    UnloadArea();
 
         bool    LoadOverlay();
         bool    UnloadOverlay();
