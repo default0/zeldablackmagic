@@ -40,7 +40,6 @@
         {
             case OVER_INIT:
             {
-
                 ChangeWES(game->overWE, hwnd, game);
 
                 game->pictWin = NULL;
@@ -59,7 +58,7 @@
 
                 InitOverMode(game);
 
-                // now that graphics are ready and all that we can generate bitmaps for menus
+                // now that graphics are ready and all that, we can generate bitmaps for menus
                 // and create this dialog
                 game->toolDlg = CreateDialogParam(thisProg,
                                                   MAKEINTRESOURCE(IDD_OVER_TILES),
@@ -90,11 +89,7 @@
 
                 // --------------------------------
 
-                o->allEntr[o->area]     = o->areaEntr;
-                o->allHoles[o->area]    = o->areaHoles;
-                o->allExits[o->area]    = o->areaExits;
-                o->allItems[0][o->area] = o->areaItems;
-                o->allSpr[1][o->area]   = o->areaSpr;
+                o->UnloadArea();
 
                 o->area = (u8) wp;
            
@@ -1148,7 +1143,7 @@
                         // and if not, generate a new one if space is available
                         newMap32 = o->FindMap32(map16Vals);                    
 
-                        // failure. try to allocate a map32 file
+                        // failure. try to allocate a map32 tile
                         if(newMap32 == -1)
                             newMap32 = o->AllocateMap32(map16Vals, oldMap32);
 
@@ -1166,7 +1161,7 @@
                     SetMap8Tile(o->map8Buf,   o->tile8, x,   y);
                     SetMap16Tile(o->map16Buf, newMap16, x16, y16);
 
-                    // increment resource counts for map16 and map32 tiles
+                    // update resource counts for map16 tiles
                     o->DecMapCounts(oldMap16, usingMap16);
                     o->IncMapCounts(newMap16, usingMap16, map8Vals);
 

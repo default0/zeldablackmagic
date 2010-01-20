@@ -182,17 +182,42 @@
 
         }
 
-        this->areaHoles = this->allHoles[area];
-        this->areaEntr  = this->allEntr[area];
-        this->areaExits = this->allExits[area];
-        this->areaItems = this->allItems[0][area];
-        this->areaSpr   = this->allSpr[1][area];
+        areaHoles = allHoles[area];
+        areaEntr  = allEntr[area];
+        areaExits = allExits[area];
+        areaItems = allItems[0][area];
+        areaSpr   = allSpr[1][area];
 
-        /// disabled temporarily
-        /// LoadOverlay();
+        if(this->editOverlay == true)
+        {
+            LoadOverlay();
+        }
+        else
+        {
+            // refresh the tiles in the map8 buffer
+            LoadMap8();
+        }
 
-        // refresh the tiles in the map8 buffer
-        LoadMap8();
+        return true;
+    }
+
+// ===============================================================
+
+    bool OverData::UnloadArea()
+    {
+        // since these area all dynamic lists, the pointer to the head of each list
+        // could have changed during editing
+        // that's why I'm updating the pointers in the main structures
+        allEntr[area]     = areaEntr;
+        allHoles[area]    = areaHoles;
+        allExits[area]    = areaExits;
+        allItems[0][area] = areaItems;
+        allSpr[1][area]   = areaSpr;
+
+        // If we don't make sure to unload the overlay when switching areas,
+        // The changes to the map16 overlay will be lost.
+        if(editOverlay == true)
+            UnloadOverlay();
 
         return true;
     }
@@ -1391,6 +1416,8 @@
 
                         if(GetBank(map16Addr) != 0x7E)
                             done = true;
+                        else
+                            map16Addr &= 0xFFFF;
                         
 				        offset += 3;
                         write = true;
@@ -1403,6 +1430,8 @@
                         // bad bank, must be 0x7E!
                         if(GetBank(map16Addr) != 0x7E)
                             done = true;
+                        else
+                            map16Addr &= 0xFFFF;
                             
                         offset += 3;
                         write = true;
