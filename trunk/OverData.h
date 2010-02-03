@@ -68,6 +68,8 @@
         //bool    AddAreaHole(u32 x, u32 y, u32 entrance = 0);
         bool    DeleteAreaHole(u32 index);
 
+        void    Map16Analysis();
+
         u16     GetMap32Tile(u32 x, u32 y);
         
         u32     PutMap32Tile(u32 x, u32 y, u32 value);

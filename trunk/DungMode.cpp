@@ -551,6 +551,8 @@
         u32 *sprIndices = (u32*) &game->dngObjs->sprIndices[0];
         u32 *overIndices = (u32*) &game->dngObjs->overIndices[0];
 
+        // ------------------------------------------------------
+
         for(i = 0; i < 16; i++)
             sprIndices[i] = -1;
 

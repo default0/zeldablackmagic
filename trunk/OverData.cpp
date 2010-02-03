@@ -44,8 +44,8 @@
         this->map16Flags    = CreateBuffer(0x10000 / 8);
         this->map32Flags    = CreateBuffer(0x10000 / 8);
 
-        this->map16Counts   = CreateBuffer(0x10000 * 4);
-        this->map32Counts   = CreateBuffer(0x10000 * 4);
+        this->map16Counts   = CreateBuffer(0x10000, 0x01, 4);
+        this->map32Counts   = CreateBuffer(0x10000, 0x01, 4);
 
         this->map32To16     = CreateBuffer(0x40000);
 
@@ -179,8 +179,9 @@
             }
             else
                 LoadMap16(area, upper_left);
-
         }
+
+        Map16Analysis();
 
         areaHoles = allHoles[area];
         areaEntr  = allEntr[area];
@@ -199,6 +200,133 @@
         }
 
         return true;
+    }
+
+// ===============================================================
+
+    void OverData::Map16Analysis()
+    {
+        u16 i = 0, j = 0;
+        u16 x = 0, y = 0;
+        u16 baseX = 0, baseY = 0;
+
+        u16 numBytes = 0;
+
+        u16 val1 = 0, val2 = 0;
+
+        u32 k = 0;
+
+        FILE *f = NULL;
+
+        // -----------------------
+
+        f = fopen("map16Dist.log", "wt");
+
+        for(k = 0; k < map16Counts->length; k += 4)
+        {
+            val1 = Get4Bytes(map16Counts, k);
+
+            if(val1)
+                fprintf(f, "%04X\t%d\n", (k / 4), val1);
+        }
+
+        fclose(f);
+
+        for(y = 0; y < map16Buf->height; ++y)
+        {
+            for(x = 0; x < map16Buf->width; ++x)
+            {
+                baseY = 0;
+
+                for( ; baseY < map16Buf->height; ++baseY)
+                {
+                    baseX = 0;
+
+                    if( ( (baseX) + ( (baseY) << 6)) >= (x + (y << 6)) )
+                        break;                        
+
+                    for( ; baseX < map16Buf->width; ++baseX)
+                    {
+                        if( ( (baseX) + ( (baseY) << 6)) >= (x + (y << 6)) )
+                            break;
+
+                        numBytes = 0;
+
+                        // width first loop
+                        for(i = 0, j = 0; (baseY + j) < map16Buf->height; ++j)
+                        {
+                            if( ( (baseX + i) + ( (baseY + j) << 6)) >= (x + (y << 6)) )
+                                break;
+
+                            val1 = Get2Bytes(map16Buf, x     + i, y     + j);
+                            val2 = Get2Bytes(map16Buf, baseX + i, baseY + j);
+
+                            if(val1 != val2)
+                                break;
+
+                            for(i = 0; (baseX + i) < map16Buf->width; ++i)
+                            {
+                                if( ( (baseX + i) + ( (baseY + j) << 6)) >= (x + (y << 6)) )
+                                    break;
+
+                                val1 = Get2Bytes(map16Buf, x     + i, y     + j);
+                                val2 = Get2Bytes(map16Buf, baseX + i, baseY + j);
+
+                                if(val1 != val2)
+                                    break;
+                                else
+                                    numBytes += 1;
+
+                            }
+
+                        }
+
+                        if(numBytes > 0x17)
+                            numBytes = numBytes;
+
+                        numBytes = 0;
+
+                        // height first loop
+                        for(i = 0, j = 0; (baseX + i) < map16Buf->width; ++i)
+                        {
+                            if( ( (baseX + i) + ( (baseY + j) << 6)) >= (x + (y << 6)) )
+                                break;
+
+                            val1 = Get2Bytes(map16Buf, x     + i, y     + j);
+                            val2 = Get2Bytes(map16Buf, baseX + i, baseY + j);
+
+                            if(val1 != val2)
+                                break;
+
+                            for(j = 0; (baseY + j) < map16Buf->height; ++j)
+                            {
+                                if( ( (baseX + i) + ( (baseY + j) << 6)) >= (x + (y << 6)) )
+                                    break;
+
+                                val1 = Get2Bytes(map16Buf, x     + i, y     + j);
+                                val2 = Get2Bytes(map16Buf, baseX + i, baseY + j);
+
+                                if(val1 != val2)
+                                    break;
+                                else
+                                    numBytes += 1;
+                            }
+
+                        }
+                        
+                        if(numBytes > 0x17)
+                            numBytes = numBytes;
+
+                    }
+                }
+
+            }
+        }
+
+
+
+
+
     }
 
 // ===============================================================
@@ -528,8 +656,6 @@
 
 // ===============================================================
 
-// ===============================================================
-
     void OverData::DecMapCounts(u16 mapVal, bool map32)
     {
         u32 a = 0;
@@ -790,6 +916,8 @@
         0x0E9A,
         0x0E9C
     };
+
+// ===============================================================
 
     void OverData::LoadMapFlags()
     {

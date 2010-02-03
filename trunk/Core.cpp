@@ -680,7 +680,10 @@
         // 5. Finally go for the sprite data.
     
         if(spritePtrBank == 0x090000)
+        {
             spritePtrBase |= spritePtrBank;
+            spritePtrBase  = CpuToRomAddr(spritePtrBase);
+        }
         else
             spritePtrBase = RomToCpuAddr(spritePtrBase);
 
@@ -691,13 +694,18 @@
             // the sprite pointer table is in. The latter never changes
             if(spritePtrBank != 0x090000)
             {   
-                spritePtrBank = GetByte(game->image,
-                                        game->bm_Header.dngSpriteBanks + index);
+                spritePtrBank   = GetByte(game->image, game->bm_Header.dngSpriteBanks + index);
                 spritePtrBank <<= 0x10;            
             }
 
             // Get the rom address of the current room's sprites
-            currentPtr = Get2Bytes( game->image, asm_sprite_local + (index*2) );
+        
+            /// 1/22/2010 - taken out temporarily b/c this was probably just a line of code that was modified
+            /// so that shards of might would open
+            /// currentPtr = Get2Bytes( game->image, asm_sprite_local + (index*2) );
+            
+            /// replaced with the following line:
+            currentPtr  = Get2Bytes(game->image, spritePtrBase + (index*2));
             currentPtr |= spritePtrBank;
             currentPtr = CpuToRomAddr(currentPtr);
        
