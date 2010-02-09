@@ -441,7 +441,6 @@
         static HWND container;
         static HWND button = 0;
 
-        char dummy[256];
         WEStruct *temp;
     
         SCROLLINFO si;
@@ -786,15 +785,12 @@
 
             case ID_GRAPHICS_EXPORT:
             {
-                char temp[10];
                 char path[MAX_PATH];
 
                 u32 a = 0, b = 0;
                 u32 c = 0;
 
                 PathName *p = new PathName( (const char*) ToString(game->romName) );
-
-                HANDLE dumpFH;
 
                 // -----------------------------
 

@@ -32,7 +32,7 @@
             void    SetSize();
             u32     GetSize();
            
-            static  List*   Add(List *list, List *entry);
+            static  void    Add(List **list, List *entry);
             virtual List*   Insert(u32 index);
             virtual List*   Extract(List **extracted = NULL);
             virtual List*   Delete(List **s = NULL);

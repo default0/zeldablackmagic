@@ -32,8 +32,142 @@
 
     class _ZeldaGame;
 
+    class OverArea
+    {
+
+    public:
+
+        // area number (large areas resolve down to one area number)
+        u8 index;
+            
+        // member variables
+        bool largeArea;
+        bool fallingRocks[0x03];
+                
+        // specific graphics settings for the area
+        graphicsInfo *gi;
+
+        // lists of data for each area
+        Entrance   *entr;
+        Entrance   *holes;
+        OverExit   *exits;
+        OverSpr    *spr[0x03];
+        OverItem   *items[0x03];
+        OwOverlay  *overlays;
+
+		bufPtr      map32Data;
+        
+    public:
+
+        // member functions
+        OverArea();
+        ~OverArea();
+
+        LoadMap32(u32 mapNum);
+
+
+
+    };
+
     class OverData
     {
+    public:
+
+        bool editOverlay;
+
+        u8 phase;               // 0 - beginning, 1 - first part, 2 - second part
+        
+        u16 prevX;
+        u16 prevY;
+
+        u16 numMap32Tiles;
+        u16 numMap16Tiles;
+
+        u16 tile8, tile16, tile32;
+        
+        // the current editing mode
+        owEditMode editMode;
+
+        // determines whether we're currently working in map8, map16, or map32 tiles
+        objMapType tileSize;
+        
+        bufPtr map16Buf;        // 0x2000 byte array for a full map16 tilemap
+        bufPtr map16Backup;     // used for backing up the map16 buffer when event overlay editing is enabled
+        
+        bufPtr map8Buf;         // 0x8000 byte array for a full 1024x1024 area
+
+        bufPtr rom;             // passed in from the ZeldaGame structure
+
+        bufPtr map32Flags;      // bitfield telling us which map32 tiles are being used
+        bufPtr map16Flags;      // bitfield telling us which map16 tiles are being used.
+
+        bufPtr map32To16;
+
+        // pointers to map32 to map16 arrays (will probably later use this for map16 to map8... refactoring sucks ...)
+        bufPtr upperLeft32;
+        bufPtr upperRight32;
+        bufPtr lowerLeft32;
+        bufPtr lowerRight32;
+
+        bufPtr map16To8;
+
+        bufPtr map16Counts;     // for each map16 tile, tells us how many there are in use
+        bufPtr map32Counts;     // for each map32 tile, tells us how many there are in use
+
+        OverObj obj;
+        OverObj *pObj;
+
+        // selection related data
+        OverObj *selObj;
+        OverObj *selObj2;
+
+        OverArea *area;
+        OverArea *areas[0xC0];
+
+        // entrance related data
+        u8 entrPos;
+        u8 entrBuf[0x10];
+
+        // hole related data
+        u8 holePos;
+        u8 holeBuf[0x10];
+
+        // exit related data
+        u8 exitPos;
+        u8 exitBuf[0x10];
+
+        // sprite related data
+        u8 sprPos;
+        u8 sprBuf[0x10];        
+ 
+        // item related data
+        u8 itemPos;
+        u8 itemBuf[0x10];
+
+        // ----------------------------------------------
+        // variables I'm not sure need to be in the class
+
+        BM_Header *header;
+
+        _ZeldaGame *durp;
+
+        // ----------------------------------------------
+        // variables that are Windows specific.
+        // should be moved elsewhere eventually,
+        // divorcing platform from business logic
+
+        ManagedBitmap *bStock[0x10];
+
+        HBITMAP hStock[0x10];
+        
+        HMENU stockContext;
+        HMENU selectContext;
+        HMENU sprContext;
+        HMENU itemContext;
+        HMENU exitContext;
+        HMENU entrContext;
+        HMENU holeContext;
+
     public:
 
         // member functions
@@ -87,114 +221,6 @@
        
         bufPtr  LoadMap32(u32 mapNum);
 
-
-    public:
-
-        bool largeArea;
-        bool editOverlay;
-
-        u8 area;                // current area        
-        
-        u16 prevX;
-        u16 prevY;
-
-        u16 numMap32Tiles;
-        u16 numMap16Tiles;
-
-        u16 tile8, tile16, tile32;
-        
-        bufPtr map16Buf;        // 0x2000 byte array for a full map16 tilemap
-        bufPtr map16Backup;     // used for backing up the map16 buffer when event overlay editing is enabled
-        
-        bufPtr map8Buf;         // 0x8000 byte array for a full 1024x1024 area
-
-        owEditMode editMode;
-
-        bufPtr rom;             // passed in from the ZeldaGame structure
-
-		bufPtr map32Data[0xC0];
-
-        bufPtr map32Flags;      // bitfield telling us which map32 tiles are being used
-        bufPtr map16Flags;      // bitfield telling us which map16 tiles are being used.
-
-        bufPtr map32To16;
-
-        bufPtr upperLeft32;
-        bufPtr upperRight32;
-        bufPtr lowerLeft32;
-        bufPtr lowerRight32;
-
-        bufPtr map16To8;
-
-        bufPtr map16Counts;     // for each map16 tile, tells us how many there are in use
-        bufPtr map32Counts;     // for each map32 tile, tells us how many there are in use
-
-        graphicsInfo *gi;
-
-        objMapType tileSize;    // determines whether we're currently working in map8, map16, or map32 tiles
-
-        ManagedBitmap *bStock[0x10];
-
-        OverObj obj;
-        OverObj *pObj;
-
-        // selection related data
-        OverObj *selObj;
-        OverObj *selObj2;
-
-        // entrance related data
-        u8 entrPos;
-        u8 entrBuf[0x10];
-
-        Entrance *areaEntr;
-        Entrance *allEntr[0xC0];
-        
-        // hole related data
-        u8 holePos;
-        u8 holeBuf[0x10];
-
-        Entrance *areaHoles;
-        Entrance *allHoles[0xC0];
-
-        // exit related data
-        u8 exitPos;
-        u8 exitBuf[0x10];
-
-        OverExit *areaExits;
-        OverExit *allExits[0xC0];
-
-        // sprite related data
-        u8 sprPos;
-        u8 sprBuf[0x10];        
- 
-        OverSpr *areaSpr;
-        OverSpr *allSpr[0x03][0xC0];
-        bool fallingRocks[0x03][0xC0];
-
-        // item related data
-        u8 itemPos;
-        u8 itemBuf[0x10];
-
-        OverItem *areaItems;
-        OverItem *allItems[0x03][0xC0];
-
-        // overlay related data
-        OwOverlay *overlays[0x80];
-
-        // ----------------------
-        BM_Header *header;
-
-        _ZeldaGame *durp;
-
-        HBITMAP hStock[0x10];
-        
-        HMENU stockContext;
-        HMENU selectContext;
-        HMENU sprContext;
-        HMENU itemContext;
-        HMENU exitContext;
-        HMENU entrContext;
-        HMENU holeContext;
     };
 
 
