@@ -13,14 +13,16 @@
 
     #define forgrid(x) { u32 i =0; u32 j = 0; for(i = 0; i < data->width; ++i) { for(j = 0; j < data->height; ++j) { (x); } } }
 
-    class OwOverlay
+// ================================================
+
+    class EventOverlay
     {
     private:
         bufPtr data;
 
     public:
-        OwOverlay();
-        ~OwOverlay();
+        EventOverlay();
+        ~EventOverlay();
 
         void Initialize();
 
@@ -30,7 +32,7 @@
         u16 GetTile(u8 x, u8 y);
     };
 
-    class _ZeldaGame;
+// ================================================
 
     class OverArea
     {
@@ -53,21 +55,28 @@
         OverExit   *exits;
         OverSpr    *spr[0x03];
         OverItem   *items[0x03];
-        OwOverlay  *overlays;
+        EventOverlay    *eOverlay;
 
 		bufPtr      map32Data;
+        bufPtr          rom;
         
     public:
 
         // member functions
-        OverArea();
+        OverArea(u8 area, bufPtr rom);
         ~OverArea();
 
-        LoadMap32(u32 mapNum);
+        bufPtr      LoadMap32();
 
-
-
+        bool        LoadOverlay();
+        bool        UnloadOverlay();
     };
+
+// ================================================
+
+    // forward declaration so OverData is aware of the
+    // existence of the ZeldaGame class
+    class _ZeldaGame;
 
     class OverData
     {
@@ -189,9 +198,6 @@
 
         bool    LoadArea();
         bool    UnloadArea();
-
-        bool    LoadOverlay();
-        bool    UnloadOverlay();
 
         bool    LoadAllEntranceData();
         bool    LoadAllHoleData();
