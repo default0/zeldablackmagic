@@ -1,7 +1,6 @@
 
 	#include "Globals.h"
 	#include "Core.h"
-	#include "Sprites.h"
     #include "OverData.h"
 	#include "OverMode.h"
 	#include "OverModeGui.h"
@@ -9,6 +8,55 @@
 
     const bool usingMap16 = false;
     const bool usingMap32 = true;
+
+    static u16 reservedMap16[] = 
+    {
+        stock_bush,
+        stock_bush2,
+        stock_rock_sl,
+        stock_rock_sh,
+        stock_peg,
+        stock_rock_bl0,
+        stock_rock_bl1,
+        stock_rock_bl2,
+        stock_rock_bl3,
+        stock_rock_bh0,
+        stock_rock_bh1,
+        stock_rock_bh2,
+        stock_rock_bh3,
+        stock_warp,
+        stock_rockPile0,
+        stock_rockPile1,
+        stock_rockPile2,
+        stock_rockPile3,
+        stock_sign,
+        stock_grass,
+        stock_jumpPoint,
+        stock_stump0,
+        stock_stump1,
+        stock_stump2,
+        stock_stump3,
+        0x0212,
+        0x0DA4,
+        0x0DA5,
+        0x0DA6,
+        0x0DA7,
+        0x0DB5,
+        0x0DC7,
+        0x0DC8,
+        0x0E1B,
+        0x0E21,
+        0x0E25,
+        0x0E3F,
+        0x0E48,
+        0x0E54,
+        0x0E64,
+        0x0E88,
+        0x0E8C,
+        0x0E92,
+        0x0E9A,
+        0x0E9C
+    };
 
     const u32 mask16      = ~0x01;
     const u32 mask32      = ~0x03;
@@ -26,7 +74,6 @@
 
         //---------------------------
         
-        this->largeArea   = false;
         this->editOverlay = false;
 
         this->rom         = rom;
@@ -133,6 +180,13 @@
 
     static FILE* mapCountFile = fopen("C:\\map32log.log", "wt");
 
+// ===============================================================
+
+    u8 OverData::ResolveArea(u8 area)
+    {
+        // Maps 512x512 area number to the larger 1024x1024 area number that it belongs to.
+        return ( GetByte(rom, 0x125EC + (area & 0x3F)) + (area & 0x40) );
+    }
 
 // ===============================================================
 
@@ -920,57 +974,6 @@
 
 // ===============================================================
 
-    static u16 reservedMap16[] = 
-    {
-        stock_bush,
-        stock_bush2,
-        stock_rock_sl,
-        stock_rock_sh,
-        stock_peg,
-        stock_rock_bl0,
-        stock_rock_bl1,
-        stock_rock_bl2,
-        stock_rock_bl3,
-        stock_rock_bh0,
-        stock_rock_bh1,
-        stock_rock_bh2,
-        stock_rock_bh3,
-        stock_warp,
-        stock_rockPile0,
-        stock_rockPile1,
-        stock_rockPile2,
-        stock_rockPile3,
-        stock_sign,
-        stock_grass,
-        stock_jumpPoint,
-        stock_stump0,
-        stock_stump1,
-        stock_stump2,
-        stock_stump3,
-        0x0212,
-        0x0DA4,
-        0x0DA5,
-        0x0DA6,
-        0x0DA7,
-        0x0DB5,
-        0x0DC7,
-        0x0DC8,
-        0x0E1B,
-        0x0E21,
-        0x0E25,
-        0x0E3F,
-        0x0E48,
-        0x0E54,
-        0x0E64,
-        0x0E88,
-        0x0E8C,
-        0x0E92,
-        0x0E9A,
-        0x0E9C
-    };
-
-// ===============================================================
-
     void OverData::LoadMapFlags()
     {
         bool usingMap32 = true;
@@ -1161,13 +1164,15 @@
 
     bool OverData::LoadAllHoleData()
     {
-        u32 i           = 0, x = 0, y = 0, area = 0, entrance = 0;
+        // (a stands for area)
+        u32 i           = 0, x = 0, y = 0, a = 0, entrance = 0;
         u32 check       = 0;
         u32 numHoles    = 0;
         u32 mapOffset   = 0, areaOffset = 0, entrOffset  = 0;
         u32 map16Val    = 0;
         
         Entrance *hole  = NULL;
+        Entrance **list = NULL;
 
         // -------------------------------
 
@@ -1186,15 +1191,17 @@
             map16Val = Get2Bytes(rom, mapOffset + (i << 1) ) + 0x400;
             x        = ((map16Val & 0x007F) >> 1) << 4;
             y        = ((map16Val & 0x1F80) >> 7) << 4;
-            area     = Get2Bytes(rom, areaOffset + (i << 1) );
+            a        = Get2Bytes(rom, areaOffset + (i << 1) );
             entrance = GetByte(rom, entrOffset + i);
 
             if(area >= 0xC0)
                 continue;
 
-            hole = new Entrance(x, y, entrance, area);
+            hole = new Entrance(x, y, entrance, a);
 
-            Entrance::Add( &allHoles[area], hole);
+            list = &(areas[a]->holes);
+
+            Entrance::Add(list, hole);
         }
 
         return true;
@@ -1204,13 +1211,15 @@
 
     bool OverData::LoadAllEntranceData()
     {
-        u32 i           = 0, x = 0, y = 0, area = 0, entrance = 0;
+        // (a stands for area)
+        u32 i           = 0, x = 0, y = 0, a = 0, entrance = 0;
         u32 check       = 0;
         u32 numEntr     = 0;
         u32 mapOffset   = 0, areaOffset = 0, entrOffset  = 0;
         u32 map16Val    = 0;
 
         Entrance *entr = NULL;
+        Entrance **list = NULL; 
 
         // -------------------------------
 
@@ -1229,15 +1238,17 @@
             map16Val = Get2Bytes(rom, mapOffset + (i << 1) );
             x        = ((map16Val & 0x007F) >> 1) << 4;
             y        = ((map16Val & 0x1F80) >> 7) << 4;
-            area     = Get2Bytes(rom, areaOffset + (i << 1) );
+            a        = Get2Bytes(rom, areaOffset + (i << 1) );
             entrance = GetByte(rom, entrOffset + i);
 
-            if(area >= 0xC0)
+            if(a >= 0xC0)
                 continue;
 
-            entr = new Entrance(x, y, entrance, area);
+            entr = new Entrance(x, y, entrance, a);
 
-            Entrance::Add( &allEntr[area], entr);
+            list = &(areas[a]->entr);
+
+            Entrance::Add(list, entr);
         }
 
         return true;
@@ -1656,76 +1667,5 @@
 		    }
         }
     }
-
-// ===============================================================
-
-    bool OverData::LoadOverlay()
-    {
-        u32 i        = 0;
-        u32 j        = 0;
-        u32 map16Val = 0;
-
-        OwOverlay *lay = overlays[area];
-
-        // -----------------------
-
-        CopyBuffer(map16Backup, map16Buf, 0, 0, map16Buf->length);
-
-        for(i = 0; i < 0x40; ++i)
-        { 
-            for(j = 0; j < 0x40; ++j)
-            {
-                map16Val = lay->GetTile(i, j);
-
-                if(map16Val == 0xFFFF)
-                    continue;
-
-                SetMap16Tile(map16Buf, map16Val, i, j);
-            }
-        }
-
-        LoadMap8();
-
-        return true;
-    }
-
-// ===============================================================
-
-    bool OverData::UnloadOverlay()
-    {
-        u32 i        = 0;
-        u32 j        = 0;
-        u32 newMap16 = 0;
-        u32 oldMap16 = 0;
-
-        OwOverlay *lay = overlays[area];
-
-        // -----------------------
-        
-        // figure out what the differences are between the map
-        // with the overlay enabled and the overlay not enabled.
-        for(i = 0; i < 0x40; ++i)
-        { 
-            for(j = 0; j < 0x40; ++j)
-            {
-                newMap16 = GetMap16Tile(map16Buf, i, j);
-                oldMap16 = GetMap16Tile(map16Backup, i, j);
-
-                if(newMap16 == oldMap16)
-                    lay->SetTile(0xFFFF, i, j);
-                else
-                    lay->SetTile(newMap16, i, j);
-            }
-        }
-        
-        // restore the map16 buffer to the way it was before the overlay was activated
-        CopyBuffer(map16Buf, map16Backup, 0, 0, map16Backup->length);
-
-        LoadMap8();
-
-        return true;
-    }
-
-
 
 // ===============================================================
