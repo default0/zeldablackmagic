@@ -21,6 +21,8 @@
         operator OverItem*() { return (OverItem*) this; }
         operator OverSpr*()  { return (OverSpr*)  this; }
 
+        operator List**() { return (List**) this; }
+
         static MarkerList* Select(MarkerList *list, u16 x, u16 y)
         {
             MarkerList *m = NULL;
@@ -109,7 +111,7 @@
         MarkerList* GetPrev() {   return (MarkerList*) this->prev;     }
         static MarkerList* GetHead(MarkerList *exit) { return exit ? (MarkerList*) exit->head : exit;    }
         static MarkerList* GetTail(MarkerList *exit) { return exit ? (MarkerList*) exit->tail : exit;    }
-        static MarkerList* Add(MarkerList *list, MarkerList *entry) { return (MarkerList*) List::Add(list, entry); }
+        static void Add(MarkerList **list, MarkerList *entry) { List::Add( (List**) list, entry); }
     };
 
 // =========================================================================
@@ -140,6 +142,8 @@
             }
 
         // ********************************
+
+        static void Add(Entrance **list, Entrance *entry) { MarkerList::Add( (MarkerList**) list, entry); }
     };
 
 // =========================================================================
@@ -285,7 +289,7 @@
             OverExit* GetPrev() {   return (OverExit*) this->prev;     }
             static OverExit* GetHead(OverExit *exit) { return exit ? (OverExit*) exit->head : exit;    }
             static OverExit* GetTail(OverExit *exit) { return exit ? (OverExit*) exit->tail : exit;    }
-            static OverExit* Add(OverExit *list, OverExit *entry) { return (OverExit*) List::Add(list, entry); }
+            static void Add(OverExit **list, OverExit *entry) { List::Add( (List**) list, entry); }
     };
 
 // =========================================================================
@@ -304,8 +308,6 @@
 
         u16 spriteNum;
 
-        // ------------------
-
     public:
 
         OverSpr(u16 spriteNum = 0, u16 x = 0, u16 y = 0, bool overlord = false, u8 exData1 = 0, u8 exData2 = 0, u8 exData3 = 0)
@@ -323,6 +325,9 @@
 
         }
 
+    // ----------------------------
+
+
         bool SetType(u16 value)
         {
             bool retVal = false;
@@ -335,6 +340,11 @@
 
             return retVal;
         }
+
+    // ----------------------------
+
+        static void Add(OverSpr **list, OverSpr *entry) { MarkerList::Add( (MarkerList**) list, entry); }
+
     };
     
 // =========================================================================
@@ -351,8 +361,6 @@
 
         u16 itemNum;
 
-        // ------------------
-        
     public:
 
         OverItem(u16 itemNum = 0, u16 x = 0, u16 y = 0, u8 exData1 = 0, u8 exData2 = 0, u8 exData3 = 0)
@@ -368,6 +376,8 @@
             SetPos(x, y);
             SetType(itemNum);
         }
+
+    // ----------------------------
 
         bool SetType(u16 value)
         {
@@ -399,6 +409,11 @@
 
             return retVal;
         }
+
+    // ----------------------------
+
+        static void Add(OverItem **list, OverItem *entry) { MarkerList::Add( (MarkerList**) list, entry); }
+
     };
     
 // =========================================================================

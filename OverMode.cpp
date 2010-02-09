@@ -1474,7 +1474,7 @@
 
         // merge all the hole data together into one array
         for(list = NULL, i = 0; i < 0xC0; ++i)
-            list = (Entrance*) MarkerList::Add(list, o->allHoles[i]);
+            Entrance::Add( &list, o->allHoles[i]);
 
         h->overNumHoles = list->GetSize();
         size      = 5 * h->overNumHoles;
@@ -1511,7 +1511,7 @@
  
         // merge all the entrance data together
         for(list = NULL, i = 0; i < 0xC0; ++i)
-            list = (Entrance*) MarkerList::Add(list, o->allEntr[i]);
+            Entrance::Add( &list, o->allEntr[i]);
 
         h->overNumEntr = list->GetSize();
         /// number of entrances isn't tracked...?

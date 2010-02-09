@@ -1891,7 +1891,7 @@
                 OverSpr *spr = (OverSpr*) MarkerList::GetClicked(o->areaSpr, x, y);
                 
                 if(k == ID_ADD_SPRITE)
-                    o->areaSpr = (OverSpr*) MarkerList::Add(o->areaSpr, new OverSpr(0, x, y, false));
+                    OverSpr::Add( &o->areaSpr, new OverSpr(0, x, y, false));
                 else if(k == ID_REMOVE_SPRITE)
                 {
                     if(spr)
@@ -1921,7 +1921,7 @@
                 OverItem *item = (OverItem*) MarkerList::GetClicked(o->areaItems, x, y);
                 
                 if(k == ID_ADD_ITEM)
-                    o->areaItems = (OverItem*) MarkerList::Add(o->areaItems, new OverItem(0, x, y));
+                    OverItem::Add( &o->areaItems, new OverItem(0, x, y));
                 else if(k == ID_REMOVE_ITEM)
                 {
                     if(item)
@@ -1947,7 +1947,7 @@
                 {
                     case ID_ADD_EXIT:
                     {
-                        o->areaExits = OverExit::Add(o->areaExits, new OverExit(x, y, o->area, 0, over_exit_down));
+                        OverExit::Add(&o->areaExits, new OverExit(x, y, o->area, 0, over_exit_down));
 
                         break;
                     }
@@ -1991,10 +1991,10 @@
                 {
                     case IDC_ADD_ENTRANCE:
                     {
-                        m = new Entrance(x, y, 0, o->area);
+                        Entrance *e = new Entrance(x, y, 0, o->area);
 
-                        o->areaEntr = (Entrance*) MarkerList::Add(o->areaEntr, m);
-                        InvalidateRect(game->pictWin, m->GetRect(), FALSE);
+                        Entrance::Add(&o->areaEntr, e);
+                        InvalidateRect(game->pictWin, e->GetRect(), FALSE);
 
                         break;
                     }
@@ -2034,7 +2034,7 @@
                     {
                         Entrance *hole = new Entrance(x, y, 0, o->area);
 
-                        o->areaHoles = (Entrance*) MarkerList::Add(o->areaHoles, hole);
+                        Entrance::Add(&o->areaHoles, hole);
                         
                         InvalidateRect(game->pictWin, hole->GetRect(), FALSE);
                         break;

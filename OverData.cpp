@@ -32,7 +32,6 @@
         this->rom         = rom;
 
         this->pObj        = NULL;
-        // obsolete this->holeObj     = NULL;
 
         this->editMode      = mode_drawtile;
 
@@ -56,7 +55,7 @@
         
         this->map16To8      = CreateBuffer(0x40000);
 
-        this->area          = 0x45;
+        this->area          = 0x42;
         this->gi            = new graphicsInfo;
 
         this->header        = header;
@@ -76,10 +75,6 @@
 
         this->selObj2       = new OverObj();
 
-        this->areaHoles     = NULL;
-        this->areaEntr      = NULL;
-        this->areaExits     = NULL;
-
         this->tile8  = 0;
         this->tile16 = 0;
         this->tile32 = 0;
@@ -89,19 +84,9 @@
         // Load all the Map32 data ahead of time
         for(i = 0; i < 0xC0; ++i)
         {
-            this->allHoles[i]    = NULL;
-            this->allEntr[i]     = NULL;
-            this->allExits[i]    = NULL;
-            this->allItems[0][i] = NULL;
+            areas[i] = new OverArea();
 
-            if(i >= 0xA0)
-            {
-                this->map32Data[i] = NULL;
-                continue;
-            }
-
-            this->map32Data[i] = LoadMap32(i);
-            j &= (bool) this->map32Data[i];
+            j &= (bool) (this->areas[i] == 0 ? true : false);
         }
 
         for(i = 0; i < 13; ++i)
@@ -218,7 +203,75 @@
 
         FILE *f = NULL;
 
+        u16 map8_1[4];
+        u16 map8_2[4];
+
+        bufPtr flags = CreateBuffer(0x10000 / 8);
+
         // -----------------------
+
+        // return;
+
+        for(i = 0; i < map16Buf->width; ++i)
+        {
+            for(j = 0; j < map16Buf->height; ++j)
+            {
+                val1 = GetMap16Tile(map16Buf, i, j);
+
+                if(!GetBit(flags, val1))
+                    k += 1;
+
+                PutBit(flags, 1, val1);
+            }
+        }
+
+        return;
+
+        for(i = 0; i < numMap16Tiles; ++i)
+        {
+            for(j = 0; j < i; ++j)
+            {
+                Map16To8(i, map8_1);
+                Map16To8(j, map8_2);
+
+                if(map8_1[0] != map8_2[0])
+                    continue;
+                else if(map8_1[1] != map8_2[1])
+                    continue;
+                else if(map8_1[2] != map8_2[2])
+                    continue;
+                else if(map8_1[3] != map8_2[3])
+                    continue;
+                else
+                    k += 1;
+
+            }
+        }
+
+        k = 0;
+
+        for(i = 0; i < numMap32Tiles; ++i)
+        {
+            for(j = 0; j < i; ++j)
+            {
+                Map32To16(i, map8_1);
+                Map32To16(j, map8_2);
+
+                if(map8_1[0] != map8_2[0])
+                    continue;
+                else if(map8_1[1] != map8_2[1])
+                    continue;
+                else if(map8_1[2] != map8_2[2])
+                    continue;
+                else if(map8_1[3] != map8_2[3])
+                    continue;
+                else
+                    k += 1;
+
+            }
+        }
+
+        return;
 
         f = fopen("map16Dist.log", "wt");
 
@@ -231,6 +284,8 @@
         }
 
         fclose(f);
+
+        return;
 
         for(y = 0; y < map16Buf->height; ++y)
         {
@@ -323,10 +378,7 @@
             }
         }
 
-
-
-
-
+        return;
     }
 
 // ===============================================================
@@ -1142,7 +1194,7 @@
 
             hole = new Entrance(x, y, entrance, area);
 
-            allHoles[area] = (Entrance*) MarkerList::Add(allHoles[area], hole);
+            Entrance::Add( &allHoles[area], hole);
         }
 
         return true;
@@ -1185,7 +1237,7 @@
 
             entr = new Entrance(x, y, entrance, area);
 
-            allEntr[area] = (Entrance*) MarkerList::Add(allEntr[area], entr);
+            Entrance::Add( &allEntr[area], entr);
         }
 
         return true;
@@ -1260,7 +1312,7 @@
 
             exit->door->SetPos(GetMap16X(doorData), GetMap16Y(doorData));
 
-            allExits[area] = OverExit::Add(allExits[area], exit);
+            OverExit::Add( &allExits[area], exit);
         }
 
         return true;
@@ -1288,6 +1340,7 @@
         
         usingOld = (tableOffset[0] == 0x9C881) ? true : false;
 
+        // after the rom has been saved once by Black Magic, sprites are stored for all 0xC0 areas, rather than the first 0x90.
         if(!usingOld) { for(i = 0; i < 3; ++i) {  tableSizes[3] = 0xC0; } }
 
         for(i = 0; i < 3; ++i)
@@ -1331,7 +1384,7 @@
                         id -= 0xF5;
                     }
 
-                    allSpr[i][j] = (OverSpr*) MarkerList::Add(allSpr[i][j], new OverSpr(id, x << 4, y << 4) ); 
+                    OverSpr::Add( &allSpr[i][j], new OverSpr(id, x << 4, y << 4) ); 
                 }
 
             }
@@ -1402,8 +1455,7 @@
                    }
                 }
 
-                allItems[0][i] = (OverItem*) OverItem::Add(allItems[0][i], 
-                                                           new OverItem(itemNum, x, y));
+                OverItem::Add(&allItems[0][i], new OverItem(itemNum, x, y));
             }
         }
        

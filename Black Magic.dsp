@@ -282,6 +282,10 @@ SOURCE=.\resource.h
 # PROP Default_Filter "*.*"
 # Begin Source File
 
+SOURCE=.\OverArea.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\OverData.cpp
 # End Source File
 # Begin Source File

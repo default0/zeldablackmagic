@@ -69,7 +69,7 @@
     {
         POINT pt = { x, y };
 
-        return (bool) PtInRect( (const RECT*) this->GetRect(), pt);
+        return PtInRect( (const RECT*) this->GetRect(), pt) == TRUE ? true : false;
     }
 
 // ===============================================================

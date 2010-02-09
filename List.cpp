@@ -61,31 +61,37 @@
 
 // ===============================================================
 
-    List* List::Add(List *list, List *entry)
+    void List::Add(List **list, List *entry)
     {
-        List *t;
+        List *s = NULL;
+        List *t = NULL;
 
-        if(!entry)
-            return list;
+        // -------------------------
 
-        if(!list)
+        if(!entry || !list)
+            return;
+
+        s = (*list);
+
+        if(s)
         {
-            list = entry;
-            return list;
-        }
+            entry->prev     = s->tail;
+            s->tail->next   = entry;
 
-        entry->prev = list->tail;
-        list->tail->next = entry;
-
-        for(t = list->head; t != NULL; t = t->next)
+            for(t = s->head; t != NULL; t = t->next)
         {
-            t->head = list->head;
+                t->head = s->head;
             t->tail = entry->tail;
         }
 
-        list->SetSize();
+            s->SetSize();
 
-        return list->head;
+            (*list) = s->head;
+        }
+        else
+        {
+            (*list) = entry;
+        }
     }
 
 // ===============================================================
@@ -189,16 +195,16 @@
         List *s = NULL;
         List *u = NULL;
 
-        List::Add(t, new List());
-        List::Add(t, new List());
-        List::Add(t, new List());
+        List::Add(&t, new List());
+        List::Add(&t, new List());
+        List::Add(&t, new List());
 
         t->Delete(&t);
         t->Delete(&t);
         t->Delete(&t);
 
-        List::Add(t, new List());
-        List::Add(t, new List());
+        List::Add(&t, new List());
+        List::Add(&t, new List());
 
         s = t->head->Extract();
         u = t->tail->Extract();
