@@ -1,0 +1,181 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: Black Magic - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\User\LOCALS~1\Temp\RSPCE.tmp" with contents
+[
+/nologo /ML /W3 /GX /O2 /I "..\Compresch\src\\" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /FR"Release/" /Fp"Release/Black Magic.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Programming\RH\Black_Magic_a06\Strings.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\User\LOCALS~1\Temp\RSPCE.tmp" 
+Creating temporary file "C:\DOCUME~1\User\LOCALS~1\Temp\RSPCF.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib msimg32.lib re_lib_vs06.lib compresch_vs6.lib /nologo /subsystem:windows /incremental:no /pdb:"Release/Black Magic.pdb" /map:"Release/Black Magic.map" /machine:I386 /out:"Release/Black Magic.exe" /libpath:"../re_lib_vs06/release" /libpath:"..\Compresch_vs6\Release\\" 
+".\Release\Black Magic.obj"
+.\Release\constants.obj
+.\Release\Globals.obj
+.\Release\List.obj
+.\Release\Marker.obj
+.\Release\PathName.obj
+.\Release\Strings.obj
+.\Release\planning.obj
+.\Release\OverData.obj
+.\Release\OverHole.obj
+.\Release\OverMode.obj
+.\Release\OverModeGui.obj
+.\Release\DungMode.obj
+.\Release\Objects.obj
+.\Release\Music.obj
+.\Release\Sprites.obj
+.\Release\TextMode.obj
+.\Release\Core.obj
+.\Release\Graphics.obj
+.\Release\BM_resource.res
+]
+Creating command line "link.exe @C:\DOCUME~1\User\LOCALS~1\Temp\RSPCF.tmp"
+<h3>Output Window</h3>
+Compiling...
+Strings.cpp
+Linking...
+Creating temporary file "C:\DOCUME~1\User\LOCALS~1\Temp\RSPD1.tmp" with contents
+[
+/nologo /o"Release/Black Magic.bsc" 
+".\Release\Black Magic.sbr"
+.\Release\constants.sbr
+.\Release\Globals.sbr
+.\Release\List.sbr
+.\Release\Marker.sbr
+.\Release\PathName.sbr
+.\Release\Strings.sbr
+.\Release\planning.sbr
+.\Release\OverData.sbr
+.\Release\OverHole.sbr
+.\Release\OverMode.sbr
+.\Release\OverModeGui.sbr
+.\Release\DungMode.sbr
+.\Release\Objects.sbr
+.\Release\Music.sbr
+.\Release\Sprites.sbr
+.\Release\TextMode.sbr
+.\Release\Core.sbr
+.\Release\Graphics.sbr]
+Creating command line "bscmake.exe @C:\DOCUME~1\User\LOCALS~1\Temp\RSPD1.tmp"
+Creating browse info file...
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+Black Magic.exe - 0 error(s), 0 warning(s)
+<h3>
+--------------------Configuration: Black Magic - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\User\LOCALS~1\Temp\RSPD2.tmp" with contents
+[
+/nologo /MLd /W3 /Gm /GX /ZI /Od /I "..\Compresch\src\\" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR"Debug/" /Fp"Debug/Black Magic.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\Programming\RH\Black_Magic_a06\Globals.cpp"
+"C:\Programming\RH\Black_Magic_a06\OverData.cpp"
+"C:\Programming\RH\Black_Magic_a06\OverMode.cpp"
+"C:\Programming\RH\Black_Magic_a06\OverModeGui.cpp"
+"C:\Programming\RH\Black_Magic_a06\DungMode.cpp"
+"C:\Programming\RH\Black_Magic_a06\Objects.cpp"
+"C:\Programming\RH\Black_Magic_a06\Music.cpp"
+"C:\Programming\RH\Black_Magic_a06\TextMode.cpp"
+"C:\Programming\RH\Black_Magic_a06\Graphics.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\User\LOCALS~1\Temp\RSPD2.tmp" 
+Creating temporary file "C:\DOCUME~1\User\LOCALS~1\Temp\RSPD3.tmp" with contents
+[
+/nologo /MLd /Ze /W3 /Gm /GX /ZI /Od /I "..\Compresch\src\\" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR"Debug/" /Fp"Debug/Black Magic.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\Programming\RH\Black_Magic_a06\Strings.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\User\LOCALS~1\Temp\RSPD3.tmp" 
+Creating temporary file "C:\DOCUME~1\User\LOCALS~1\Temp\RSPD4.tmp" with contents
+[
+comctl32.lib re_lib_vs06.lib msimg32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib compresch_vs6.lib /nologo /subsystem:windows /incremental:yes /pdb:"Debug/Black Magic.pdb" /map:"Debug/Black Magic.map" /debug /machine:I386 /out:"Debug/Black Magic.exe" /libpath:"../re_lib_vs06/debug" /libpath:"..\Compresch_vs6\Release\\" 
+".\Debug\Black Magic.obj"
+.\Debug\constants.obj
+.\Debug\Globals.obj
+.\Debug\List.obj
+.\Debug\Marker.obj
+.\Debug\PathName.obj
+.\Debug\Strings.obj
+.\Debug\planning.obj
+.\Debug\OverData.obj
+.\Debug\OverHole.obj
+.\Debug\OverMode.obj
+.\Debug\OverModeGui.obj
+.\Debug\DungMode.obj
+.\Debug\Objects.obj
+.\Debug\Music.obj
+.\Debug\Sprites.obj
+.\Debug\TextMode.obj
+.\Debug\Core.obj
+.\Debug\Graphics.obj
+.\Debug\BM_resource.res
+]
+Creating command line "link.exe @C:\DOCUME~1\User\LOCALS~1\Temp\RSPD4.tmp"
+<h3>Output Window</h3>
+Compiling...
+Globals.cpp
+OverData.cpp
+C:\Programming\RH\Black_Magic_a06\OverData.cpp(102) : warning C4800: 'Buffer *' : forcing value to bool 'true' or 'false' (performance warning)
+C:\Programming\RH\Black_Magic_a06\OverData.cpp(102) : warning C4805: '&=' : unsafe mix of type 'unsigned int' and type 'bool' in operation
+OverMode.cpp
+OverModeGui.cpp
+C:\Programming\RH\Black_Magic_a06\OverModeGui.cpp(1503) : warning C4390: ';' : empty controlled statement found; is this the intent?
+C:\Programming\RH\Black_Magic_a06\OverModeGui.cpp(2166) : warning C4101: 'tile' : unreferenced local variable
+C:\Programming\RH\Black_Magic_a06\OverModeGui.cpp(2179) : warning C4101: 'tile' : unreferenced local variable
+C:\Programming\RH\Black_Magic_a06\OverModeGui.cpp(2192) : warning C4101: 'tile' : unreferenced local variable
+C:\Programming\RH\Black_Magic_a06\OverModeGui.cpp(2206) : warning C4101: 'tile' : unreferenced local variable
+C:\Programming\RH\Black_Magic_a06\OverModeGui.cpp(2219) : warning C4101: 'tile' : unreferenced local variable
+C:\Programming\RH\Black_Magic_a06\OverModeGui.cpp(2241) : warning C4101: 'tile' : unreferenced local variable
+DungMode.cpp
+Objects.cpp
+C:\Programming\RH\Black_Magic_a06\Objects.cpp(4650) : warning C4102: 'failure' : unreferenced label
+Music.cpp
+TextMode.cpp
+C:\Programming\RH\Black_Magic_a06\TextMode.cpp(1192) : warning C4101: 'dummy' : unreferenced local variable
+Graphics.cpp
+Compiling...
+Strings.cpp
+Linking...
+LINK : warning LNK4098: defaultlib "LIBC" conflicts with use of other libs; use /NODEFAULTLIB:library
+Creating temporary file "C:\DOCUME~1\User\LOCALS~1\Temp\RSPD6.tmp" with contents
+[
+/nologo /o"Debug/Black Magic.bsc" 
+".\Debug\Black Magic.sbr"
+.\Debug\constants.sbr
+.\Debug\Globals.sbr
+.\Debug\List.sbr
+.\Debug\Marker.sbr
+.\Debug\PathName.sbr
+.\Debug\Strings.sbr
+.\Debug\planning.sbr
+.\Debug\OverData.sbr
+.\Debug\OverHole.sbr
+.\Debug\OverMode.sbr
+.\Debug\OverModeGui.sbr
+.\Debug\DungMode.sbr
+.\Debug\Objects.sbr
+.\Debug\Music.sbr
+.\Debug\Sprites.sbr
+.\Debug\TextMode.sbr
+.\Debug\Core.sbr
+.\Debug\Graphics.sbr]
+Creating command line "bscmake.exe @C:\DOCUME~1\User\LOCALS~1\Temp\RSPD6.tmp"
+Creating browse info file...
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+Black Magic.exe - 0 error(s), 12 warning(s)
+</pre>
+</body>
+</html>
