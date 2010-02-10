@@ -40,19 +40,11 @@
 
         eOverlay = new EventOverlay();
 
-        // Map16Analysis();
-
-        /*        
-        areaHoles = allHoles[area];
-        areaEntr  = allEntr[area];
-        areaExits = allExits[area];
-        areaItems = allItems[0][area];
-        areaSpr   = allSpr[1][area];
-        */
-
         /*
         if(this->editOverlay == true)
         {
+            // 
+
             LoadOverlay();
         }
         else
