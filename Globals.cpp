@@ -424,103 +424,52 @@
         "" // empty terminator
     };
 
-    unsigned int entranceBufSizes[] = { 2, 8, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1 }; 
-    char editBuf[512];
-    char msgBuffer[256];
-
-    int quit;
-    int numGames;
-    int zgIndex;
-
-    RGBQUAD mainPalette[256];
-
-    DungeonFile portFile;
-
-    OPENFILENAME bmOFN;
-
-    BITMAPINFOHEADER* bmInfoHeadPtr;
-    HBITMAP mainBM;
-    SnesPalPtr defaultPal;
-    int totalMem;
-
-    HANDLE testFH;
-    HWND windowList[0x100];
-    zgPtr newGamePtr;
-
-    BITMAPINFO* bmInfoPtr;
-
-    HINSTANCE thisProg;
-    HDC mainDC;
-    RECT mainRect;
-    MSG mainMsg;
-    WNDCLASSEX mainClass;
-    WNDCLASSEX pictureClass;
-
-    LONG oldEditProc;
-
-    int expansionList[] =  {IDC_8MB,
-                            IDC_12MB,
-                            IDC_16MB,
-                            IDC_20MB,
-                            IDC_24MB,
-                            IDC_28MB,
-                            IDC_32MB};
-
-
-    WindowElement dungTemp[] =
-    {
-        { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 60, 0, 30, 20, 0, (HMENU) ID_DungAttrNum, 0, 0, 0, 12},
-        { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 90, 0, 60, 20, 0, (HMENU) ID_DungAttrAddress, 0, 0, 0, 0},
-        { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 150, 0, 60, 20, 0, (HMENU) ID_DungTilemapAddress, 0, 0, 0, 0},
-        { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 210, 0, 60, 20, 0, (HMENU) ID_DungTilemapNum, 0, 0, 0, 0},
-        { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 270, 0, 60, 20, 0, (HMENU) ID_DungRoomNum, 0, 0, 0, 0},
-        { pictureExStyle, "PICTURE", "DUNGPIC", pictureStyle|WS_GROUP, 80, 80, 512, 512, 0, (HMENU) ID_DungPictureBox, 0, 0, 0, 0},
-        { buttonExStyle,  "BUTTON",  "->",      buttonStyle|WS_GROUP, 0, 0, 50,  30, 0, (HMENU) ID_DungJumpButton, 0, 0, 0, 0},
-        { buttonExStyle,  "BUTTON",  "Header",  buttonStyle|WS_GROUP, 0, 60, 50, 30, 0, (HMENU) ID_DungHeaderButton, 0, 0, 0, 0},
-        { buttonExStyle,  "BUTTON",  "<-",      buttonStyle|WS_GROUP, 0, 30, 50, 30, 0, (HMENU) ID_DungRoomButton, 0, 0, 0, 0},
-        { buttonExStyle,  "BUTTON",  "Search",  buttonStyle|WS_GROUP, 0, 90, 50, 30, 0, (HMENU) ID_DungSearchButton, 0, 0, 0, 0},
-        { radioExStyle,   "BUTTON",  "BG1",     radioStyle|WS_GROUP, 0, 120, 50, 30, 0, (HMENU) ID_DungLayer1Radio, 0, 0, 0, 0},
-        { radioExStyle,   "BUTTON",  "BG2",     radioStyle|WS_GROUP, 0, 150, 50, 30, 0, (HMENU) ID_DungLayer2Radio, 0, 0, 0, END_FLAG}
-    };
-
-    WindowElement overTemp[] =
-    {
-        { editExStyle, "EDIT", editBuf, editStyle, 0, 0x400, 100, 20, 0, (HMENU) ID_OverPaletteNum, 0, 0, 0, 2},
-        { pictureExStyle, "PICTURE", "OVERPIC", pictureStyle|WS_GROUP, 0, 0, 0x400, 0x400, 0, (HMENU) ID_DungPictureBox, 0, 0, 0, END_FLAG},
-
-    };
-
     // List of what values of $0AA1 correspond to
 
-    // 0x00 - hyrule castle throne room
-    // 0x01 - dungeon interior?
-    // 0x02 - agahnim's room
-    // 0x03 - houses
-    // 0x04 - hyrule castle part 1 / sanctuary / hyrule castle part 2
-    // 0x05 - eastern palace (dungeon) / tower of hera
-    // 0x06 - cave
-    // 0x08 - swamp palace / watergate
-    // 0x09 - skull woods palace
-    // 0x0A - gargoyle's domain / blind's old hideout
-    // 0x0B - ice palace (dungeon)
-    // 0x0C - misery mire
-    // 0x0D - turtle rock
-    // 0x0E - Ganon's tower
-    // 0x0F - sahashralah's hideout
+    char* mainGfxStrings[] =
+    {
+        "Hyrule Castle throne room",                // 0x00 - hyrule castle throne room
+        "Default dungeon interior",                 // 0x01 - dungeon interior?
+        "Agahnim's room",                           // 0x02 - agahnim's room
+        "House interiors",                          // 0x03 - houses
+        "Hyrule Castle / Sanctuary",                // 0x04 - hyrule castle part 1 / sanctuary / hyrule castle part 2
+        "Eastern Palace / Tower of Hera interior",  // 0x05 - eastern palace (dungeon) / tower of hera
+        "Caves",                                    // 0x06 - cave
+        "Unknown",                                  // 0x07 - unknown
+        "Swamp Palace / Watergate",                 // 0x08 - swamp palace / watergate
+        "Skull Woods Palace",                       // 0x09 - skull woods palace
+        "Gargoyle's Domain / Blind's Hideout",      // 0x0A - gargoyle's domain / blind's old hideout
+        "Ice Palace interior",                      // 0x0B - ice palace (dungeon)
+        "Misery Mire interior",                     // 0x0C - misery mire
+        "Turtle Rock interior",                     // 0x0D - turtle rock
+        "Ganon's Tower interior",                   // 0x0E - Ganon's tower
+        "Sahashralah's Hideout",                    // 0x0F - sahashralah's hideout
+        
+        "Unknown",                                  // 0x10 - unknown
+        "Fortune teller / Bow & Arrow Game",        // 0x11 - fortune teller / bow & arrow game
+        "Desert Palace / Pyramid of Power",         // 0x12 - desert palace / pyramid of power fountain
+        "Ganon pit room",                           // 0x13 - Ganon pit room
+        "Shopkeepers / Storytellers",               // 0x14 - shopkeepers / storytellers
+        "Unknown",                                  // 0x15 - unknown
+        "Unknown",                                  // 0x16 - unknown
+        "Unknown",                                  // 0x17 - unknown
+        "Unknown",                                  // 0x18 - unknown
+        "Unknown",                                  // 0x19 - unknown
+        "Unknown",                                  // 0x1A - unknown
+        "Unknown",                                  // 0x1B - unknown
+        "Unknown",                                  // 0x1C - unknown
+        "Unknown",                                  // 0x1D - unknown
+        "Unknown",                                  // 0x1E - unknown
+        "Unknown",                                  // 0x1F - unknown
+        
+        "Light World overworld",                    // 0x20 - light world overworld / map screen
+        "Dark World overworld",                     // 0x21 - dark world overworld
+        "2bpp graphics",                            // 0x22 - 2bpp graphics? why?
+        "Title screen / menus",                     // 0x23 - title screen / menus
+        "Triforce room"                             // 0x24 - triforce room
+    }
 
-    // 0x11 - fortune teller / bow & arrow game
-    // 0x12 - desert palace / pyramid of power fountain
-    // 0x13 - Ganon pit room
-    // 0x14 - shopkeeper / storytellers
-    // 0x15 - ???
-
-    
-    
-    // 0x20 - light world overworld / map screen
-    // 0x21 - dark world overworld
-    // 0x22 - 2bpp graphics? why?
-    // 0x23 - title screen / menus
-    // 0x24 - triforce room
+    // List of what values of $0AA2 correspond to
 
     char* auxGfxStrings[] =
     {
@@ -614,7 +563,71 @@
         ""                                  // null terminator string
     };
 
-    // List of what values of $0AA2 correspond to
+    unsigned int entranceBufSizes[] = { 2, 8, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1 }; 
+    char editBuf[512];
+    char msgBuffer[256];
+
+    int quit;
+    int numGames;
+    int zgIndex;
+
+    RGBQUAD mainPalette[256];
+
+    DungeonFile portFile;
+
+    OPENFILENAME bmOFN;
+
+    BITMAPINFOHEADER* bmInfoHeadPtr;
+    HBITMAP mainBM;
+    SnesPalPtr defaultPal;
+    int totalMem;
+
+    HANDLE testFH;
+    HWND windowList[0x100];
+    zgPtr newGamePtr;
+
+    BITMAPINFO* bmInfoPtr;
+
+    HINSTANCE thisProg;
+    HDC mainDC;
+    RECT mainRect;
+    MSG mainMsg;
+    WNDCLASSEX mainClass;
+    WNDCLASSEX pictureClass;
+
+    LONG oldEditProc;
+
+    int expansionList[] =  {IDC_8MB,
+                            IDC_12MB,
+                            IDC_16MB,
+                            IDC_20MB,
+                            IDC_24MB,
+                            IDC_28MB,
+                            IDC_32MB};
+
+
+    WindowElement dungTemp[] =
+    {
+        { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 60, 0, 30, 20, 0, (HMENU) ID_DungAttrNum, 0, 0, 0, 12},
+        { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 90, 0, 60, 20, 0, (HMENU) ID_DungAttrAddress, 0, 0, 0, 0},
+        { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 150, 0, 60, 20, 0, (HMENU) ID_DungTilemapAddress, 0, 0, 0, 0},
+        { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 210, 0, 60, 20, 0, (HMENU) ID_DungTilemapNum, 0, 0, 0, 0},
+        { editExStyle,    "EDIT",    editBuf,   editStyle | ES_READONLY, 270, 0, 60, 20, 0, (HMENU) ID_DungRoomNum, 0, 0, 0, 0},
+        { pictureExStyle, "PICTURE", "DUNGPIC", pictureStyle|WS_GROUP, 80, 80, 512, 512, 0, (HMENU) ID_DungPictureBox, 0, 0, 0, 0},
+        { buttonExStyle,  "BUTTON",  "->",      buttonStyle|WS_GROUP, 0, 0, 50,  30, 0, (HMENU) ID_DungJumpButton, 0, 0, 0, 0},
+        { buttonExStyle,  "BUTTON",  "Header",  buttonStyle|WS_GROUP, 0, 60, 50, 30, 0, (HMENU) ID_DungHeaderButton, 0, 0, 0, 0},
+        { buttonExStyle,  "BUTTON",  "<-",      buttonStyle|WS_GROUP, 0, 30, 50, 30, 0, (HMENU) ID_DungRoomButton, 0, 0, 0, 0},
+        { buttonExStyle,  "BUTTON",  "Search",  buttonStyle|WS_GROUP, 0, 90, 50, 30, 0, (HMENU) ID_DungSearchButton, 0, 0, 0, 0},
+        { radioExStyle,   "BUTTON",  "BG1",     radioStyle|WS_GROUP, 0, 120, 50, 30, 0, (HMENU) ID_DungLayer1Radio, 0, 0, 0, 0},
+        { radioExStyle,   "BUTTON",  "BG2",     radioStyle|WS_GROUP, 0, 150, 50, 30, 0, (HMENU) ID_DungLayer2Radio, 0, 0, 0, END_FLAG}
+    };
+
+    WindowElement overTemp[] =
+    {
+        { editExStyle, "EDIT", editBuf, editStyle, 0, 0x400, 100, 20, 0, (HMENU) ID_OverPaletteNum, 0, 0, 0, 2},
+        { pictureExStyle, "PICTURE", "OVERPIC", pictureStyle|WS_GROUP, 0, 0, 0x400, 0x400, 0, (HMENU) ID_DungPictureBox, 0, 0, 0, END_FLAG},
+
+    };
 
     unsigned long numBytesRead;
 

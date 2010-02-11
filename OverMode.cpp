@@ -792,12 +792,10 @@
         u32 value = 0;
 
         bool map16Failure = false;
-        bool map32Failure = false;
 
         u8  area     = o->area;
 
         u16 oldMap16 = 0;
-        u16 oldMap32 = 0;
         u16 map8Vals[4];
         u16 map16Vals[4];
 
@@ -824,22 +822,12 @@
         u32 dx16   = (x16Max - x16Min + 1);
         u32 dy16   = (y16Max - y16Min + 1);
         
-        u32 x32Min = bound(x16Min >> 1, 0, 0x1F);
-        u32 x32Max = bound( (x16Min + dx16 - 1) >> 1, 0, 0x1F);
-        u32 dx32   = (x32Max - x32Min + 1);
-        
-        u32 y32Min = bound(y16Min >> 1, 0, 0x1F);
-        u32 y32Max = bound( (y16Min + dy16 - 1) >> 1, 0, 0x1F);
-        u32 dy32   = (y32Max - y32Min + 1);
-
         bufPtr mapData   = NULL;
         
         bufPtr tempMap16 = NULL;
         bufPtr tempMap8  = NULL;
-        bufPtr tempMap32 = NULL;
 
         bufPtr saveMap16 = NULL;
-        bufPtr saveMap32 = NULL;
     
         ManagedBitmap *b = (ManagedBitmap*) GetWindowLong(game->pictWin, 0);
 
@@ -854,7 +842,6 @@
             {
                 tempMap16 = CreateBuffer(dx32 << 1, dy32 << 1, 2);
                 tempMap8  = CreateBuffer(dx32 << 2, dy32 << 2, 2);
-                tempMap32 = CreateBuffer(dx32     , dy32     , 2);
                 mapData   = FromString( (char*) obj->mapData, dx8, dy8, 4);
 
                 // copy the contents of a subsection of the map8 buffer to a temporary array
@@ -886,18 +873,7 @@
                     fprintf(errFile, "\n");
                 }
 
-                // do the same for the map32 tiles
-                for(j = 0; j < tempMap32->height; ++j)
-                {            
-                    for(i = 0; i < tempMap32->width; ++i)
-                    {
-                        value = o->GetMap32Tile(x32Min + i, y32Min + j); 
-                        Put2Bytes(tempMap32, i, j, value);
-                    }
-                }
-                
                 saveMap16 = DuplicateBuffer(tempMap16);
-                saveMap32 = DuplicateBuffer(tempMap32);
                 
                 // now write in the map8 parts of the object to the tempMap8 buffer
                 for(j = 0; j < dy8; ++j)

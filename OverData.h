@@ -49,7 +49,20 @@
         // specific graphics settings for the area
         graphicsInfo *gi;
 
-        // lists of data for each area
+        // 0x2000 byte array for a full map16 tilemap
+        bufPtr map16Buf;
+
+        // used for backing up the map16 buffer when event overlay editing is enabled
+        bufPtr map16Backup;
+        
+        // area specific map16 flags
+        bufPtr map16Flags  = CreateBuffer(0x10000 / 8);
+
+        // map32 data used only on initial load, will not be saved into the black magic modded rom
+		bufPtr          map32Data;
+        bufPtr          rom;
+
+        // lists of data entries for each area
         Entrance   *entr;
         Entrance   *holes;
         OverExit   *exits;
@@ -57,9 +70,6 @@
         OverItem   *items[0x03];
         EventOverlay    *eOverlay;
 
-		bufPtr      map32Data;
-        bufPtr          rom;
-        
     public:
 
         // member functions
@@ -99,9 +109,6 @@
 
         // determines whether we're currently working in map8, map16, or map32 tiles
         objMapType tileSize;
-        
-        bufPtr map16Buf;        // 0x2000 byte array for a full map16 tilemap
-        bufPtr map16Backup;     // used for backing up the map16 buffer when event overlay editing is enabled
         
         bufPtr map8Buf;         // 0x8000 byte array for a full 1024x1024 area
 
