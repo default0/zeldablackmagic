@@ -34,9 +34,16 @@
         }
 
         if(largeArea)
+        {
             map16Buf = CreateBuffer(0x40, 0x40, 2);
+            map16Backup = CreateBuffer(0x40, 0x40, 2);
+        }
         else(largeArea)
+        {
             map16Buf = CreateBuffer(0x20, 0x20, 2);
+            map16Backup = CreateBuffer(0x20, 0x20, 2);
+
+        }
 
         eOverlay = new EventOverlay();
 
