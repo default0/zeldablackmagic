@@ -1,28 +1,28 @@
 
 	#include "Globals.h"
     #include "OverData.h"
-    #include "Core.h" // only used so we can have access to graphics.cpp functions
+    #include "Core.h"       // only used so we can have access to graphics.cpp functions
 
 // ===============================================================
 
     OverArea::OverArea(u8 area, bufPtr rom)
     {
-        this->rom = rom;
+        this->rom     = rom;
         this->areaNum = area;
 
         if(areaNum < 0x80)
         {
             // Check whether we're in the dark world.
             darkWorld = (areaNum & 0x40) ? true : false;
-        
+            
             // Check whether the map is 1024x1024 (loads 4 areas) or 512x512 (loads 1 area)
             largeArea = GetByte(rom, 0x12844 + (areaNum & 0x3F) ) != 0 ? true : false;
-
+            
             if(largeArea)
             {
                 // Maps 512x512 area number to the larger 1024x1024 area number that it belongs to.
                 area = GetByte(rom, 0x125EC + (areaNum & 0x3F)) + (darkWorld ? 0x40 : 0x00);
-
+                
                 // Loads all four of the 512x512 submaps that make up the large area.
                 LoadMap16(area + 0, upper_left);
                 LoadMap16(area + 1, upper_right);
@@ -35,18 +35,20 @@
 
         if(largeArea)
         {
-            map16Buf = CreateBuffer(0x40, 0x40, 2);
-            map16Backup = CreateBuffer(0x40, 0x40, 2);
+            map16       = new Map16Buf(0x40, 0x40);
+            map16Backup = new Map16Buf(0x40, 0x40);
         }
-        else(largeArea)
+        else
         {
-            map16Buf = CreateBuffer(0x20, 0x20, 2);
-            map16Backup = CreateBuffer(0x20, 0x20, 2);
-
+            map16       = new Map16Buf(0x20, 0x20);
+            map16Backup = new Map16Buf(0x20, 0x20);
         }
+
+        /// not sure if I'm going to need a flags buffer for each area
+        map16Flags      = CreateBuffer(0x10000 / 8);
 
         eOverlay = new EventOverlay();
-
+        
         /*
         if(this->editOverlay == true)
         {
@@ -60,9 +62,6 @@
             LoadMap8();
         }
         */
-
-        
-        return true;
     }
 
 // ===============================================================
@@ -76,54 +75,59 @@
 
 // ===============================================================
 
-    bufPtr OverArea::LoadMap32()
-    {
-        u8 a         = 0;
-        u8 b         = 0;
+    bufPtr OverData::LoadMap16(u32 index, map16Pos p)
+    {   
+        /**
 
-        u32 i        = 0;
-        u32 tableLoc = 0;
-        u32 offset   = 0;
+        u32 map32Val = 0;
+        u16 map16Vals[4];
 
-        bufPtr data1 = NULL;
-        bufPtr data2 = NULL;
+        u32 i = 0;
+        u32 j = 0;
+        u32 k = 0;
 
-        // map32 in Zelda should contain 0x200 bytes of data
-        bufPtr map32Buf = CreateBuffer(0x10, 0x10, 2);
+        bufPtr map32To16 = this->map32To16;
 
-        // ---------------------------------------------
+        // -----------------------------------------------
 
-        tableLoc = CpuToRomAddr(Get3Bytes(this->rom, asm_overmap_ptrs));
-        offset   = Get3Bytes(this->rom, tableLoc + (areaNum * 3));
-        data1    = DecompressBank02(this->rom, CpuToRomAddr(offset) );
+        // pretty complex for loop eh?
+        for
+        (
+            k = 0x10, i = 0, j = (u32) p;
+            i < 0x200;
+            i += 2, j += 4, k--
+        )
+        { 
+            // this conditional statement when activated, positions j
+            // so that it will start writing to the next "line" of the map16 buffer
+            if(!k)
+            {
+                j += 0xC0;
+                k  = 0x10;
+            }
 
-        tableLoc = CpuToRomAddr(Get3Bytes(this->rom, asm_overmap_ptrs2));
-        offset   = Get3Bytes(this->rom, tableLoc + (areaNum * 3));
-        data2    = DecompressBank02(this->rom, CpuToRomAddr(offset) );
+            map32Val = Get2Bytes(map32Buf, i) * 8;
 
-        for(i = 0; i < 0x100; ++i)
-        {
-            // notice how this data is interlaced from two separate sources
-            // strange storage method... maybe it compresses better that way
-            a = GetByte(data1, i);
-            b = GetByte(data2, i);
-            PutByte(map32Buf, (i*2)+1, a);
-            PutByte(map32Buf, (i*2),   b);
+            map16Vals[0] = Get2Bytes(map32To16, map32Val + 0);
+            map16Vals[1] = Get2Bytes(map32To16, map32Val + 2);
+            map16Vals[2] = Get2Bytes(map32To16, map32Val + 4);
+            map16Vals[3] = Get2Bytes(map32To16, map32Val + 6);
+
+            Put2Bytes(this->map16Buf, j + 0x00, map16Vals[0]);
+            Put2Bytes(this->map16Buf, j + 0x02, map16Vals[1]);
+            Put2Bytes(this->map16Buf, j + 0x80, map16Vals[2]);
+            Put2Bytes(this->map16Buf, j + 0x82, map16Vals[3]);
         }
 
-        DeallocBuffer(data1);
-        DeallocBuffer(data2);
+        */
 
-        // signal that there's a problem if the map32 data is not of the correct size
-        if(map32Buf->length != 0x200)
-            map32Buf->error = 1;
+        return NULL;
 
-        return map32Buf;
     }
 
 // ===============================================================
 
-    bool OverData::LoadOverlay()
+    bool OverArea::LoadOverlay()
     {
         u32 i        = 0;
         u32 j        = 0;
@@ -131,29 +135,30 @@
 
         // -----------------------
 
-        CopyBuffer(map16Backup, map16Buf, 0, 0, map16Buf->length);
+        // copy map16 data to a backup buffer
+        (*map16Backup) = (*map16);
 
-        for(i = 0; i < 0x40; ++i)
+        for(i = 0; i < map16->width; ++i)
         { 
-            for(j = 0; j < 0x40; ++j)
+            for(j = 0; j < map16->height; ++j)
             {
                 map16Val = eOverlay->GetTile(i, j);
 
                 if(map16Val == 0xFFFF)
                     continue;
 
-                SetMap16Tile(map16Buf, map16Val, i, j);
+                map16->SetTile(i, j, map16Val);
             }
         }
 
-        LoadMap8();
+        /// LoadMap8();
 
         return true;
     }
 
 // ===============================================================
 
-    bool OverData::UnloadOverlay()
+    bool OverArea::UnloadOverlay()
     {
         u32 i        = 0;
         u32 j        = 0;
@@ -168,8 +173,8 @@
         { 
             for(j = 0; j < 0x40; ++j)
             {
-                newMap16 = GetMap16Tile(map16Buf, i, j);
-                oldMap16 = GetMap16Tile(map16Backup, i, j);
+                newMap16 = map16->GetTile(i, j);
+                oldMap16 = map16Backup->GetTile(i, j);
 
                 if(newMap16 == oldMap16)
                     eOverlay->SetTile(0xFFFF, i, j);
@@ -178,10 +183,9 @@
             }
         }
         
-        // restore the map16 buffer to the way it was before the overlay was activated
-        CopyBuffer(map16Buf, map16Backup, 0, 0, map16Backup->length);
+        (*map16) = (*map16Backup);
 
-        LoadMap8();
+        /// LoadMap8();
 
         return true;
     }
