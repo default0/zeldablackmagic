@@ -1390,7 +1390,7 @@
             // now create the data that the pointers link to.
             for(i = 0; i < 0xC0; ++i)
             {
-                list2 = o->allSpr[part][i];
+                list2 = o->areas[i]->spr[part];
 
                 if(list2)
                     size = (list2->GetSize() * 3) + 1;
@@ -1398,7 +1398,7 @@
                     continue;
 
                 // need an additional sprite to have falling rocks in the area
-                if(o->fallingRocks[part][i] == true)
+                if(o->areas[i]->fallingRocks[part] == true)
                     size += 3;
 
                 fprintf(f, "\norg $%06X", AdvancePointer(game, offset, size));
@@ -1408,7 +1408,7 @@
                 for(sprite = (OverSpr*) MarkerList::GetHead(list2); sprite != NULL; sprite = (OverSpr*) sprite->GetNext())
                     fprintf(f, "\n        db $%02X, $%02X, $%02X ; y coord, x coord, sprite num", sprite->y >> 4, sprite->x >> 4, sprite->spriteNum);
 
-                if(o->fallingRocks[part][i] == true)
+                if(o->areas[i]->fallingRocks[i] == true)
                     fprintf(f, "\n        db $00, $00, $F4 ; falling rocks overlord sprite");
 
                 fprintf(f, "\n        db $FF ; terminating byte");
