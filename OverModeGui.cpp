@@ -91,7 +91,7 @@
 
                 o->UnloadArea();
 
-                o->area = (u8) wp;
+                o->area = o->areas[(u8) wp];
            
                 o->LoadArea();
 
