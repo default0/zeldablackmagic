@@ -7,7 +7,6 @@
     {
         fromMap8  = 0x08,
         fromMap16 = 0x10,
-        fromMap32 = 0x20
     } objMapType;
 
     class OverObj

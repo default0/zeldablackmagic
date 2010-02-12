@@ -413,8 +413,8 @@
     extern char* OverStrings[];
     extern char* ItemStrings[];
 
+    extern char* mainGfxStrings[];
     extern char* auxGfxStrings[];
-    /// extern char auxGfxStrings[0x100][0x60];
 
     extern RGBQUAD mainPalette[];
 

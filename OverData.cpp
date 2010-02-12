@@ -69,14 +69,13 @@
 
     OverData::OverData(bufPtr rom, BM_Header *header)
     {
-        u32 i       = 0;
-        u32 j       = true;
+        bool j  = true;
+
+        u32 i   = 0;
 
         //---------------------------
         
-        this->editOverlay = false;
-
-        this->area          = 0x42;
+        this->editOverlay   = false;
 
         this->tile8         = 0;
         this->tile16        = 0;
@@ -92,7 +91,7 @@
         this->map16Flags    = CreateBuffer(0x10000 / 8);
 
         this->map16Counts   = CreateBuffer(0x10000, 0x01, 4);
-        
+
         this->map16To8      = CreateBuffer(0x40000);
 
         // copy of the BM_Header struct from the parent ZeldaGame object
@@ -112,9 +111,9 @@
             areas[a] = NULL;
 
             // large areas group together 4 small areas
-            a = ResolveArea(a)
+            a = ResolveArea(a);
 
-            if(area[a] == NULL)
+            if(areas[a] == NULL)
             {
                 areas[a] = new OverArea(a, rom);
             }
@@ -122,36 +121,47 @@
             {
                 // copy the pointer from the slot for the large area
                 // that this area is part of, to avoid confusion
-                areas[i] = areas[a]
+                areas[i] = areas[a];
+            }
+
+            j &= (this->areas[i] == 0 ? true : false);
         }
 
-            j &= (bool) (this->areas[i] == 0 ? true : false);
-        }
+        this->area          = areas[0x03];
 
-        LoadMap32To16();
         LoadMap16To8();
-
-        // load various types of different data
-        LoadAllHoleData();
-        LoadAllEntranceData();
-        LoadAllExitData();
-        LoadAllSpriteData();
-        LoadAllItemData();
-        LoadOverlaysOld();
         
         // Initializes all the map16 and map32 flags so we can know which tiles are being used and which aren't.
         LoadMapFlags();
+        
+        if(1) /// change this to something like "usingOld" later when we get an implementation up and running
+        {
+            for(i = 0; i < 0xA0; ++i)
+            {
+                map32Data[i] = LoadMap32(i);
 
-        j &= !!this->gi;
+            }
+
+            LoadMap32To16();
+
+            // load various types of different data
+            LoadOverlaysOld();
+            LoadAllHoleData();
+            LoadAllEntranceData();
+            LoadAllExitData();
+            LoadAllSpriteData();
+            LoadAllItemData();
+
+            j &= !!this->map32To16;
+        }
+
         j &= !!this->map16Buf; 
-        j &= !!this->map32Data; 
-        j &= !!this->map32To16;
         j &= !!this->map16To8;
-        j &= !!this->map32Flags; 
         j &= !!this->map16Flags; 
+
         j &= !!this->map8Buf;
 
-        // GUI related crap that needs to be phased somewhere else.
+        /// GUI related crap that needs to be phased somewhere else.
         this->stockContext  = GetSubMenu(LoadMenu(thisProg, MAKEINTRESOURCE(IDR_OVER_STOCK)), 0);
         this->selectContext = GetSubMenu(LoadMenu(thisProg, MAKEINTRESOURCE(IDR_OVER_SELECT)), 0);
         this->sprContext    = GetSubMenu(LoadMenu(thisProg, MAKEINTRESOURCE(IDR_OVER_SPRITE)), 0);
@@ -165,19 +175,16 @@
             this->bStock[i] = NULL;
             this->hStock[i] = NULL;
         }
-        // End of GUI crap
+        /// End of GUI crap
     }
 
 // ===============================================================
 
     OverData::~OverData()
     {
-        u32 i = 0;
+        /// insert code to destroy all OverArea objects later!!!
 
-        delete gi;
-        
-        for(i = 0; i < 0xA0; ++i)
-            DestroyBuffer(this->map32Data[i]);
+
     }
 
     static FILE* mapCountFile = fopen("C:\\map32log.log", "wt");
@@ -188,10 +195,10 @@
     {
         if(area < 0x80)
         {
-        // Maps 512x512 area number to the larger 1024x1024 area number that it belongs to.
-        return ( GetByte(rom, 0x125EC + (area & 0x3F)) + (area & 0x40) );
-    }
-
+            // Maps 512x512 area number to the larger 1024x1024 area number that it belongs to.
+            return ( GetByte(rom, 0x125EC + (area & 0x3F)) + (area & 0x40) );
+        }
+        
         // areas 0x80 and above just return the normal area index....
         return area;
     }
@@ -205,19 +212,21 @@
 
         // ----------------------------
 
-        if(area < 0x80)
+        /**
+
+        if(area->areaNum < 0x80)
         {
             // Check whether we're in the dark world.
-            darkWorld = (area & 0x40) ? true : false;
-
+            darkWorld = (area->areaNum & 0x40) ? true : false;
+            
             // Check whether the map is 1024x1024 (loads 4 areas) or 512x512 (loads 1 area)
             largeArea = GetByte(rom, 0x12844 + (area & 0x3F) ) != 0 ? true : false;
-
+            
             if(largeArea)
             {
                 // Maps 512x512 area number to the larger 1024x1024 area number that it belongs to.
                 area = GetByte(rom, 0x125EC + (area & 0x3F)) + (darkWorld ? 0x40 : 0x00);
-
+                
                 // Loads all four of the 512x512 submaps that make up the large area.
                 LoadMap16(area + 0, upper_left);
                 LoadMap16(area + 1, upper_right);
@@ -228,24 +237,26 @@
                 LoadMap16(area, upper_left);
         }
 
+        */
+
         Map16Analysis();
 
+        /**        
         areaHoles = allHoles[area];
         areaEntr  = allEntr[area];
         areaExits = allExits[area];
         areaItems = allItems[0][area];
         areaSpr   = allSpr[1][area];
+        */
 
         if(this->editOverlay == true)
         {
-            LoadOverlay();
-        }
-        else
-        {
-            // refresh the tiles in the map8 buffer
-            LoadMap8();
+            area->LoadOverlay();
         }
 
+        // refresh the tiles in the map8 buffer
+        LoadMap8();
+        
         return true;
     }
 
@@ -270,15 +281,17 @@
 
         bufPtr flags = CreateBuffer(0x10000 / 8);
 
+        Map16Buf *map16 = area->map16;
+
         // -----------------------
 
         // return;
 
-        for(i = 0; i < map16Buf->width; ++i)
+        for(i = 0; i < map16->width; ++i)
         {
-            for(j = 0; j < map16Buf->height; ++j)
+            for(j = 0; j < map16->height; ++j)
             {
-                val1 = GetMap16Tile(map16Buf, i, j);
+                val1 = map16->GetTile(i, j);
 
                 if(!GetBit(flags, val1))
                     k += 1;
@@ -312,27 +325,6 @@
 
         k = 0;
 
-        for(i = 0; i < numMap32Tiles; ++i)
-        {
-            for(j = 0; j < i; ++j)
-            {
-                Map32To16(i, map8_1);
-                Map32To16(j, map8_2);
-
-                if(map8_1[0] != map8_2[0])
-                    continue;
-                else if(map8_1[1] != map8_2[1])
-                    continue;
-                else if(map8_1[2] != map8_2[2])
-                    continue;
-                else if(map8_1[3] != map8_2[3])
-                    continue;
-                else
-                    k += 1;
-
-            }
-        }
-
         return;
 
         f = fopen("map16Dist.log", "wt");
@@ -349,20 +341,20 @@
 
         return;
 
-        for(y = 0; y < map16Buf->height; ++y)
+        for(y = 0; y < map16->height; ++y)
         {
-            for(x = 0; x < map16Buf->width; ++x)
+            for(x = 0; x < map16->width; ++x)
             {
                 baseY = 0;
 
-                for( ; baseY < map16Buf->height; ++baseY)
+                for( ; baseY < map16->height; ++baseY)
                 {
                     baseX = 0;
 
                     if( ( (baseX) + ( (baseY) << 6)) >= (x + (y << 6)) )
                         break;                        
 
-                    for( ; baseX < map16Buf->width; ++baseX)
+                    for( ; baseX < map16->width; ++baseX)
                     {
                         if( ( (baseX) + ( (baseY) << 6)) >= (x + (y << 6)) )
                             break;
@@ -370,7 +362,7 @@
                         numBytes = 0;
 
                         // width first loop
-                        for(i = 0, j = 0; (baseY + j) < map16Buf->height; ++j)
+                        for(i = 0, j = 0; (baseY + j) < map16->height; ++j)
                         {
                             if( ( (baseX + i) + ( (baseY + j) << 6)) >= (x + (y << 6)) )
                                 break;
@@ -381,13 +373,13 @@
                             if(val1 != val2)
                                 break;
 
-                            for(i = 0; (baseX + i) < map16Buf->width; ++i)
+                            for(i = 0; (baseX + i) < map16->width; ++i)
                             {
                                 if( ( (baseX + i) + ( (baseY + j) << 6)) >= (x + (y << 6)) )
                                     break;
 
-                                val1 = Get2Bytes(map16Buf, x     + i, y     + j);
-                                val2 = Get2Bytes(map16Buf, baseX + i, baseY + j);
+                                val1 = map16->GetTile(x     + i, y     + j);
+                                val2 = map16->GetTile(baseX + i, baseY + j);
 
                                 if(val1 != val2)
                                     break;
@@ -404,7 +396,7 @@
                         numBytes = 0;
 
                         // height first loop
-                        for(i = 0, j = 0; (baseX + i) < map16Buf->width; ++i)
+                        for(i = 0, j = 0; (baseX + i) < map16->width; ++i)
                         {
                             if( ( (baseX + i) + ( (baseY + j) << 6)) >= (x + (y << 6)) )
                                 break;
@@ -415,28 +407,25 @@
                             if(val1 != val2)
                                 break;
 
-                            for(j = 0; (baseY + j) < map16Buf->height; ++j)
+                            for(j = 0; (baseY + j) < map16->height; ++j)
                             {
                                 if( ( (baseX + i) + ( (baseY + j) << 6)) >= (x + (y << 6)) )
                                     break;
 
-                                val1 = Get2Bytes(map16Buf, x     + i, y     + j);
-                                val2 = Get2Bytes(map16Buf, baseX + i, baseY + j);
+                                val1 = map16->GetTile(x     + i, y     + j);
+                                val2 = map16->GetTile(baseX + i, baseY + j);
 
                                 if(val1 != val2)
                                     break;
                                 else
                                     numBytes += 1;
                             }
-
                         }
                         
                         if(numBytes > 0x17)
                             numBytes = numBytes;
-
                     }
                 }
-
             }
         }
 
@@ -450,6 +439,8 @@
         // since these area all dynamic lists, the pointer to the head of each list
         // could have changed during editing
         // that's why I'm updating the pointers in the main structures
+
+        /**
         allEntr[area]     = areaEntr;
         allHoles[area]    = areaHoles;
         allExits[area]    = areaExits;
@@ -460,6 +451,8 @@
         // The changes to the map16 overlay will be lost.
         if(editOverlay == true)
             UnloadOverlay();
+
+        */
 
         return true;
     }
@@ -482,15 +475,15 @@
         u16 base     = 0;
         u16 index    = 0;
     
-        u16 map16Vals[4]  = {0, 0, 0, 0};
+        u16 map16Vals[4]    = {0, 0, 0, 0};
 
         // default offsets for the conversion arrays.
-        u32 offsets[4]    = { 0x18000, 0x1B400, 0x20000, 0x23400 };
+        u32 offsets[4]      = { 0x18000, 0x1B400, 0x20000, 0x23400 };
 
         // corresponds to the upper left, upper right, lower left, lower right map16 values of the map32 block
-        const u8 shift[4] = {0x04, 0x00, 0x0C, 0x08}; 
+        const u8 shift[4]   = {0x04, 0x00, 0x0C, 0x08}; 
 
-        bufPtr a   = this->map32To16;
+        bufPtr a            = this->map32To16;
 
         // --------------------------------------
 
@@ -617,12 +610,12 @@
     void OverData::DecMapCounts(u16 mapVal)
     {
         u16     *total  = &(this->numMap16Tiles);
-
-        u32 a = 0;
         
-        bufPtr counts = this->map16Counts;
-        bufPtr flags  = this->map16Flags;
-        bufPtr assoc  = this->map16To8;
+        u32     a       = 0;
+
+        bufPtr  counts  = this->map16Counts;
+        bufPtr  flags   = this->map16Flags;
+        bufPtr  assoc   = this->map16To8;
 
         // ------------------------------------------------------
 
@@ -653,12 +646,12 @@
     {
         u16     *total  = &(this->numMap16Tiles);
 
-        u32 a = 0;
-        u32 offset = mapVal * 8;
+        u32     a       = 0;
+        u32     offset  = mapVal * 8;
 
-        bufPtr counts = this->map16Counts;
-        bufPtr flags  = this->map16Flags;
-        bufPtr assoc  = this->map16To8;
+        bufPtr  counts  = this->map16Counts;
+        bufPtr  flags   = this->map16Flags;
+        bufPtr  assoc   = this->map16To8;
 
         // ------------------------------------------------------
 
@@ -739,7 +732,7 @@
 // ===============================================================
 
     bufPtr OverData::LoadMap16(u32 index, map16Pos p)
-    {
+    {   
         u32 map32Val = 0;
         u16 map16Vals[4];
 
@@ -759,14 +752,14 @@
             i < 0x200;
             i += 2, j += 4, k--
         )
-    {
+        { 
             // this conditional statement when activated, positions j
             // so that it will start writing to the next "line" of the map16 buffer
             if(!k)
-        {
+            {
                 j += 0xC0;
                 k  = 0x10;
-        }
+            }
 
             map32Val = Get2Bytes(map32Buf, i) * 8;
 
@@ -779,7 +772,7 @@
             Put2Bytes(this->map16Buf, j + 0x02, map16Vals[1]);
             Put2Bytes(this->map16Buf, j + 0x80, map16Vals[2]);
             Put2Bytes(this->map16Buf, j + 0x82, map16Vals[3]);
-    }
+        }
 
         return map16Buf;
     }
@@ -832,7 +825,7 @@
 // ===============================================================
 
     void OverData::LoadMapFlags()
-    {   
+    {
         bool usingMap32 = true;
         bool usingMap16 = false; // these values are rigged for the sake of Inc / Dec MapCounts routines
         
@@ -846,7 +839,7 @@
         // -----------------------------------
 
         for(i = 0; i < 0xA0; i += 4)
-        { 
+        {
             LoadMap16(i + 0, upper_left);
             LoadMap16(i + 1, upper_right);
             LoadMap16(i + 2, lower_left);
@@ -857,10 +850,10 @@
             for(j = 0; j < map16Buf->length; j += 2)
             {
                 map16Val = Get2Bytes(this->map16Buf, j);
-                IncMapCounts(map16Val, usingMap16);
+                IncMapCounts(map16Val);
             }
-            }
-
+        }
+        
         // Make sure to protect the map16 tiles that have special purposes
         for(i = 0; i < numReserved; ++i)
             IncMapCounts(reservedMap16[i]);
@@ -909,7 +902,7 @@
             a        = Get2Bytes(rom, areaOffset + (i << 1) );
             entrance = GetByte(rom, entrOffset + i);
 
-            if(area >= 0xC0)
+            if(areas[a]->areaNum >= 0xC0)
                 continue;
 
             hole = new Entrance(x, y, entrance, a);
@@ -933,7 +926,7 @@
         u32 mapOffset   = 0, areaOffset = 0, entrOffset  = 0;
         u32 map16Val    = 0;
 
-        Entrance *entr = NULL;
+        Entrance *entr  = NULL;
         Entrance **list = NULL; 
 
         // -------------------------------
@@ -960,7 +953,7 @@
                 continue;
 
             entr = new Entrance(x, y, entrance, a);
-
+            
             list = &(areas[a]->entr);
 
             Entrance::Add(list, entr);
@@ -1059,9 +1052,9 @@
         u32 value   = 0, offset = 0;
 
         u32 tableSizes[3]   = { 0x90, 0x90, 0x90 }; // number of areas in each table
-        u32 tableOffset[3] = { header->overSprOffset0, header->overSprOffset2, header->overSprOffset3 };
+        u32 tableOffset[3]  = { header->overSprOffset0, header->overSprOffset2, header->overSprOffset3 };
 
-        OverSpr *s = NULL;
+        OverSpr *s      = NULL;
         OverSpr **list  = NULL;
 
         OverArea *a     = NULL;
@@ -1080,7 +1073,7 @@
         }
 
         for(phase = 0; phase < 3; ++i)
-        {               
+        {
             for(area = 0; area < tableSizes[phase]; ++area)
             {
                 // only going to operate on canonical area numbers
@@ -1136,7 +1129,7 @@
 
             for(area = tableSizes[i]; area < 0xC0; ++area)
             {
-                if(ResolveArea(area != area)
+                if(ResolveArea(area) != area)
                     continue;
 
                 areas[area]->spr[phase] = NULL;
@@ -1171,7 +1164,7 @@
             // don't operate on unauthentic area numbers.
             if(ResolveArea(area) != area)
                 continue;
-            
+
             a = areas[area];
 
             if(header->overItemOffset == 0x1BC2F9)
@@ -1229,25 +1222,25 @@
 
 // ===============================================================
 
-        OwOverlay::OwOverlay()
+        EventOverlay::EventOverlay()
         {
             data = CreateBuffer(0x40, 0x40, 2);
 
             Initialize();
         }
 
-        OwOverlay::~OwOverlay()
+        EventOverlay::~EventOverlay()
         {
             DeallocBuffer(data);
         }
 
-        void OwOverlay::Initialize()
+        void EventOverlay::Initialize()
         {
             // fill with -1 (null) map16 values)
             forgrid(Put2Bytes(data, i, j, 0xFFFF));
         }
         
-        bool OwOverlay::SetTile(u16 addr, u16 value)
+        bool EventOverlay::SetTile(u16 addr, u16 value)
         {
             u8 x = GetMap16X(addr) >> 4;
             u8 y = GetMap16Y(addr) >> 4;
@@ -1258,14 +1251,14 @@
             return SetTile(value, x, y);
         }
 
-        bool OwOverlay::SetTile(u16 value, u8 x, u8 y)
+        bool EventOverlay::SetTile(u16 value, u8 x, u8 y)
         {
             Put2Bytes(data, (u32) x, (u32) y, value);
 
             return true;
         }
 
-        u16 OwOverlay::GetTile(u8 x, u8 y)
+        u16 EventOverlay::GetTile(u8 x, u8 y)
         {
             if(x >= 0x40)
                 return -1;
@@ -1294,7 +1287,7 @@
         u32 offset      = 0;
         u32 x_reg       = 0;
        
-        OwOverlay *lay  = NULL;
+        EventOverlay *lay  = NULL;
        
         // -----------------------
 
@@ -1302,7 +1295,7 @@
         {
             done   = false;
 
-            lay    = overlays[i] = new OwOverlay();
+            lay    = areas[i]->eOverlay = new EventOverlay();
 
             // don't use bad pointers.
             if(!lay)

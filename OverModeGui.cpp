@@ -702,9 +702,6 @@
         sprintf(temp, "%04X", GetMap16Tile(o->map16Buf, x >> 4, y >> 4));
         SetDlgItemText(game->toolDlg, ID_OW_EDIT3, temp);
 
-        sprintf(temp, "%04X", o->GetMap32Tile(x >> 5, y >> 5));
-        SetDlgItemText(game->toolDlg, ID_OW_EDIT4, temp);
-
         // next we look at the current edit mode and decide how to handle the mouse move
         switch(o->editMode)
         {
@@ -1068,9 +1065,9 @@
                     o->itemPos = 0;
                     sprintf( (char*) o->itemBuf, "%02X", ((OverItem*) m)->itemNum);
                 }
-
+                
                 break;
-
+                
             }
             case mode_entrance:
             case mode_hole:
@@ -1083,100 +1080,99 @@
                 }
                 else
                 {
-                    list    = o->areaHoles;
+                    list = o->areaHoles;
                     pos  = &o->holePos;
                     buf  = o->holeBuf;
                 }
-                                
+                
                 // if a entrance ended up getting clicked, select it
                 for(entr = (Entrance*) MarkerList::GetHead(list); entr != NULL; entr = (Entrance*) entr->GetNext())
                 {       // refresh all entrs that have been deselected
                     InvalidateRect(game->pictWin, entr->GetRect(), false);
                     entr->selected = false;
                 }
-
+                
                 entr =  (Entrance*) list->GetAt(xFull, yFull);
-
+                
                 if(entr)
                 {
                     m = MarkerList::Select(list, xFull, yFull);
-
+                    
                     (*pos) = 0;
                     sprintf( (char*) buf, "%02X", entr->entrance);
                 }
-
+                
                 break;
             }
             case mode_drawtile:
             {
                 oldMap16 = GetMap16Tile(o->map16Buf, x16, y16);
-                oldMap32 = o->GetMap32Tile(x32, y32);
-
+                
                 o->Map16To8(oldMap16, map8Vals);
                 o->Map32To16(oldMap32, map16Vals);
-
+                
                 index = (x & 0x01) + ((y & 0x01) << 1);
-
+                
                 map8Vals[index] = o->tile8;                
-
+                
                 index = ((x & 0x02) >> 1) + (y & 0x02); 
-
+                
                 if(o->tileSize == fromMap8)
                 {
                     newMap16 = o->FindMap16(map8Vals);
-
+                    
                     // failure. attempt to allocate a new map16 value
                     if(newMap16 == -1)
                         newMap16 = o->AllocateMap16(map8Vals, oldMap16);
-
+                    
                     if(newMap16 == -1)
                     {
                         MessageBox(hwnd, "No more map16 tiles can be allocated.", "error", MB_OK);
                         return;
                     }
-
+                    
                     map16Vals[index] = newMap16; 
-
+                    
                     if(o->editOverlay == false)
                     {
                         // now we need to figure out whether we can find an existing map32 tile
                         // and if not, generate a new one if space is available
                         newMap32 = o->FindMap32(map16Vals);                    
-
+                        
                         // failure. try to allocate a map32 tile
                         if(newMap32 == -1)
                             newMap32 = o->AllocateMap32(map16Vals, oldMap32);
-
+                        
                         if(newMap32 == -1)
                         {
                             MessageBox(hwnd, "No more map32 tiles can be allocated.", "error", MB_OK);
                             return;
                         }
-
+                        
                         o->PutMap32Tile(x32, y32, newMap32);
                         o->DecMapCounts(oldMap32, usingMap32);
                         o->IncMapCounts(newMap32, usingMap32, map16Vals);
                     }
-
+                    
                     SetMap8Tile(o->map8Buf,   o->tile8, x,   y);
-                    SetMap16Tile(o->map16Buf, newMap16, x16, y16);
-
+                    o->map16Buf->SetTile(x16, y16, newMap16);
+                    
                     // update resource counts for map16 tiles
                     o->DecMapCounts(oldMap16, usingMap16);
                     o->IncMapCounts(newMap16, usingMap16, map8Vals);
-
+                    
                     DrawMap8(game, b, o->tile8, x, y);
                     InvalidateTile(game, x, y);
-
+                    
                     SendMessage(game->pictWin, WM_PAINT, 0, 0);
                     PostMessage(hwnd, PICTURE_MOUSEMOVE, 0, lp);
                 }
                 else if(o->tileSize == fromMap16)
                 {
                     newMap16 = o->tile16;
-    
+                    
                     map16Vals[index] = newMap16;
-
+                    
                     if(o->editOverlay == false)
                     {
                         newMap32 = o->FindMap32(map16Vals);                    
@@ -1196,7 +1192,7 @@
                         o->IncMapCounts(newMap32, usingMap32, map16Vals);
                     }
 
-                    SetMap16Tile(o->map16Buf, newMap16, x16, y16);
+                    o->map16Buf->SetTile(x16, y16, newMap16);
 
                     // update resource counts for map16 tiles
                     o->DecMapCounts(oldMap16, usingMap16);
@@ -1298,7 +1294,7 @@
             }
             case mode_sprite:
             {
-                m = MarkerList::GetSelected(o->areaSpr);
+                m = MarkerList::GetSelected( &o->area->spr[1]);
 
                 if(!m) break;
 
@@ -1632,7 +1628,6 @@
     void OwOnPictureRButtonDown(HWND hwnd, ManagedBitmap* b, LPARAM lp, zgPtr game)
     {
         u16 x = 0, y = 0;
-        /// u16 map8Vals[4];
 
         int menuNum = IDR_BLANK;
 
@@ -1671,20 +1666,8 @@
             {
                 if(o->tileSize == fromMap8)
                     o->tile8  = GetMap8Tile(o->map8Buf, x >> 3, y >> 3);
-                if(o->tileSize == fromMap16)
+                else if(o->tileSize == fromMap16)
                     o->tile16 = GetMap16Tile(o->map16Buf, x >> 4, y >> 4);
-                else
-                {
-                    area32 = o->area;
-
-                    if(x >= 0x200)
-                        area32 += 1;
-
-                    if(y >= 0x200)
-                        area32 += 8;
-                        
-                    o->tile32 = GetMap32Tile(o->map32Data[area32], x >> 5, y >> 5);
-                }
 
                 return;
             }
@@ -2575,4 +2558,4 @@
         ReleaseDC(hwnd, hdc);        
     }
 
-// ***************************************************************
+// ===============================================================

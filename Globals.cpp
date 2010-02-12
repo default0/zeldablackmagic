@@ -467,8 +467,8 @@
         "2bpp graphics",                            // 0x22 - 2bpp graphics? why?
         "Title screen / menus",                     // 0x23 - title screen / menus
         "Triforce room"                             // 0x24 - triforce room
-    }
-
+    };
+    
     // List of what values of $0AA2 correspond to
 
     char* auxGfxStrings[] =

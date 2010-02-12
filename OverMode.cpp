@@ -44,7 +44,7 @@
 
         // ------------------------------
 
-        switch(game->overData->area)
+        switch(game->overData->area->areaNum)
         {
         case 0x03: case 0x05: case 0x07:
         case 0x43: case 0x45: case 0x47:
@@ -696,13 +696,6 @@
 
 // ===============================================================
 
-    u16 GetMap16Tile(bufPtr map16Buf, u16 x, u16 y)
-    {
-        return Get2Bytes(map16Buf, (x * 2) + (y * 0x80));
-    }
-
-// ===============================================================
-
     u16 GetMap8Tile(bufPtr map8Buf, u16 x, u16 y)
     {
         return Get2Bytes(map8Buf, (x * 2) + (y * 0x100) );
@@ -713,13 +706,6 @@
     u32 SetMap32Tile(bufPtr map32Buf, u16 value, u16 x, u16 y)
     {
         return Put2Bytes(map32Buf, (x * 2) + (y * 0x20), value);
-    }
-
-// ===============================================================
-
-    u32 SetMap16Tile(bufPtr map16Buf, u16 value, u16 x, u16 y)
-    {
-        return Put2Bytes(map16Buf, (x * 2) + (y * 0x80), value);
     }
 
 // ===============================================================
@@ -793,9 +779,9 @@
 
         bool map16Failure = false;
 
-        u8  area     = o->area;
+        u8  area        = o->area;
 
-        u16 oldMap16 = 0;
+        u16 oldMap16    = 0;
         u16 map8Vals[4];
         u16 map16Vals[4];
 
@@ -821,7 +807,7 @@
 
         u32 dx16   = (x16Max - x16Min + 1);
         u32 dy16   = (y16Max - y16Min + 1);
-        
+
         bufPtr mapData   = NULL;
         
         bufPtr tempMap16 = NULL;
@@ -840,8 +826,8 @@
         {
             case fromMap8:
             {
-                tempMap16 = CreateBuffer(dx32 << 1, dy32 << 1, 2);
-                tempMap8  = CreateBuffer(dx32 << 2, dy32 << 2, 2);
+                tempMap16 = CreateBuffer(dx16, dy16, 2);
+                tempMap8  = CreateBuffer(dx16 << 1, dy16 << 1, 2);
                 mapData   = FromString( (char*) obj->mapData, dx8, dy8, 4);
 
                 // copy the contents of a subsection of the map8 buffer to a temporary array
@@ -872,7 +858,7 @@
 
                     fprintf(errFile, "\n");
                 }
-
+                
                 saveMap16 = DuplicateBuffer(tempMap16);
                 
                 // now write in the map8 parts of the object to the tempMap8 buffer
@@ -898,7 +884,7 @@
                     for(i = 0; i < saveMap16->width; ++i)
                     {
                         value = Get2Bytes(saveMap16, i, j);
-                        o->DecMapCounts(value, usingMap16);
+                        o->DecMapCounts(value);
 
                         fprintf(errFile, "%04X\t", value);
                     }
@@ -947,100 +933,34 @@
                 if(!map16Failure)
                 {
                     threshold = 0;
-
-                    // temporarily decrease the map counts of all the original map32 values involved
-                    for(j = 0; j < saveMap32->height; ++j)
-                    {
-                        for(i = 0; i < saveMap32->width; ++i)
-                        {
-
-                            value = Get2Bytes(saveMap32, i, j);
-                            o->DecMapCounts(value, usingMap32);
-                        }
-                    }
-
-                    // same procedure we did earlier for map16 we now do for map32
-                    for(j = 0; j < (dy32 << 1); j += 2)
-                    {
-                        for(i = 0; i < (dx32 << 1); i += 2)
-                        {                            
-                            oldMap32 = Get2Bytes(tempMap32, i >> 1, j >> 1);
-                        
-                            GetMap2x2(map16Vals, tempMap16, i, j);
-                        
-                            value = MatchMap2x2(tempMap16, tempMap32, map16Vals, i, j);
-                        
-                            if(value == -1)
-                            {
-                                value = o->FindMap32(map16Vals);
-                                                                        
-                                if(value == -1)
-                                {                            
-                                    value = o->AllocateMap32(map16Vals, oldMap32, threshold);
-
-                                    if(value == -1)
-                                    {
-                                        map16Failure = true;
-                                        map32Failure = true;
-                                    }
-                                    else
-                                        threshold = value + 1;
-                                }
-                            }
-
-                            Put2Bytes(tempMap32, i >> 1, j >> 1, value);
-                        }
-                    }
                      
-                    if(!map32Failure)
+                    for(i = 0; i < (dx32 << 2); i += 2)
                     {
-                        for(i = 0; i < (dx32 << 2); i += 2)
+                        for(j = 0; j < (dy32 << 2); j += 2)
                         {
-                            for(j = 0; j < (dy32 << 2); j += 2)
-                            {
-                                value = Get2Bytes(tempMap16, i >> 1, j >> 1);
-                                GetMap2x2(map8Vals, tempMap8, i, j);
-                                o->IncMapCounts(value, usingMap16, map8Vals);
-                            }
+                            value = Get2Bytes(tempMap16, i >> 1, j >> 1);
+                            GetMap2x2(map8Vals, tempMap8, i, j);
+                            o->IncMapCounts(value, map8Vals);
                         }
+                    }
 
-                        for(i = 0; i < (dx32 << 1); i += 2)
+                    for(i = 0; i < dx8; ++i)
+                    {
+                        for(j = 0; j < dy8; ++j)
                         {
-                            for(j = 0; j < (dy32 << 1); j += 2)
-                            {
-                                value = Get2Bytes(tempMap32, i >> 1, j >> 1);
-                                GetMap2x2(map16Vals, tempMap16, i, j);
-                                o->IncMapCounts(value, usingMap32, map16Vals);
-                            }
+                            value = Get2Bytes(mapData, i, j);
+                            Put2Bytes(o->map8Buf, i + x8, j + y8, value);
+                            DrawMap8(game, b, value, i + x8, j + y8);
+                            InvalidateTile(game, i + x8, j + y8);
                         }
+                    }
 
-                        for(i = 0; i < dx8; ++i)
+                    for(i = 0; i < tempMap16->width; ++i)
+                    {
+                        for(j = 0; j < tempMap16->height; ++j)
                         {
-                            for(j = 0; j < dy8; ++j)
-                            {
-                                value = Get2Bytes(mapData, i, j);
-                                Put2Bytes(o->map8Buf, i + x8, j + y8, value);
-                                DrawMap8(game, b, value, i + x8, j + y8);
-                                InvalidateTile(game, i + x8, j + y8);
-                            }
-                        }
-
-                        for(i = 0; i < tempMap16->width; ++i)
-                        {
-                            for(j = 0; j < tempMap16->height; ++j)
-                            {
-                                value = Get2Bytes(tempMap16, i, j);
-                                Put2Bytes(o->map16Buf, i + (x32Min << 1), j + (y32Min << 1), value);
-                            }
-                        }
-
-                        for(i = 0; i < tempMap32->width; ++i)
-                        {
-                            for(j = 0; j < tempMap32->height; ++j)
-                            {
-                                value = Get2Bytes(tempMap32, i, j);
-                                o->PutMap32Tile(i + x32Min, j + y32Min, value); 
-                            }
+                            value = Get2Bytes(tempMap16, i, j);
+                            Put2Bytes(o->map16Buf, i + (x32Min << 1), j + (y32Min << 1), value);
                         }
                     }
                 }
@@ -1054,22 +974,7 @@
                         for(j = 0; j < saveMap16->height; ++j)
                         {
                             value = Get2Bytes(saveMap16, i, j);
-                            o->IncMapCounts(value, usingMap16);
-                        }
-                    }
-
-                }
-
-                if(map32Failure)
-                {
-                    // increase the counts of the map32 values we subtracted off earlier.
-                    // because the map16 allocation failed, we just revert to the old state.
-                    for(i = 0; i < saveMap32->width; ++i)
-                    {
-                        for(j = 0; j < saveMap32->height; ++j)
-                        {
-                            value = Get2Bytes(saveMap32, i, j);
-                            o->IncMapCounts(value, usingMap32);
+                            o->IncMapCounts(value);
                         }
                     }
 
@@ -1078,10 +983,7 @@
                 // clean up and get rid of all the memory we allocated
                 DeallocBuffer(tempMap8);
                 DeallocBuffer(tempMap16);
-                DeallocBuffer(tempMap32);
-
                 DeallocBuffer(saveMap16);
-                DeallocBuffer(saveMap32);
 
                 DeallocBuffer(mapData);
                     
@@ -1098,20 +1000,7 @@
                 dx16    = obj->width / obj->mapType;
                 dy16    = obj->height / obj->mapType;
 
-                x32Min  = bound(x16 >> 1, 0, 0x1F);
-                y32Min  = bound(y16 >> 1, 0, 0x1F);
-
-                x32Max  = bound( (x16 + dx16 - 1) >> 1, 0, 0x1F);
-                y32Max  = bound( (y16 + dy16 - 1) >> 1, 0, 0x1F);
-
-                dx32    = (x32Max - x32Min + 1);
-                dy32    = (y32Max - y32Min + 1);
-
-                xBase   = x32Min << 1;
-                yBase   = y32Min << 1;
-
                 tempMap16 = CreateBuffer(dx32 << 1, dy32 << 1, 2);
-                tempMap32 = CreateBuffer(dx32, dy32, 2);
                 mapData = FromString( (char*) obj->mapData, dx16, dy16, 4);
 
                 for(i = 0; i < tempMap16->width; ++i)
@@ -1122,18 +1011,6 @@
                         Put2Bytes(tempMap16, i, j, value);
                     }
                 }
-
-                // do the same for the map32 tiles
-                for(i = 0; i < tempMap32->width; ++i)
-                {
-                    for(j = 0; j < tempMap32->height; ++j)
-                    {
-                        value = o->GetMap32Tile(x32Min + i, y32Min + j); 
-                        Put2Bytes(tempMap32, i, j, value);
-                    }
-                }
-
-                saveMap32 = DuplicateBuffer(tempMap32);
 
                 // now write in the map16 parts of the object to the tempMap16 buffer
                 for(i = 0; i < dx16; ++i)
@@ -1149,16 +1026,6 @@
                                       value);
                     }
                 }   
-
-                // temporarily decrease the map counts of all the original map16 values involved
-                for(i = 0; i < saveMap32->width; ++i)
-                {
-                    for(j = 0; j < saveMap32->height; ++j)
-                    {
-                        value = Get2Bytes(saveMap32, i, j);
-                        o->DecMapCounts(value, usingMap32);
-                    }
-                }
                 
                 // going to do a check of all the map 8 clusters to see if we are able to allocate all the map16
                 // tiles we need
@@ -1166,113 +1033,36 @@
                 {
                     for(j = 0; j < tempMap16->height; j += 2)
                     {
-                        oldMap32 = Get2Bytes(tempMap32, i >> 1, j >> 1);
-                        
+                        /// value = Get2Bytes(tempMap32, i >> 1, j >> 1);
                         GetMap2x2(map16Vals, tempMap16, i, j);
-                        
-                        value = MatchMap2x2(tempMap16, tempMap32, map16Vals, i, j);
-                        
-                        if(value == -1)
-                        {
-                            value = o->FindMap32(map16Vals);
-                                                                        
-                            if(value == -1)
-                            {                            
-                                value = o->AllocateMap32(map16Vals, oldMap32, threshold);
-
-                                if(value == -1)
-                                    map32Failure = true;
-                                else
-                                    threshold = value + 1;
-                            }
-                        }
-
-                        Put2Bytes(tempMap32, i >> 1, j >> 1, value);
                     }
                 }
 
-                if(!map32Failure)
+                for(i = 0; i < tempMap16->width; ++i)
                 {
-                    for(i = 0; i < tempMap16->width; i += 2)
+                    for(j = 0; j < tempMap16->height; ++j)
                     {
-                        for(j = 0; j < tempMap16->height; j += 2)
-                        {
-                            value = Get2Bytes(tempMap32, i >> 1, j >> 1);
-                            GetMap2x2(map16Vals, tempMap16, i, j);
-                            o->IncMapCounts(value, usingMap32, map16Vals);
-                        }
-                    }
-                    /*
-                    x8 = xBase << 1;
-                    y8 = yBase << 1;
-
-                    dx8 = dx16 << 1;
-                    dy8 = dy16 << 1;
-                    
-                    for(i = 0; i < dx8; ++i)
-                    {
-                        for(j = 0; j < dy8; ++j)
-                        {
-                            Put2Bytes(o->map8Buf, xBase 
-
-                            Put2Bytes(o->map16Buf, i + xBase, j + yBase, value);
-                            DrawMap16(game, b, value, i + xBase, j + yBase);
-                            InvalidateTile(game, i + x8, j + y8);
-                        }
-                    } */
-
-                    for(i = 0; i < tempMap16->width; ++i)
-                    {
-                        for(j = 0; j < tempMap16->height; ++j)
-                        {
-                            value = Get2Bytes(tempMap16, i, j);
-                            Put2Bytes(o->map16Buf, i + xBase, j + yBase, value);
-                            DrawMap16(game, b, value, i + xBase, j + yBase);
-                        }
-                    }
-
-                    for(i = 0; i < tempMap32->width; ++i)
-                    {
-                        for(j = 0; j < tempMap32->height; ++j)
-                        {
-                            value = Get2Bytes(tempMap32, i, j);
-                            o->PutMap32Tile(i + x32Min, j + y32Min, value); 
-                        }
-                    }
-
-                    for(i = 0; i < tempMap16->width; ++i)
-                    {
-                        for(j = 0; j < tempMap16->height; ++j)
-                        {
-                            value = Get2Bytes(tempMap16, i, j);
-                            o->Map16To8(value, map8Vals);
-                       
-                            Put2Bytes(o->map8Buf, (xBase << 1) + i*2 + 0, (yBase << 1) + j*2 + 0, map8Vals[0]);
-                            Put2Bytes(o->map8Buf, (xBase << 1) + i*2 + 1, (yBase << 1) + j*2 + 0, map8Vals[1]);
-                            Put2Bytes(o->map8Buf, (xBase << 1) + i*2 + 0, (yBase << 1) + j*2 + 1, map8Vals[2]);
-                            Put2Bytes(o->map8Buf, (xBase << 1) + i*2 + 1, (yBase << 1) + j*2 + 1, map8Vals[3]);
-
-
-                        }
+                        value = Get2Bytes(tempMap16, i, j);
+                        Put2Bytes(o->map16Buf, i + xBase, j + yBase, value);
+                        DrawMap16(game, b, value, i + xBase, j + yBase);
                     }
                 }
-                else
+
+                for(i = 0; i < tempMap16->width; ++i)
                 {
-                    // increase the counts of the map16 values we subtracted off earlier.
-                    // because the map16 allocation failed, we just revert to the old state.
-                    for(i = 0; i < saveMap32->width; ++i)
+                    for(j = 0; j < tempMap16->height; ++j)
                     {
-                        for(j = 0; j < saveMap32->height; ++j)
-                        {
-                            value = Get2Bytes(saveMap32, i, j);
-                            o->IncMapCounts(value, usingMap32);
-                        }
+                        value = Get2Bytes(tempMap16, i, j);
+                        o->Map16To8(value, map8Vals);
+                   
+                        Put2Bytes(o->map8Buf, (xBase << 1) + i*2 + 0, (yBase << 1) + j*2 + 0, map8Vals[0]);
+                        Put2Bytes(o->map8Buf, (xBase << 1) + i*2 + 1, (yBase << 1) + j*2 + 0, map8Vals[1]);
+                        Put2Bytes(o->map8Buf, (xBase << 1) + i*2 + 0, (yBase << 1) + j*2 + 1, map8Vals[2]);
+                        Put2Bytes(o->map8Buf, (xBase << 1) + i*2 + 1, (yBase << 1) + j*2 + 1, map8Vals[3]);
                     }
                 }
 
                 DeallocBuffer(tempMap16);
-                DeallocBuffer(tempMap32);
-                DeallocBuffer(saveMap32);
                 DeallocBuffer(mapData);
 
                 break;
@@ -1351,7 +1141,7 @@
         // update the map32 to map16 conversion arrays and pack them together
         // there's a special, nonlinear format that uses 12 bits for each map32 to map16 conversion
 
-        o->PackMap32To16();
+        /**
 
         h->map32To16UL = AdvancePointer(game, offset, 0x8000);
         fprintf(f, "\norg $%06X", h->map32To16UL);
@@ -1376,6 +1166,8 @@
         fprintf(f, "\n    owMap32To16LowerRight:");
         fprintf(f, "\n        incbin overworld/owMap32To16LowerRight.bin");
         ToFile(o->lowerRight32, "owMap32To16LowerRight.bin");
+        */
+    
 
         // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         
@@ -1450,7 +1242,7 @@
 
         // merge all the hole data together into one array
         for(list = NULL, i = 0; i < 0xC0; ++i)
-            Entrance::Add( &list, o->allHoles[i]);
+            Entrance::Add( &list, o->areas[i]->holes);
 
         h->overNumHoles = list->GetSize();
         size      = 5 * h->overNumHoles;
@@ -1487,7 +1279,7 @@
  
         // merge all the entrance data together
         for(list = NULL, i = 0; i < 0xC0; ++i)
-            Entrance::Add( &list, o->allEntr[i]);
+            Entrance::Add( &list, o->areas[i]->entr);
 
         h->overNumEntr = list->GetSize();
         /// number of entrances isn't tracked...?
@@ -1533,7 +1325,8 @@
         // write the pointer table out
         for(i = 0; i < 0x80; ++i)
         {
-            if(o->allItems[0][i] == NULL)
+            /// refactor this whole routine!!!!!!!
+            if(o->areas[i]->items[0] == NULL)
                 fprintf(f, "\n        dl nullSecretSet");
             else
                 fprintf(f, "\n        dl owSecretPointers%X", i);
@@ -1541,7 +1334,7 @@
 
         for(i = 0; i < 0x80; ++i)
         {
-            list2 = o->allItems[0][i];
+            list2 = o->areas[i]->items[0];
 
             if(list2)
                 size = (list2->GetSize() * 3) + 2;
@@ -1588,7 +1381,7 @@
             // output the pointer table
             for(i = 0; i < 0xC0; ++i)
             {
-                if(o->allSpr[part][i] == NULL)
+                if(o->areas[i]->spr[part] == NULL)
                     fprintf(f, "\n        dl nullSpriteSet");
                 else
                     fprintf(f, "\n        dl ow%sSpritePtr%X", spriteParts[part], i);
