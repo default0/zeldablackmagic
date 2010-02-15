@@ -83,7 +83,7 @@
     {
         u32 i = 0;
 
-        u32 a = game->overData->area;
+        u32 a = game->overData->area->areaNum;
         u32 x = 0;
         u32 offset = 0;
 
@@ -127,14 +127,14 @@
         offset = CpuToRomAddr(0x1B0000 + offset + 0xD4E0);
         LoadPalettes(game, offset, 1, 7, SP6 + 2);
 
-        // corresponds to $DECE4 (loads sword palette)
+        // corresponds to $DED03 (loads sword palette)
         // Set SP5 (second half), 1st three colors
         x = 0;
         offset = GetByte(game->image, CpuToRomAddr(0x1BEBB4 + x));
         offset = CpuToRomAddr(0x1B0000 + offset + 0xD360);
         LoadPalettes(game, offset, 1, 3, SP5 + 0x12);
 
-        // corresponds to $DECE4 (loads shield palette)
+        // corresponds to $DED29 (loads shield palette)
         // Set SP5 (second half), last 4 colors
         x = 0;
         offset = GetByte(game->image, CpuToRomAddr(0x1BEBC1 + x));
@@ -311,7 +311,7 @@
         u16 map32Val = 0;
         u16 map16Val = 0;
 
-        u32 area = game->overData->area;
+        u32 area = game->overData->area->areaNum;
         u32 i = 0, j = 0;
     
         giPtr gi = game->gi;
@@ -382,7 +382,7 @@
 
             if(i != wes->numElements)
             {
-                if(o->largeArea)
+                if(o->area->largeArea)
                     we->nHeight = we->nWidth = 1024;
                 else
                     we->nHeight = we->nWidth = 512;
@@ -779,7 +779,7 @@
 
         bool map16Failure = false;
 
-        u8  area        = o->area;
+        u8  area        = o->area->areaNum;
 
         u16 oldMap16    = 0;
         u16 map8Vals[4];
@@ -835,7 +835,7 @@
                 {
                     for(i = 0; i < tempMap8->width; ++i)
                     {
-                        value = Get2Bytes(o->map8Buf, (x32Min << 2) + i, (y32Min << 2) + j);
+                        value = Get2Bytes(o->map8Buf, (x16Min << 1) + i, (y16Min << 1) + j);
                         Put2Bytes(tempMap8, i, j, value);
                     }
                 }
@@ -847,7 +847,7 @@
                 {
                     for(i = 0; i < tempMap16->width; ++i)
                     {
-                        value = Get2Bytes(o->map16Buf, (x32Min << 1) + i, (y32Min << 1) + j);
+                        value = Get2Bytes(o->map16Buf, x16Min + i, y16Min + j);
                         Put2Bytes(tempMap16, i, j, value);
 
                         fprintf(errFile, "%04X\t", value);
@@ -870,8 +870,8 @@
                         
                         if(value != -1)
                             Put2Bytes(tempMap8, 
-                                      (x8 - (x32Min << 2)) + i,
-                                      (y8 - (y32Min << 2)) + j,
+                                      (x8 - (x16Min << 1)) + i,
+                                      (y8 - (y16Min << 1)) + j,
                                       value);
                     }
                 }   
@@ -894,9 +894,9 @@
                 
                 // going to do a check of all the map8 clusters to see if we are able to allocate all the map16
                 // tiles we need
-                for(j = 0; j < dy32 << 2; j += 2)
+                for(j = 0; j < dy16 << 1; j += 2)
                 {          
-                    for(i = 0; i < dx32 << 2; i += 2)
+                    for(i = 0; i < dx16 << 1; i += 2)
                     {
                         // get the old map16 value
                         oldMap16 = Get2Bytes(tempMap16, i >> 1, j >> 1);
@@ -934,9 +934,9 @@
                 {
                     threshold = 0;
                      
-                    for(i = 0; i < (dx32 << 2); i += 2)
+                    for(i = 0; i < (dx16 << 1); i += 2)
                     {
-                        for(j = 0; j < (dy32 << 2); j += 2)
+                        for(j = 0; j < (dy16 << 1); j += 2)
                         {
                             value = Get2Bytes(tempMap16, i >> 1, j >> 1);
                             GetMap2x2(map8Vals, tempMap8, i, j);
@@ -960,7 +960,7 @@
                         for(j = 0; j < tempMap16->height; ++j)
                         {
                             value = Get2Bytes(tempMap16, i, j);
-                            Put2Bytes(o->map16Buf, i + (x32Min << 1), j + (y32Min << 1), value);
+                            Put2Bytes(o->map16Buf, i + x16Min, j + y16Min, value);
                         }
                     }
                 }
@@ -1000,7 +1000,7 @@
                 dx16    = obj->width / obj->mapType;
                 dy16    = obj->height / obj->mapType;
 
-                tempMap16 = CreateBuffer(dx32 << 1, dy32 << 1, 2);
+                tempMap16 = CreateBuffer(dx16, dy16, 2);
                 mapData = FromString( (char*) obj->mapData, dx16, dy16, 4);
 
                 for(i = 0; i < tempMap16->width; ++i)

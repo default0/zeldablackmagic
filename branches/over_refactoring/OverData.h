@@ -1,6 +1,7 @@
 
 	#include "Globals.h"
     #include "Strings.h"
+    #include "OverMode.h"
 
 #ifndef OVERDATA_H
 
@@ -13,25 +14,6 @@
     extern const u32 mask32;
 
     #define forgrid(x) { u32 i =0; u32 j = 0; for(i = 0; i < data->width; ++i) { for(j = 0; j < data->height; ++j) { (x); } } }
-
-// ================================================
-
-    class EventOverlay
-    {
-    private:
-        bufPtr data;
-
-    public:
-        EventOverlay();
-        ~EventOverlay();
-
-        void Initialize();
-
-        bool SetTile(u16 value, u16 addr);
-        bool SetTile(u16 value, u8 x, u8 y);
-
-        u16 GetTile(u8 x, u8 y);
-    };
 
 // ================================================
 
@@ -63,7 +45,6 @@
             DeallocBuffer(data);
         }
 
-
     // --------------------------
 
         Map16Buf* operator = (Map16Buf *m)
@@ -84,6 +65,19 @@
         u16 GetTile(u16 x, u16 y)
         {
             return Get2Bytes(data, (x * 2) + (y * 0x80));
+        }
+
+    // --------------------------
+
+        bool SetTile(u16 addr, u16 value)
+        {
+            u8 x = GetMap16X(addr) >> 4;
+            u8 y = GetMap16Y(addr) >> 4;
+
+            if(addr > 0x2000)
+                return false;
+
+            return SetTile(x, y, value);
         }
 
     // --------------------------
