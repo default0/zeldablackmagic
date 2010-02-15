@@ -976,7 +976,9 @@
 
         over_exit_type exit_type = over_exit_down; // defaults
 
-        OverExit *exit = NULL;
+        OverExit *exit  = NULL;
+
+        OverArea *a     = NULL;
 
         // -------------------------------
 
@@ -988,23 +990,24 @@
         doorOffset  = xOffset    + (numExits * 8);
         doorOffset2 = doorOffset + (numExits * 2);
 
-        // basic error checking
-        if(numExits > 0x1000) // hardcoded for now
+        /// basic error checking
+        if(numExits > 0x1000) /// hardcoded for now
             return false;
 
         for(i = 0; i < numExits; ++i)
         {
-            // note the normal formula for entrances versus holes. strange.
-            room     = Get2Bytes(rom, roomOffset + (i * 2) );
-            area     = GetByte(rom, areaOffset + i);
+            room        =Get2Bytes(rom, roomOffset + (i * 2) );
+            area        = GetByte(rom, areaOffset + i);
+
+            a           = areas[area];
             
-            xStart   = (area & 0x07) << 9;
-            yStart   = (area & 0x38) << 6;
+            xStart      = (area & 0x07) << 9;
+            yStart      = (area & 0x38) << 6;
 
-            x        = Get2Bytes(rom, xOffset + (i * 2) ) - xStart;
-            y        = Get2Bytes(rom, yOffset + (i * 2) ) - yStart;
+            x           = Get2Bytes(rom, xOffset + (i * 2) ) - xStart;
+            y           = Get2Bytes(rom, yOffset + (i * 2) ) - yStart;
 
-            doorData = Get2Bytes(rom, doorOffset + (i * 2) );
+            doorData    = Get2Bytes(rom, doorOffset + (i * 2) );
 
             if(doorData == 0x0000)
                 exit_type = over_exit_down;
@@ -1031,7 +1034,7 @@
 
             exit->door->SetPos(GetMap16X(doorData), GetMap16Y(doorData));
 
-            OverExit::Add( &allExits[area], exit);
+            OverExit::Add(&a->exits, exit);
         }
 
         return true;

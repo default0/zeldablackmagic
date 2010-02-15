@@ -95,7 +95,7 @@
            
                 o->LoadArea();
 
-                if(o->area & 0x40)
+                if(o->area->areaNum & 0x40)
                 {
                     gi->backGfx0 = 0x21;
                     gi->spriteGfx1 = 0x0B;
@@ -107,14 +107,14 @@
                 }
 
                 // Load up graphics info
-                gi->backGfx1   = GetByte(game->image, CpuToRomAddr(0x00FC9C) + o->area);
+                gi->backGfx1   = GetByte(game->image, CpuToRomAddr(0x00FC9C) + o->area->areaNum);
 
                 SendMessage(GetDlgItem(game->toolDlg, ID_AUX_BG_GFX),
                             CB_SETCURSEL,
                             (WPARAM) gi->backGfx1,
                             0);
 
-                gi->spriteGfx0 = GetByte(game->image, CpuToRomAddr(0x00FA41) + o->area);
+                gi->spriteGfx0 = GetByte(game->image, CpuToRomAddr(0x00FA41) + o->area->areaNum);
 
                 sprintf(temp, "%0X", gi->spriteGfx0);
                 SetDlgItemText(game->toolDlg, ID_AUX_SPR_GFX, temp);
@@ -152,7 +152,7 @@
 
                     if(i != wes->numElements)
                     {
-                        if(o->largeArea)
+                        if(o->area->largeArea)
                             we->nHeight = we->nWidth = 1024;
                         else
                             we->nHeight = we->nWidth = 512;
@@ -168,9 +168,9 @@
             case OVER_EVENT_OVERLAY:
             {
                 if(o->editOverlay == true)
-                    o->LoadOverlay();
+                    o->area->LoadOverlay();
                 else
-                    o->UnloadOverlay();
+                    o->area->UnloadOverlay();
 
                 DrawOW(game, b, o->map8Buf);
 
@@ -232,11 +232,16 @@
             }
             case BM_TEARDOWN:
             {
+                /**
+
+                /// No replacement for this yet, but it must be fixed eventually!!!!
                 o->allEntr[o->area]     = o->areaEntr;
                 o->allHoles[o->area]    = o->areaHoles;
                 o->allExits[o->area]    = o->areaExits;
                 o->allItems[0][o->area] = o->areaItems;
                 o->allSpr[1][o->area]   = o->areaSpr;
+
+                */
 
                 break;
             }
@@ -404,8 +409,8 @@
                 
                 // ----------------------------------
 
-                exit  = OverExit::GetHead(o->areaExits);
-                buf   = o->exitBuf;
+                exit  = OverExit::GetHead(o->area->exits);
+                buf   = o->buf;
                 brush = whiteBrush;
                 
                 SetTextColor(memDC, RGB(0x00, 0x00, 0x00));
@@ -453,14 +458,14 @@
             }
             case mode_sprite:
             {
-                buf   = o->sprBuf;
+                buf   = o->buf;
                 brush = purpleBrush;
                 
                 SetTextColor(memDC, RGB(0xFF, 0xFF, 0xFF));
 
                 HFONT oldFont = (HFONT) SelectObject(memDC, courier);
 
-                OverSpr *s = o->areaSpr;
+                OverSpr *s = o->area->spr[1];
 
                 for(   ; s != NULL; s = (OverSpr*) s->GetNext())
                 {
@@ -513,14 +518,14 @@
             }
             case mode_item:
             {
-                buf   = o->itemBuf;
+                buf   = o->buf;
                 brush = redBrush;
                 
                 SetTextColor(memDC, RGB(0xFF, 0xFF, 0xFF));
 
                 HFONT oldFont = (HFONT) SelectObject(memDC, courier);
 
-                OverItem *item = o->areaItems;
+                OverItem *item = o->area->items[0];
 
                 for(   ; item != NULL; item = (OverItem*) item->GetNext())
                 {
@@ -558,8 +563,8 @@
             }
             case mode_entrance:
 
-                entr  = (Entrance*) MarkerList::GetHead(o->areaEntr);
-                buf   = o->entrBuf;
+                entr  = (Entrance*) MarkerList::GetHead(o->area->entr);
+                buf   = o->buf;
                 brush = yellowBrush;
 
                 SetTextColor(memDC, RGB(0x00, 0x00, 0x00));
@@ -570,8 +575,8 @@
 
             case mode_hole:
 
-                entr  = (Entrance*) MarkerList::GetHead(o->areaHoles);
-                buf   = o->holeBuf;
+                entr  = (Entrance*) MarkerList::GetHead(o->area->holes);
+                buf   = o->buf;
                 brush = blackBrush;
 
                 SetTextColor(memDC, RGB(0xFF, 0xFF, 0xFF));
@@ -635,9 +640,6 @@
 
             case fromMap16:
                 modulus = 16; break;
-    
-            case fromMap32:
-                modulus = 32; break;
         }
 
         InvalidateRect(game->pictWin, obj->GetRect(), false);
@@ -699,7 +701,7 @@
         sprintf(temp, "%04X", GetMap8Tile(o->map8Buf, x >> 3, y >> 3));
         SetDlgItemText(game->toolDlg, ID_OW_EDIT2, temp);
 
-        sprintf(temp, "%04X", GetMap16Tile(o->map16Buf, x >> 4, y >> 4));
+        /// sprintf(temp, "%04X", GetMap16Tile(o->map16Buf, x >> 4, y >> 4));
         SetDlgItemText(game->toolDlg, ID_OW_EDIT3, temp);
 
         // next we look at the current edit mode and decide how to handle the mouse move
@@ -763,25 +765,25 @@
             }
             case mode_sprite:
             {
-                m = MarkerList::GetDragging(o->areaSpr);
+                m = MarkerList::GetDragging(o->area->spr[1]);
 
                 goto moveMarker;
             }
             case mode_item:
             {
-                m = MarkerList::GetDragging(o->areaItems);
+                m = MarkerList::GetDragging(o->area->items[0]);
 
                 goto moveMarker;
             }
             case mode_entrance:
             {
-                m = MarkerList::GetDragging(o->areaEntr);
+                m = MarkerList::GetDragging(o->area->entr);
 
                 goto moveMarker;
             }
             case mode_hole:
             {   
-                m = MarkerList::GetDragging(o->areaHoles);
+                m = MarkerList::GetDragging(o->area->holes);
 
                 goto moveMarker;
             }
@@ -801,7 +803,7 @@
             }
             case mode_exit:
             {
-                OverExit *exit = OverExit::GetDraggingExit(o->areaExits);
+                OverExit *exit = OverExit::GetDraggingExit(o->area->exits);
 
                 if(exit)
                 {
@@ -868,10 +870,10 @@
                 break;
         }
 
-        newArea = o->area + ((o->largeArea) ? large_changes[j][i] : small_changes[j][i]);
+        newArea = o->area->areaNum + ((o->area->largeArea) ? large_changes[j][i] : small_changes[j][i]);
         newArea %= 0x80;
         
-        if(newArea != o->area)
+        if(newArea != o->area->areaNum)
             PostMessage(hwnd, OVER_CHANGE, (WPARAM) newArea, 0);
     }
 
@@ -1012,7 +1014,7 @@
             }
             case mode_exit:
             {
-                OverExit *list = o->areaExits;
+                OverExit *list = o->area->exits;
                 OverExit *exit = NULL;
 
                 for(exit = OverExit::GetHead(list); exit; exit = exit->GetNext() )
@@ -1027,25 +1029,25 @@
                 {
                     Marker::Select( (Marker*) exit );
 
-                    o->exitPos = 0;
-                    sprintf( (char*) o->exitBuf, "%04X", exit->room);
+                    o->pos = 0;
+                    sprintf( (char*) o->buf, "%04X", exit->room);
                 }
 
                 break;
             }
             case mode_sprite:
             {
-                m = MarkerList::GetSelected(o->areaSpr);
+                m = MarkerList::GetSelected(o->area->spr[1]);
 
                 if(m) { InvalidateRect(game->pictWin, m->GetRect(), false); }
 
-                m = MarkerList::Select(o->areaSpr, xFull, yFull);
+                m = MarkerList::Select(o->area->spr[1], xFull, yFull);
 
                 if(m) 
                 {
                     InvalidateRect(game->pictWin, m->GetRect(), false); 
-                    o->sprPos = 0;
-                    sprintf( (char*) o->sprBuf, "%02X", ((OverSpr*) m)->spriteNum);
+                    o->pos = 0;
+                    sprintf( (char*) o->buf, "%02X", ((OverSpr*) m)->spriteNum);
                 }
 
                 break;
@@ -1053,17 +1055,17 @@
             }
             case mode_item:
             {
-                m = MarkerList::GetSelected(o->areaItems);
+                m = MarkerList::GetSelected(o->area->items[0]);
 
                 if(m) { InvalidateRect(game->pictWin, m->GetRect(), false); }
 
-                m = MarkerList::Select(o->areaItems, xFull, yFull);
+                m = MarkerList::Select(o->area->items[0], xFull, yFull);
 
                 if(m) 
                 {
                     InvalidateRect(game->pictWin, m->GetRect(), false); 
-                    o->itemPos = 0;
-                    sprintf( (char*) o->itemBuf, "%02X", ((OverItem*) m)->itemNum);
+                    o->pos = 0;
+                    sprintf( (char*) o->buf, "%02X", ((OverItem*) m)->itemNum);
                 }
                 
                 break;
@@ -1074,15 +1076,15 @@
             {
                 if(o->editMode == mode_entrance)
                 {
-                    list = o->areaEntr;
-                    pos  = &o->entrPos;
-                    buf  = o->entrBuf;
+                    list = o->area->entr;
+                    pos  = &o->pos;
+                    buf  = o->buf;
                 }
                 else
                 {
-                    list = o->areaHoles;
-                    pos  = &o->holePos;
-                    buf  = o->holeBuf;
+                    list = o->area->holes;
+                    pos  = &o->pos;
+                    buf  = o->buf;
                 }
                 
                 // if a entrance ended up getting clicked, select it
@@ -1106,7 +1108,7 @@
             }
             case mode_drawtile:
             {
-                oldMap16 = GetMap16Tile(o->map16Buf, x16, y16);
+                /// oldMap16 = GetMap16Tile(o->map16Buf, x16, y16);
                 
                 o->Map16To8(oldMap16, map8Vals);
                 o->Map32To16(oldMap32, map16Vals);
@@ -1133,33 +1135,12 @@
                     
                     map16Vals[index] = newMap16; 
                     
-                    if(o->editOverlay == false)
-                    {
-                        // now we need to figure out whether we can find an existing map32 tile
-                        // and if not, generate a new one if space is available
-                        newMap32 = o->FindMap32(map16Vals);                    
-                        
-                        // failure. try to allocate a map32 tile
-                        if(newMap32 == -1)
-                            newMap32 = o->AllocateMap32(map16Vals, oldMap32);
-                        
-                        if(newMap32 == -1)
-                        {
-                            MessageBox(hwnd, "No more map32 tiles can be allocated.", "error", MB_OK);
-                            return;
-                        }
-                        
-                        o->PutMap32Tile(x32, y32, newMap32);
-                        o->DecMapCounts(oldMap32, usingMap32);
-                        o->IncMapCounts(newMap32, usingMap32, map16Vals);
-                    }
-                    
                     SetMap8Tile(o->map8Buf,   o->tile8, x,   y);
-                    o->map16Buf->SetTile(x16, y16, newMap16);
+                    /// o->map16Buf->SetTile(x16, y16, newMap16);
                     
                     // update resource counts for map16 tiles
-                    o->DecMapCounts(oldMap16, usingMap16);
-                    o->IncMapCounts(newMap16, usingMap16, map8Vals);
+                    o->DecMapCounts(oldMap16);
+                    o->IncMapCounts(newMap16, map8Vals);
                     
                     DrawMap8(game, b, o->tile8, x, y);
                     InvalidateTile(game, x, y);
@@ -1172,31 +1153,12 @@
                     newMap16 = o->tile16;
                     
                     map16Vals[index] = newMap16;
-                    
-                    if(o->editOverlay == false)
-                    {
-                        newMap32 = o->FindMap32(map16Vals);                    
-                        
-                        // failure. try to allocate a map32 file
-                        if(newMap32 == -1)
-                            newMap32 = o->AllocateMap32(map16Vals, oldMap32);
-                        
-                        if(newMap32 == -1)
-                        {
-                            MessageBox(hwnd, "No more map32 tiles can be allocated.", "error", MB_OK);
-                            return;
-                        }
 
-                        o->PutMap32Tile(x32, y32, newMap32);
-                        o->DecMapCounts(oldMap32, usingMap32);
-                        o->IncMapCounts(newMap32, usingMap32, map16Vals);
-                    }
-
-                    o->map16Buf->SetTile(x16, y16, newMap16);
+                    /// o->map16Buf->SetTile(x16, y16, newMap16);
 
                     // update resource counts for map16 tiles
-                    o->DecMapCounts(oldMap16, usingMap16);
-                    o->IncMapCounts(newMap16, usingMap16, map8Vals);
+                    o->DecMapCounts(oldMap16);
+                    o->IncMapCounts(newMap16, map8Vals);
 
                     o->Map16To8(newMap16, map8Vals);
 
@@ -1294,12 +1256,12 @@
             }
             case mode_sprite:
             {
-                m = MarkerList::GetSelected( &o->area->spr[1]);
+                m = MarkerList::GetSelected( o->area->spr[1]);
 
                 if(!m) break;
 
-                pos = &o->sprPos;
-                buf = o->sprBuf;
+                pos = &o->pos;
+                buf = o->buf;
 
                 goto handle_char;
 
@@ -1307,12 +1269,12 @@
             }   
             case mode_item:
             {
-                m = MarkerList::GetSelected(o->areaItems);
+                m = MarkerList::GetSelected(o->area->items[0]);
 
                 if(!m) break;
 
-                pos = &o->itemPos;
-                buf = o->itemBuf;
+                pos = &o->pos;
+                buf = o->buf;
 
                 goto handle_char;
 
@@ -1320,13 +1282,13 @@
             }
             case mode_exit:
             {
-                OverExit *exit = OverExit::GetSelectedExit(o->areaExits);
+                OverExit *exit = OverExit::GetSelectedExit(o->area->exits);
 
                 if(!exit)
                     break;
 
-                pos = &o->exitPos;
-                buf = o->exitBuf;
+                pos = &o->pos;
+                buf = o->buf;
                
                 value = HexDigit(c);
 
@@ -1359,10 +1321,10 @@
             }
             case mode_entrance:
             {   
-                pos = &o->entrPos;
-                buf = o->entrBuf;
+                pos = &o->pos;
+                buf = o->buf;
 
-                m = MarkerList::GetSelected(o->areaEntr);
+                m = MarkerList::GetSelected(o->area->entr);
 
                 goto handle_char;
 
@@ -1370,10 +1332,10 @@
             }
             case mode_hole:
             {
-                pos = &o->holePos;
-                buf = o->holeBuf;
+                pos = &o->pos;
+                buf = o->buf;
 
-                m = MarkerList::GetSelected(o->areaHoles);
+                m = MarkerList::GetSelected(o->area->holes);
 
                 goto handle_char;
 
@@ -1485,7 +1447,7 @@
         {
             case mode_exit:
             {
-                OverExit *exit = OverExit::GetSelectedExit(o->areaExits);
+                OverExit *exit = OverExit::GetSelectedExit(o->area->exits);
 
                 switch(wp)
                 {
@@ -1572,7 +1534,7 @@
             }
             case mode_sprite:
             {
-                m = MarkerList::GetSelected(o->areaSpr);
+                m = MarkerList::GetSelected(o->area->spr[1]);
 
                 if(m)
                     m->dragging = false; 
@@ -1581,7 +1543,7 @@
             }
             case mode_item:
             {
-                m = MarkerList::GetSelected(o->areaItems);
+                m = MarkerList::GetSelected(o->area->items[0]);
 
                 if(m)
                     m->dragging = false; 
@@ -1590,7 +1552,7 @@
             }
             case mode_exit:
             {
-                OverExit *exit = OverExit::GetDraggingExit(o->areaExits);
+                OverExit *exit = OverExit::GetDraggingExit(o->area->exits);
 
                 if(exit)
                     exit->dragging = false;
@@ -1599,7 +1561,7 @@
             }
             case mode_entrance:
             {
-                m = MarkerList::GetDragging(o->areaEntr);
+                m = MarkerList::GetDragging(o->area->entr);
 
                 if(m)
                     m->dragging = false;
@@ -1608,7 +1570,7 @@
             }
             case mode_hole:
             {
-                m = MarkerList::GetDragging(o->areaHoles);
+                m = MarkerList::GetDragging(o->area->holes);
 
                 if(m)
                     m->dragging = false;
@@ -1667,7 +1629,7 @@
                 if(o->tileSize == fromMap8)
                     o->tile8  = GetMap8Tile(o->map8Buf, x >> 3, y >> 3);
                 else if(o->tileSize == fromMap16)
-                    o->tile16 = GetMap16Tile(o->map16Buf, x >> 4, y >> 4);
+                    o->tile16 = 0; /// GetMap16Tile(o->map16Buf, x >> 4, y >> 4);
 
                 return;
             }
@@ -1699,30 +1661,30 @@
             }
             case mode_sprite:
             {
-                if(OverSpr::GetDragging(o->areaSpr))
+                if(OverSpr::GetDragging(o->area->spr[1]))
                     return;
 
                 context = o->sprContext;
 
-                m = MarkerList::GetClicked(o->areaSpr, x, y);
+                m = MarkerList::GetClicked(o->area->spr[1], x, y);
 
                 if(m)
                     EnableMenuItem(context, ID_REMOVE_SPRITE, MF_BYCOMMAND | MF_ENABLED);
                 else
                     EnableMenuItem(context, ID_REMOVE_SPRITE, MF_BYCOMMAND | MF_GRAYED);
 
-                CheckMenuItem(context, ID_FALLING_ROCKS, MF_BYCOMMAND | (o->fallingRocks[1][o->area] ? MF_CHECKED : MF_UNCHECKED));
+                CheckMenuItem(context, ID_FALLING_ROCKS, MF_BYCOMMAND | (o->area->fallingRocks[1] ? MF_CHECKED : MF_UNCHECKED));
 
                 break;
             }
             case mode_item:
             {
-                if(OverItem::GetDragging(o->areaItems))
+                if(OverItem::GetDragging(o->area->items[0]))
                     return;
 
                 context = o->itemContext;
 
-                m = MarkerList::GetClicked(o->areaItems, x, y);
+                m = MarkerList::GetClicked(o->area->items[0], x, y);
 
                 if(m)
                     EnableMenuItem(context, ID_REMOVE_ITEM, MF_BYCOMMAND | MF_ENABLED);
@@ -1733,12 +1695,12 @@
             }
             case mode_exit:
             {
-                if(OverExit::GetDraggingExit(o->areaExits))
+                if(OverExit::GetDraggingExit(o->area->exits))
                     return;
 
                 context = o->exitContext;
 
-                exit = o->areaExits->GetClicked(x, y);
+                exit = o->area->exits->GetClicked(x, y);
 
                 if(exit)
                 {
@@ -1766,13 +1728,13 @@
             case mode_entrance:
             {
                 // don't bother if we're still dragging the hole around
-                if(Entrance::GetDragging(o->areaEntr))
+                if(Entrance::GetDragging(o->area->entr))
                     return;
 
                 // otherwise pop out a popup menu
                 context = o->entrContext;
 
-                m = MarkerList::GetClicked(o->areaEntr, x, y);
+                m = MarkerList::GetClicked(o->area->entr, x, y);
 
                 EnableMenuItem(context, ID_REMOVE_ENTRANCE, MF_BYCOMMAND | (m ? MF_ENABLED : MF_GRAYED) );
 
@@ -1781,13 +1743,13 @@
             case mode_hole:
             {
                 // don't bother if we're still dragging the hole around
-                if(Entrance::GetDragging(o->areaHoles))
+                if(Entrance::GetDragging(o->area->holes))
                     return;
 
                 // otherwise pop out a popup menu
                 context = o->holeContext;
 
-                m = MarkerList::GetClicked(o->areaHoles, x, y);
+                m = MarkerList::GetClicked(o->area->holes, x, y);
 
                 EnableMenuItem(context, ID_REMOVE_HOLE, MF_BYCOMMAND | (m ? MF_ENABLED : MF_GRAYED) );
             }
@@ -1844,9 +1806,6 @@
 
                             case fromMap16:
                                 mask = ~0x0F; break;
-
-                            case fromMap32:
-                                mask = ~0x1F; break;
                         }
 
                         gridX = (x & mask); 
@@ -1871,10 +1830,10 @@
             }
             case mode_sprite:
             {
-                OverSpr *spr = (OverSpr*) MarkerList::GetClicked(o->areaSpr, x, y);
+                OverSpr *spr = (OverSpr*) MarkerList::GetClicked(o->area->spr[1], x, y);
                 
                 if(k == ID_ADD_SPRITE)
-                    OverSpr::Add( &o->areaSpr, new OverSpr(0, x, y, false));
+                    OverSpr::Add( &o->area->spr[1], new OverSpr(0, x, y, false));
                 else if(k == ID_REMOVE_SPRITE)
                 {
                     if(spr)
@@ -1883,17 +1842,17 @@
                         r.right = (strlen(spr->label) * 8) + r.left;
                         InvalidateRect(game->pictWin, &r, FALSE);
                         
-                        o->areaSpr = (OverSpr*) spr->Delete( (List**) &o->areaSpr);
+                        o->area->spr[1] = (OverSpr*) spr->Delete( (List**) &o->area->spr[1]);
                     }
                 }
                 else if(k == ID_DELETE_SPRITES_PART)
                 {
-                    while(o->areaSpr)
-                        o->areaSpr = (OverSpr*) o->areaSpr->Delete( (List**) &o->areaSpr);
+                    while(o->area->spr[1])
+                        o->area->spr[1] = (OverSpr*) o->area->spr[1]->Delete( (List**) &o->area->spr[1]);
                 }
                 else if(k == ID_FALLING_ROCKS)
                 {
-                    o->fallingRocks[1][o->area] = !o->fallingRocks[1][o->area];
+                    o->area->fallingRocks[1] = !o->area->fallingRocks[1];
 
                 }
 
@@ -1901,10 +1860,10 @@
             }
             case mode_item:
             {
-                OverItem *item = (OverItem*) MarkerList::GetClicked(o->areaItems, x, y);
+                OverItem *item = (OverItem*) MarkerList::GetClicked(o->area->items[0], x, y);
                 
                 if(k == ID_ADD_ITEM)
-                    OverItem::Add( &o->areaItems, new OverItem(0, x, y));
+                    OverItem::Add( &o->area->items[0], new OverItem(0, x, y));
                 else if(k == ID_REMOVE_ITEM)
                 {
                     if(item)
@@ -1913,37 +1872,37 @@
                         r.right = (strlen(item->label) * 8) + r.left;
                         InvalidateRect(game->pictWin, &r, FALSE);
                         
-                        o->areaItems = (OverItem*) item->Delete( (List**) &o->areaItems);
+                        o->area->items[0] = (OverItem*) item->Delete( (List**) &o->area->items[0]);
                     }
                 }
                 else if(k == ID_DELETE_ITEMS)
-                    while(o->areaItems)
-                        o->areaItems = (OverItem*) o->areaItems->Delete( (List**) &o->areaItems);
+                    while(o->area->items[0])
+                        o->area->items[0] = (OverItem*) o->area->items[0]->Delete( (List**) &o->area->items[0]);
 
                 break;
             }
             case mode_exit:
             {
-                OverExit *exit = o->areaExits->GetClicked(x, y);
+                OverExit *exit = o->area->exits->GetClicked(x, y);
                
                 switch(k)
                 {
                     case ID_ADD_EXIT:
                     {
-                        OverExit::Add(&o->areaExits, new OverExit(x, y, o->area, 0, over_exit_down));
+                        OverExit::Add(&o->area->exits, new OverExit(x, y, o->area->areaNum, 0, over_exit_down));
 
                         break;
                     }
                     case ID_DELETE_EXITS:
                     {
-                        while(o->areaExits)
-                            o->areaExits->Delete( (List**) &o->areaExits);
+                        while(o->area->exits)
+                            o->area->exits->Delete( (List**) &o->area->exits);
 
                         break;
                     }
                     case ID_REMOVE_EXIT:
                     {
-                        if(exit) exit->Delete( (List**) &o->areaExits);
+                        if(exit) exit->Delete( (List**) &o->area->exits);
 
                         break;
                     }
@@ -1974,9 +1933,9 @@
                 {
                     case IDC_ADD_ENTRANCE:
                     {
-                        Entrance *e = new Entrance(x, y, 0, o->area);
+                        Entrance *e = new Entrance(x, y, 0, o->area->areaNum);
 
-                        Entrance::Add(&o->areaEntr, e);
+                        Entrance::Add(&o->area->entr, e);
                         InvalidateRect(game->pictWin, e->GetRect(), FALSE);
 
                         break;
@@ -1984,10 +1943,10 @@
 
                     case IDC_DELETE_ENTRANCES:
                     {
-                        while(o->areaEntr)
+                        while(o->area->entr)
                         {
-                            InvalidateRect(game->pictWin, o->areaEntr->GetRect(), FALSE);
-                            o->areaEntr = (Entrance*) o->areaEntr->Delete( (List**) &o->areaEntr);
+                            InvalidateRect(game->pictWin, o->area->entr->GetRect(), FALSE);
+                            o->area->entr = (Entrance*) o->area->entr->Delete( (List**) &o->area->entr);
                         }
 
                         break;
@@ -1995,14 +1954,14 @@
 
                     case ID_REMOVE_ENTRANCE:
                     {
-                        Entrance *entr = o->areaEntr ? (Entrance*) o->areaEntr->GetAt(x, y) : NULL;
+                        Entrance *entr = o->area->entr ? (Entrance*) o->area->entr->GetAt(x, y) : NULL;
 
                         // --------------------------------------
 
                         if(entr)
                         {
                             InvalidateRect(game->pictWin, entr->GetRect(), FALSE);
-                            entr->Delete( (List**) &o->areaEntr);
+                            entr->Delete( (List**) &o->area->entr);
                         }
 
                         break;
@@ -2015,9 +1974,9 @@
                 {
                     case IDC_ADD_HOLE:
                     {
-                        Entrance *hole = new Entrance(x, y, 0, o->area);
+                        Entrance *hole = new Entrance(x, y, 0, o->area->areaNum);
 
-                        Entrance::Add(&o->areaHoles, hole);
+                        Entrance::Add(&o->area->holes, hole);
                         
                         InvalidateRect(game->pictWin, hole->GetRect(), FALSE);
                         break;
@@ -2025,10 +1984,10 @@
 
                     case IDC_DELETE_HOLES:
                     {
-                        while(o->areaHoles)
+                        while(o->area->holes)
                         {
-                            InvalidateRect(game->pictWin, o->areaHoles->GetRect(), FALSE);
-                            o->areaHoles = (Entrance*) o->areaHoles->Delete( (List**) &o->areaHoles);
+                            InvalidateRect(game->pictWin, o->area->holes->GetRect(), FALSE);
+                            o->area->holes = (Entrance*) o->area->holes->Delete( (List**) &o->area->holes);
                         }
 
                         break;
@@ -2036,14 +1995,14 @@
 
                     case ID_REMOVE_HOLE:
                     {
-                        Entrance *hole = o->areaHoles ? (Entrance*) o->areaHoles->GetAt(x, y) : NULL;
+                        Entrance *hole = o->area->holes ? (Entrance*) o->area->holes->GetAt(x, y) : NULL;
 
                         // --------------------------------------
 
                         if(hole)
                         {
                             InvalidateRect(game->pictWin, hole->GetRect(), FALSE);
-                            hole->Delete( (List**) &o->areaHoles);
+                            hole->Delete( (List**) &o->area->holes);
                         }
 
                         break;
@@ -2525,12 +2484,6 @@
 
                         case fromMap16:
                             DrawMap16(game, o->bStock[i], value, x, y); break;
-
-                        case fromMap32:
-                            // not implemented yet 
-                            //DrawMap32(  );
-                        
-                            break;
                     }
                 }
             }
