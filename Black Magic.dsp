@@ -157,6 +157,10 @@ SOURCE=.\Globals.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\Graphics.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\List.h
 # End Source File
 # Begin Source File
@@ -170,6 +174,10 @@ SOURCE=.\PathName.h
 # Begin Source File
 
 SOURCE=.\Strings.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ZeldaGame.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
@@ -367,6 +375,10 @@ SOURCE=.\Sprites.h
 # Begin Source File
 
 SOURCE=.\TextMode.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TextMode.h
 # End Source File
 # End Group
 # Begin Group "Graphics"
