@@ -1,10 +1,14 @@
-#include "Strings.h"
-#include "Globals.h"
+
+    #include "ZeldaGame.h"
 
 #ifndef OVERMODE_H
 
     #define OVERMODE_H
 
+    // externally defined variables
+    extern OverObj over_stock_objs[];
+
+    // function declarations
     bool        PlaceObject(zgPtr game, OverData *o, OverObj *obj);
             
     void        InitOverMode(zgPtr game);
@@ -32,9 +36,7 @@
     u16         GetMap8Tile(bufPtr map8Buf, u16 x, u16 y);
 
     u32         AllocateMap16(bufPtr counts, u16 map8Vals[], u16 oldMap16,  u16 threshold = 0);
-    u32         AllocateMap32(bufPtr counts, u16 map16Vals[], u16 oldMap32, u16 threshold = 0);
-
-    u32         SetMap32Tile(bufPtr map32Buf, u16 value, u16 x, u16 y);
+ 
     u32         SetMap8Tile(bufPtr map8Buf, u16 value, u16 x, u16 y);
 
     u32         SaveOverworldData(zgPtr game, u32 *offset);

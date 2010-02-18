@@ -1,16 +1,35 @@
-// Declarations of functions and variables for String.cpp
+    
+    // Declarations of functions and variables for String.cpp
 
-//#include "Globals.cpp"
+    // #defines
+    #include "Globals.h"
 
-// #defines
-#include "Globals.h"
-#include "resource.h"
+    /// why is this here?    
+    #include "resource.h"
 
 #ifndef STRINGS_H
 
     #define STRINGS_H
 
     // Variables
+
+
+    // structure types
+    typedef struct 
+    {
+      unsigned char* contents;
+      unsigned int length;
+      unsigned int error;
+      unsigned int wOffset; // write offset
+
+      // "unit" is added in case the internal data is in X byte chunks
+      unsigned int width;
+      unsigned int height;
+      unsigned int unit;
+
+    } Buffer;
+
+    typedef Buffer*     bufPtr;
 
     // function prototypes *************************************
 
@@ -87,8 +106,6 @@
     // Black Magic.cpp routines
 
     void    MainLoop();
-
-    void    RegisterBMClasses();
 
     void    MakeNewEditWindow();
 

@@ -1225,55 +1225,6 @@
 
 // ===============================================================
 
-        EventOverlay::EventOverlay()
-        {
-            data = CreateBuffer(0x40, 0x40, 2);
-
-            Initialize();
-        }
-
-        EventOverlay::~EventOverlay()
-        {
-            DeallocBuffer(data);
-        }
-
-        void EventOverlay::Initialize()
-        {
-            // fill with -1 (null) map16 values)
-            forgrid(Put2Bytes(data, i, j, 0xFFFF));
-        }
-        
-        bool EventOverlay::SetTile(u16 addr, u16 value)
-        {
-            u8 x = GetMap16X(addr) >> 4;
-            u8 y = GetMap16Y(addr) >> 4;
-
-            if(addr > 0x2000)
-                return false;
-
-            return SetTile(value, x, y);
-        }
-
-        bool EventOverlay::SetTile(u16 value, u8 x, u8 y)
-        {
-            Put2Bytes(data, (u32) x, (u32) y, value);
-
-            return true;
-        }
-
-        u16 EventOverlay::GetTile(u8 x, u8 y)
-        {
-            if(x >= 0x40)
-                return -1;
-
-            if(y >= 0x40)
-                return -1;
-
-            return Get2Bytes(data, (u32) x, (u32) y);
-        }
-
-// ===============================================================
-
     void OverData::LoadOverlaysOld()
     {
         bool done  = false;
@@ -1290,7 +1241,7 @@
         u32 offset      = 0;
         u32 x_reg       = 0;
        
-        EventOverlay *lay  = NULL;
+        Map16Buf *lay   = NULL;
        
         // -----------------------
 
@@ -1298,7 +1249,8 @@
         {
             done   = false;
 
-            lay    = areas[i]->eOverlay = new EventOverlay();
+            /// make sure to intialize to all 0xFF bytes
+            lay    = areas[i]->eOverlay;
 
             // don't use bad pointers.
             if(!lay)

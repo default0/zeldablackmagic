@@ -6,21 +6,19 @@
     //includes
 
     // 1. #include "Black Magic.h"
+    #include <windows.h>
+    #include "Limits.h"
+    #include <direct.h>
 
-    #include "Globals.h"
-    #include "Strings.h"
-    #include "Core.h"
+    /**#include "Strings.h"*/
     #include "Black Magic.h"
-    #include "Objects.h"
+    #include "Core.h"
+    /**#include "Objects.h"*/
     #include "DungMode.h"
     #include "OverMode.h"
     #include "OverModeGui.h"
     #include "Music.h"
     #include "PathName.h"
-
-    #include <windows.h>
-    #include "Limits.h"
-    #include <direct.h>
 
     #include <stack>
 

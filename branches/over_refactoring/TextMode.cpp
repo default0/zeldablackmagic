@@ -1,341 +1,335 @@
 
 //#include <regex.h>
 
-#include <iostream>
-#include <fstream>
-#include <string>
+    #include <iostream>
+    #include <fstream>
+    #include <string>
 
-#include "..\\re_lib\\regexp.h"
-#include "..\\re_lib\\regmagic.h"
-#include "Globals.h"
-#include "Core.h"
+    #include "..\\re_lib\\regexp.h"
+    #include "..\\re_lib\\regmagic.h"
+    #include "Globals.h"
+    #include "Core.h"
 
-using namespace std;
+    using namespace std;
 
+    #define NOMATCH     0
+    #define HUNGRY      1
+    #define STUFFED     2
 
-#define NOMATCH     0
-#define HUNGRY      1
-#define STUFFED     2
-
-
-
-
-
-// these are to used to convert the internal game characters to
-// something a bit more useful
-char* convChars[] =
-{
-    // codes 0x00 and up
-    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-
-    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
-    "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
-
-    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-
-    // codes 0x3E and up
-    "!", "?", "-", ".", ",", "[...]", ">", "(", ")",
-    "[ahnk]", "[waves]", "[snake]", "[LinkL]", "[LinkR]",
-    "\"", "[Up]", "[Down]", "[Left]", "[Right]", "'",
-
-    
-    // codes 52 and up
-	"[1HeartL]", "[1HeartR]", "[2HeartL]", "[3HeartL]",
-    "[3HeartR]", "[4HeartL]", "[4HeartR]",
-
-    " ", "<", "[A]", "[B]", "[X]", "[Y]",
-
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-
-    // codes 0x67 and up
-    "[NextPic]", "[Choose]", "[Item]", "[Name]", "[Window ",
-    "[Number ", "[Position ", "[ScrollSpd ", "[SelChng]",
-    
-    // codes 0x70 and up
-    "[Command 70]", "[Choose2]", "[Choose3]", "[Scroll]", 
-    "[Line1]", "[Line2]", "[Line3]", "[Color ",
-    "[Wait ", "[Sound ", "[Speed ",
-    "[Command 7B]", "[Command 7C]", "[Command 7D]", "[WaitKey]", "[End]",
-
-    // codes 0x80 and up
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-
-    // codes 0x90 and up
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-
-    // codes 0xA0 and up
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-
-    // codes 0xB0 and up
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-
-    // codes 0xC0 and up
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-
-    // codes 0xD0 and up
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-
-    // codes 0xE0 and up
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
- 
-    // codes 0xF0 and up
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
-    "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0"
-
-};
-
-int matchReg(regexp *r, char **text, u32 *lineRequest)
-{
-    char *start = 0;
-    int ret = 0;
-    int oldLine = 0;
-    u32 line = *lineRequest;
-    static regexp *newLine = regcomp("\xD\xA");
-
-    //memcpy(
-    // reset if we're working with a new buffer
-
-    // don't use invalid pointers
-    if(!r || !(*text))
-        ret = 0;
-    // see if the regex matches in the text
-    // then see if it matches the beginning of the text
-    else if(regexec(r, *text))
+    // these are to used to convert the internal game characters to
+    // something a bit more useful
+    char* convChars[] =
     {
-        start = r->startp[0];
+        // codes 0x00 and up
+        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+        "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
 
-        if(start == *text)
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+        "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+
+        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+
+        // codes 0x3E and up
+        "!", "?", "-", ".", ",", "[...]", ">", "(", ")",
+        "[ahnk]", "[waves]", "[snake]", "[LinkL]", "[LinkR]",
+        "\"", "[Up]", "[Down]", "[Left]", "[Right]", "'",
+
+    
+        // codes 52 and up
+	    "[1HeartL]", "[1HeartR]", "[2HeartL]", "[3HeartL]",
+        "[3HeartR]", "[4HeartL]", "[4HeartR]",
+
+        " ", "<", "[A]", "[B]", "[X]", "[Y]",
+
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+
+        // codes 0x67 and up
+        "[NextPic]", "[Choose]", "[Item]", "[Name]", "[Window ",
+        "[Number ", "[Position ", "[ScrollSpd ", "[SelChng]",
+    
+        // codes 0x70 and up
+        "[Command 70]", "[Choose2]", "[Choose3]", "[Scroll]", 
+        "[Line1]", "[Line2]", "[Line3]", "[Color ",
+        "[Wait ", "[Sound ", "[Speed ",
+        "[Command 7B]", "[Command 7C]", "[Command 7D]", "[WaitKey]", "[End]",
+
+        // codes 0x80 and up
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+
+        // codes 0x90 and up
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+
+        // codes 0xA0 and up
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+
+        // codes 0xB0 and up
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+
+        // codes 0xC0 and up
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+
+        // codes 0xD0 and up
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+
+        // codes 0xE0 and up
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+ 
+        // codes 0xF0 and up
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0",
+        "\0", "\0", "\0", "\0", "\0", "\0", "\0", "\0"
+
+    };
+
+    // this string is used in conjunction with strstr
+    char* cmdStrings[13] =
+    {
+        "nextpic",
+        "choose",
+        "item",
+        "name",
+        "selchng",
+        "auto",
+        "choose2",
+        "choose3",
+        "scroll",
+        "line1",
+        "line2",
+        "line3",
+        "waitkey"
+    };
+
+    char cmdCodes[13] = 
+    {
+        0x67,
+        0x68,
+        0x69,
+        0x6A,
+        0x6F, 
+        0x70,
+        0x71,
+        0x72,
+        0x73,
+        0x74,
+        0x75,
+        0x76,
+        0x7E
+    };
+
+    char* argCmdStrings[9] =
+    {
+        "window",
+        "number",
+        "position",
+        "scrollspd",
+        "color",
+        "wait",
+        "sound",
+        "speed",
+        "command"
+    };
+
+    char argCmdCodes[9] =
+    {
+        0x6B,
+        0x6C,
+        0x6D,
+        0x6E,
+        0x77,
+        0x78,
+        0x79,
+        0x7A,
+        0x7B
+    };
+
+    char* symbolStrings[21] = 
+    {
+        "...",
+        "ahnk",
+        "waves",
+        "snake",
+        "linkl",
+        "linkr",
+        "up",
+        "down",
+        "left",
+        "right",
+        "1heartl",
+        "1heartr",
+        "2heartl",
+        "3heartl",
+        "3heartr",
+        "4heartl",
+        "4heartr",
+        "b",
+        "a",
+        "x",
+        "y"
+    };
+
+    char symbolCodes[21] =
+    {
+        0x43,
+        0x47,
+        0x48,
+        0x49,
+        0x4A,
+        0x4B,
+        0x4D,
+        0x4E,
+        0x4F,
+        0x50,
+        0x52,
+        0x53,
+        0x54,
+        0x55,
+        0x56,
+        0x57,
+        0x58,
+        0x5B,
+        0x5C,
+        0x5D,
+        0x5E
+    };
+
+    // this array translates ascii characters to their zelda equivalents
+    // naturally only 0x5F or so of these indexes are used
+    // the rest of the ascii characters return a null character ( '\0' )
+    u8 asciiToZchar[256] =
+    {
+        '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
+        '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
+
+        0x59,0x3E,0x4C,'\0','\0','\0','\0',0x51,0x45,0x46,'\0','\0',0x42,0x40,0x41,'\0', 
+
+        // [0-9] starts at 0x30 and goes to 0x39 along with ? -> 0x3F (incidentally the same)
+        // 
+        0x34,0x35,0x36,0x37,0x38,0x39,0x3A,0x3B,0x3C,0x3D,'\0','\0',0x5A,'\0',0x44,0x3F, 
+
+        // [A-Z] starts at 0x41 and goes to 0x5A
+        '\0',0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E, 
+
+        // 0x50, continuation of [A-Z] with
+        0x0F,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,'\0','\0','\0','\0','\0', 
+
+        // [a-z] starts at 0x61 and goes to 0x7A
+        0x51,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,
+
+        // 0x70, continuation of [a-z] with
+        0x29,0x2A,0x2B,0x2C,0x2D,0x2E,0x2F,0x30,0x31,0x32,0x33,'\0','\0','\0','\0','\0', 
+
+        '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
+        '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
+        '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
+        '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
+        '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
+        '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
+        '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
+        '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0'
+    };
+
+    // these variables are for use in ParseZChars() and ValidSyntax()
+    static bool autoParse = false;
+    static bool realDeal = false;
+
+    static regexp *comment = regcomp("\\i((\\s)|(\\[(\\s*)Comment([^]]*)\\]))*");
+    static regexp *msg = regcomp("\\i\\[\\s*Msg\\s*(\\h+)\\s*\\]");
+    static regexp *end = regcomp("\\i\\[\\s*End\\s*\\]");
+
+    static regexp *cmds = regcomp("\\i(\\[\\s*(Scroll|NextPic|Choose[23]?|Item|Name|SelChng|Auto|WaitKey|Line[123])\\s*\\])?");
+    static regexp *argcmds = regcomp("\\i(\\[\\s*(Window|Number|Position|ScrollSpd|Color|Wait|Sound|Speed|Command)\\s*(\\h+)\\s*\\])?");
+    static regexp *symbols = regcomp("\\i(\\[\\s*([1-4]HeartL|[134]HeartR|ahnk|waves|snake|Down|Up|Left|Right|LinkL|LinkR|B|A|X|Y|\\.\\.\\.)\\s*\\])?");
+    static regexp *zchars = regcomp("([- A-Za-z0-9,\\.><\\(\\)\\?'\\\"!])*");
+
+    static char errorBuf[512];
+    static char* fileBuf = NULL;
+
+    static u32 msgNum       = 0;
+    static u32 lineNum      = 0;
+    static u32 curMsgLen    = 0;
+    static u32 curMsg       = 0;
+
+    static bufPtr outputBuf = NULL;
+    static ifstream inFile;
+    static ofstream outFile;
+
+    static DialogueFile newDF;
+
+    int matchReg(regexp *r, char **text, u32 *lineRequest)
+    {
+        char *start = 0;
+        int ret = 0;
+        int oldLine = 0;
+        u32 line = *lineRequest;
+        static regexp *newLine = regcomp("\xD\xA");
+
+        //memcpy(
+        // reset if we're working with a new buffer
+
+        // don't use invalid pointers
+        if(!r || !(*text))
+            ret = 0;
+        // see if the regex matches in the text
+        // then see if it matches the beginning of the text
+        else if(regexec(r, *text))
         {
-            // return value of two indicates it actually ate some characters
-            if(start < r->endp[0])
-                ret = 2;
-            else
-                ret = 1;
+            start = r->startp[0];
 
-            *text = r->endp[0];
-
-            oldLine = line;
-
-            while(1)
+            if(start == *text)
             {
-                if(regexec(newLine, start))
-                {   
-                    line++;
-                    start = newLine->endp[0];
-                }
+                // return value of two indicates it actually ate some characters
+                if(start < r->endp[0])
+                    ret = 2;
                 else
+                    ret = 1;
+
+                *text = r->endp[0];
+
+                oldLine = line;
+
+                while(1)
                 {
-                    *lineRequest = line;
-                    ret = 0;
-                    break;
+                    if(regexec(newLine, start))
+                    {   
+                        line++;
+                        start = newLine->endp[0];
+                    }
+                    else
+                    {
+                        *lineRequest = line;
+                        ret = 0;
+                        break;
+                    }
+
+                    if(start > r->endp[0])
+                    {
+                        line = oldLine;
+                        break;
+                    }
+                    else
+                    {
+                        oldLine++;
+
+                    }
+
                 }
 
-                if(start > r->endp[0])
-                {
-                    line = oldLine;
-                    break;
-                }
-                else
-                {
-                    oldLine++;
-
-                }
-
+                *lineRequest = line;
             }
-
-            *lineRequest = line;
+            else
+                ret = 0;
         }
         else
             ret = 0;
+
+        return ret;
     }
-    else
-        ret = 0;
-
-    return ret;
-}
-
-// this string is used in conjunction with strstr
-char* cmdStrings[13] =
-{
-    "nextpic",
-    "choose",
-    "item",
-    "name",
-    "selchng",
-    "auto",
-    "choose2",
-    "choose3",
-    "scroll",
-    "line1",
-    "line2",
-    "line3",
-    "waitkey"
-};
-
-char cmdCodes[13] = 
-{
-    0x67,
-    0x68,
-    0x69,
-    0x6A,
-    0x6F, 
-    0x70,
-    0x71,
-    0x72,
-    0x73,
-    0x74,
-    0x75,
-    0x76,
-    0x7E
-};
-
-char* argCmdStrings[9] =
-{
-    "window",
-    "number",
-    "position",
-    "scrollspd",
-    "color",
-    "wait",
-    "sound",
-    "speed",
-    "command"
-};
-
-char argCmdCodes[9] =
-{
-    0x6B,
-    0x6C,
-    0x6D,
-    0x6E,
-    0x77,
-    0x78,
-    0x79,
-    0x7A,
-    0x7B
-};
-
-char* symbolStrings[21] = 
-{
-    "...",
-    "ahnk",
-    "waves",
-    "snake",
-    "linkl",
-    "linkr",
-    "up",
-    "down",
-    "left",
-    "right",
-    "1heartl",
-    "1heartr",
-    "2heartl",
-    "3heartl",
-    "3heartr",
-    "4heartl",
-    "4heartr",
-    "b",
-    "a",
-    "x",
-    "y"
-};
-
-char symbolCodes[21] =
-{
-    0x43,
-    0x47,
-    0x48,
-    0x49,
-    0x4A,
-    0x4B,
-    0x4D,
-    0x4E,
-    0x4F,
-    0x50,
-    0x52,
-    0x53,
-    0x54,
-    0x55,
-    0x56,
-    0x57,
-    0x58,
-    0x5B,
-    0x5C,
-    0x5D,
-    0x5E
-};
-
-// this array translates ascii characters to their zelda equivalents
-// naturally only 0x5F or so of these indexes are used
-// the rest of the ascii characters return a null character ( '\0' )
-u8 asciiToZchar[256] =
-{
-    '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
-    '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
-
-    0x59,0x3E,0x4C,'\0','\0','\0','\0',0x51,0x45,0x46,'\0','\0',0x42,0x40,0x41,'\0', 
-
-    // [0-9] starts at 0x30 and goes to 0x39 along with ? -> 0x3F (incidentally the same)
-    // 
-    0x34,0x35,0x36,0x37,0x38,0x39,0x3A,0x3B,0x3C,0x3D,'\0','\0',0x5A,'\0',0x44,0x3F, 
-
-    // [A-Z] starts at 0x41 and goes to 0x5A
-    '\0',0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E, 
-
-    // 0x50, continuation of [A-Z] with
-    0x0F,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,'\0','\0','\0','\0','\0', 
-
-    // [a-z] starts at 0x61 and goes to 0x7A
-    0x51,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,
-
-    // 0x70, continuation of [a-z] with
-    0x29,0x2A,0x2B,0x2C,0x2D,0x2E,0x2F,0x30,0x31,0x32,0x33,'\0','\0','\0','\0','\0', 
-
-    '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
-    '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
-    '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
-    '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
-    '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
-    '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
-    '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', 
-    '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0'
-};
-
-// these variables are for use in ParseZChars() and ValidSyntax()
-static bool autoParse = false;
-static bool realDeal = false;
-
-static regexp *comment = regcomp("\\i((\\s)|(\\[(\\s*)Comment([^]]*)\\]))*");
-static regexp *msg = regcomp("\\i\\[\\s*Msg\\s*(\\h+)\\s*\\]");
-static regexp *end = regcomp("\\i\\[\\s*End\\s*\\]");
-
-static regexp *cmds = regcomp("\\i(\\[\\s*(Scroll|NextPic|Choose[23]?|Item|Name|SelChng|Auto|WaitKey|Line[123])\\s*\\])?");
-static regexp *argcmds = regcomp("\\i(\\[\\s*(Window|Number|Position|ScrollSpd|Color|Wait|Sound|Speed|Command)\\s*(\\h+)\\s*\\])?");
-static regexp *symbols = regcomp("\\i(\\[\\s*([1-4]HeartL|[134]HeartR|ahnk|waves|snake|Down|Up|Left|Right|LinkL|LinkR|B|A|X|Y|\\.\\.\\.)\\s*\\])?");
-static regexp *zchars = regcomp("([- A-Za-z0-9,\\.><\\(\\)\\?'\\\"!])*");
-
-static char errorBuf[512];
-static char* fileBuf = NULL;
-
-static u32 msgNum = 0;
-static u32 lineNum = 0;
-static u32 curMsgLen = 0;
-static u32 curMsg = 0;
-
-static bufPtr outputBuf = NULL;
-static ifstream inFile;
-static ofstream outFile;
-
-static DialogueFile newDF;
-
 
 
 u32 ParseZChars(zgPtr game)

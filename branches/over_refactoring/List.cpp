@@ -79,10 +79,10 @@
             s->tail->next   = entry;
 
             for(t = s->head; t != NULL; t = t->next)
-        {
+            {
                 t->head = s->head;
-            t->tail = entry->tail;
-        }
+                t->tail = entry->tail;
+            }
 
             s->SetSize();
 

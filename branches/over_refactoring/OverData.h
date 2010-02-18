@@ -1,7 +1,7 @@
 
-	#include "Globals.h"
     #include "Strings.h"
-    #include "OverMode.h"
+    #include "OverHole.h"
+    #include "OverTypes.h"
 
 #ifndef OVERDATA_H
 
@@ -14,6 +14,10 @@
     extern const u32 mask32;
 
     #define forgrid(x) { u32 i =0; u32 j = 0; for(i = 0; i < data->width; ++i) { for(j = 0; j < data->height; ++j) { (x); } } }
+
+    // forward declaration so OverData is aware of the
+    // existence of the ZeldaGame class
+    class _ZeldaGame;
 
 // ================================================
 
@@ -69,10 +73,22 @@
 
     // --------------------------
 
+        static u16 GetX(u16 addr)
+        {
+            return (addr & 0x007E) << 3;
+        }
+
+        static u16 GetY(u16 addr)
+        {
+            return (addr & 0x1F80) >> 3;
+        }
+
+    // --------------------------
+
         bool SetTile(u16 addr, u16 value)
         {
-            u8 x = GetMap16X(addr) >> 4;
-            u8 y = GetMap16Y(addr) >> 4;
+            u8 x = GetX(addr) >> 4;
+            u8 y = GetY(addr) >> 4;
 
             if(addr > 0x2000)
                 return false;
@@ -126,7 +142,7 @@
         OverExit        *exits;
         OverSpr         *spr[0x03];
         OverItem        *items[0x03];
-        EventOverlay    *eOverlay;
+        Map16Buf        *eOverlay;
 
     public:
 
@@ -134,17 +150,13 @@
         OverArea(u8 area, bufPtr rom);
         ~OverArea();
 
-        bool        LoadOverlay();
-        bool        UnloadOverlay();
+        bool    LoadOverlay();
+        bool    UnloadOverlay();
 
-        bufPtr LoadMap16(u16 index, map16Pos p);
+        bufPtr      LoadMap16();
     };
 
 // ================================================
-
-    // forward declaration so OverData is aware of the
-    // existence of the ZeldaGame class
-    class _ZeldaGame;
 
     class OverData
     {

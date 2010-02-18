@@ -1,7 +1,51 @@
      
+    #include "Strings.h"
+
 #ifndef DUNGTYPES_H
 
     #define DUNGTYPES_H
+
+    typedef struct
+    {
+        u32 x;
+        u32 y;
+        u32 key;
+        u32 type;
+        u32 subType;
+        u32 floor;
+        u32 flag; // Indicates sprite if 0, overlord if 1
+        u32 selected;
+    } SprStruct;
+
+    // typedefs for dungeon data types ... 
+    typedef char       ScrollEdges[8];
+
+    #define            ENTRANCE_BASE_SIZE     32
+
+    typedef struct
+    {
+        Buffer         roomNumber;          // 2
+        Buffer         scrollEdgeData;      // 8
+        Buffer         xCoord;              // 2
+        Buffer         yCoord;              // 2
+        Buffer         xScroll;             // 2
+        Buffer         yScroll;             // 2
+        Buffer         yLowerScrollBound;   // 2
+        Buffer         xLowerScrollBound;   // 2
+        Buffer         blockSet;            // 1
+        Buffer         floorValue;          // 1
+        Buffer         dungeonValue;        // 1
+        Buffer         doorwayType;         // 1
+        Buffer         ladderValue;         // 1 // what layer Link enters on.
+        Buffer         scrollFlags;         // 1
+        Buffer         quadrantValue;       // 1
+        Buffer         owExitData;          // 2
+        Buffer         musicValue;          // 1
+
+
+        Buffer         entranceBuffer;
+
+    } EntranceData;
 
     typedef struct
     {
@@ -96,7 +140,7 @@
 
     } DungeonFile;
 
-       typedef struct 
+    typedef struct 
     {
         // The phrasing Byte X refers to where these values reside
         // in the acutal packed header in the rom.
@@ -128,5 +172,9 @@
         unsigned char staircaseRoom4;     // Byte 13
 
     } BM_DungeonHeader;
+
+    // externally defined variables
+    extern DungeonFile portFile;
+
 
 #endif

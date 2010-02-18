@@ -1,14 +1,12 @@
 
-	#include "Globals.h"
     #include "OverData.h"
-    #include "Core.h"       // only used so we can have access to graphics.cpp functions
 
 // ===============================================================
 
     OverArea::OverArea(u8 area, bufPtr rom)
     {
-        this->rom     = rom;
-        this->areaNum = area;
+        this->rom       = rom;
+        this->areaNum   = area;
 
         if(areaNum < 0x80)
         {
@@ -23,31 +21,29 @@
                 // Maps 512x512 area number to the larger 1024x1024 area number that it belongs to.
                 area = GetByte(rom, 0x125EC + (areaNum & 0x3F)) + (darkWorld ? 0x40 : 0x00);
                 
-                // Loads all four of the 512x512 submaps that make up the large area.
-                LoadMap16(area + 0, upper_left);
-                LoadMap16(area + 1, upper_right);
-                LoadMap16(area + 8, lower_left);
-                LoadMap16(area + 9, lower_right);
+                /// Loads all four of the 512x512 submaps that make up the large area.
+                /// LoadMap16(area + 0, upper_left);
             }
             else
-                LoadMap16(area, upper_left);
+                LoadMap16(); /// fix this soooooon!!!
         }
 
         if(largeArea)
         {
             map16       = new Map16Buf(0x40, 0x40);
             map16Backup = new Map16Buf(0x40, 0x40);
+            eOverlay    = new Map16Buf(0x40, 0x40);
         }
         else
         {
             map16       = new Map16Buf(0x20, 0x20);
             map16Backup = new Map16Buf(0x20, 0x20);
+            eOverlay    = new Map16Buf(0x20, 0x20);
         }
 
         /// not sure if I'm going to need a flags buffer for each area
         map16Flags      = CreateBuffer(0x10000 / 8);
 
-        eOverlay = new EventOverlay();
         
         /*
         if(this->editOverlay == true)
@@ -75,7 +71,7 @@
 
 // ===============================================================
 
-    bufPtr OverData::LoadMap16(u32 index, map16Pos p)
+    bufPtr OverArea::LoadMap16()
     {   
         /**
 
