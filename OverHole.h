@@ -1,5 +1,6 @@
 
-#include "List.h"
+    #include "List.h"
+    #include "Marker.h"
 
 #ifndef ENTRANCE_H
     
@@ -360,7 +361,7 @@
         u8 exData3;
 
         u16 itemNum;
-
+        
     public:
 
         OverItem(u16 itemNum = 0, u16 x = 0, u16 y = 0, u8 exData1 = 0, u8 exData2 = 0, u8 exData3 = 0)

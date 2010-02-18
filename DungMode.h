@@ -2,7 +2,8 @@
 #include "Globals.h"
 
 #ifndef DUNGMODE_H
-#define DUNGMODE_H
+    
+    #define DUNGMODE_H
 
     bufPtr  RepackSprites(DngObjStruct *d);
     void    SaveRoom(zgPtr game);

@@ -3,9 +3,8 @@
     // MathOnNapkins Copyright 2005
 
     // 1. #include "Strings.h"
-    #include "Globals.h"
-    #include "Black Magic.h"
-    #include "Strings.h"
+    #include "ZeldaGame.h"
+    #include "Core.h"
 
 // ===============================================================
 
@@ -238,9 +237,9 @@
             return 0;
         }
 
-        checker = (int)  ( ( (source->contents) + offset)[0] & 0xFF);
-        checker |= (int) ( ( (source->contents) + offset)[1] << 8 & 0x00FF00);
-        checker |= (int) ( ( (source->contents) + offset)[2] << 16 & 0xFF0000);
+        checker = (int)  ( ( (source->contents) + offset)[0]       & 0x000000FF);
+        checker |= (int) ( ( (source->contents) + offset)[1] << 8  & 0x0000FF00);
+        checker |= (int) ( ( (source->contents) + offset)[2] << 16 & 0x00FF0000);
         checker |= (int) ( ( (source->contents) + offset)[3] << 24 & 0xFF000000);
 
         return checker;

@@ -707,7 +707,7 @@
             /// replaced with the following line:
             currentPtr  = Get2Bytes(game->image, spritePtrBase + (index*2));
             currentPtr |= spritePtrBank;
-            currentPtr = CpuToRomAddr(currentPtr);
+            currentPtr  = CpuToRomAddr(currentPtr);
        
             temp3 = &(file->spriteData[index]);
 

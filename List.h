@@ -1,7 +1,7 @@
 
     #include "Globals.h"
 
-// A linked list class
+    // A linked list class
 
 #ifndef LIST_H
     

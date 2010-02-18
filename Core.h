@@ -1,16 +1,14 @@
 // Declares the core data and manipulation functions
 
-
-#include "Strings.h"
-#include "Globals.h"
-
+    #include "ZeldaGame.h"
 
 #ifndef CORE_H
+
     #define CORE_H
 
-    // data types
+    /// data types
 
-    // empty...
+    /// empty...
 
     // function prototypes
 
