@@ -1,0 +1,1 @@
+This editor is designed to provide the ability to expand and modify the amount of data present in The Legend of Zelda: A Link to the Past (SNES).
